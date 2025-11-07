@@ -162,6 +162,17 @@
                           <i class="fas fa-id-card mr-3 w-4 text-center"></i>
                           Mettre à jour KYC
                         </button>
+
+                        <!-- Separator -->
+                        <div class="border-t border-gray-100 my-1"></div>
+
+                        <!-- Action Voir Wallet -->
+                        <button @click="viewUserWallet(user)" :disabled="actionLoading[user.id]"
+                          class="group flex items-center w-full px-4 py-2 text-sm text-left hover:bg-gray-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed text-teal-700 hover:text-teal-800"
+                          role="menuitem">
+                          <i class="fas fa-wallet mr-3 w-4 text-center"></i>
+                          Voir Wallet
+                        </button>
                       </div>
                     </div>
                   </Teleport>
@@ -270,15 +281,166 @@
       </div>
     </div>
   </Teleport>
+
+  <!-- Modal Wallet -->
+  <Teleport to="body">
+    <div v-if="showWalletModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
+      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-6xl mx-4 my-8">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold text-gray-800">
+            Wallet de {{ selectedUserForWallet?.first_name }} {{ selectedUserForWallet?.last_name }}
+          </h3>
+          <button 
+            @click="closeWalletModal"
+            class="text-gray-400 hover:text-gray-600"
+          >
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Résumé du Wallet -->
+        <div v-if="walletsStore.summary" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div class="bg-blue-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600">Solde Actuel</p>
+            <p class="text-2xl font-bold text-blue-600">
+              {{ formatCurrency(parseFloat(walletsStore.summary.current_balance)) }}
+            </p>
+          </div>
+          <div class="bg-green-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600">Total Dépôts</p>
+            <p class="text-2xl font-bold text-green-600">
+              {{ formatCurrency(parseFloat(walletsStore.summary.total_deposits)) }}
+            </p>
+          </div>
+          <div class="bg-red-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600">Total Retraits</p>
+            <p class="text-2xl font-bold text-red-600">
+              {{ formatCurrency(parseFloat(walletsStore.summary.total_withdrawals)) }}
+            </p>
+          </div>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600">Montant Disponible</p>
+            <p class="text-2xl font-bold text-gray-600">
+              {{ formatCurrency(parseFloat(walletsStore.summary.available_amount)) }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+          <div class="flex flex-wrap gap-4">
+            <select 
+              v-model="walletTransactionTypeFilter"
+              @change="loadWalletTransactions"
+              class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">Tous les types</option>
+              <option value="deposit">Dépôt</option>
+              <option value="withdrawal">Retrait</option>
+              <option value="bonus">Bonus</option>
+              <option value="commission">Commission</option>
+              <option value="refund">Remboursement</option>
+              <option value="transfer">Transfert</option>
+            </select>
+            <select 
+              v-model="walletStatusFilter"
+              @change="loadWalletTransactions"
+              class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">Tous les statuts</option>
+              <option value="completed">Complété</option>
+              <option value="pending">En attente</option>
+              <option value="failed">Échoué</option>
+              <option value="cancelled">Annulé</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Historique des Transactions -->
+        <div class="overflow-x-auto max-h-96">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50 sticky top-0">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Montant</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Solde Avant</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Solde Après</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Référence</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-for="transaction in walletsStore.transactions" :key="transaction.id">
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                  {{ formatDateTime(transaction.created_at) }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <span 
+                    :class="[
+                      'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
+                      getTransactionTypeClass(transaction.transaction_type)
+                    ]"
+                  >
+                    {{ transaction.transaction_type_display }}
+                  </span>
+                </td>
+                <td 
+                  class="px-4 py-3 whitespace-nowrap text-sm font-semibold"
+                  :class="getAmountClass(transaction.transaction_type)"
+                >
+                  {{ transaction.transaction_type === 'deposit' || transaction.transaction_type === 'bonus' ? '+' : '-' }}
+                  {{ formatCurrency(parseFloat(transaction.amount)) }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                  {{ formatCurrency(parseFloat(transaction.balance_before)) }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                  {{ formatCurrency(parseFloat(transaction.balance_after)) }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <span 
+                    :class="[
+                      'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
+                      getStatusClass(transaction.status)
+                    ]"
+                  >
+                    {{ transaction.status_display }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 font-mono text-xs">
+                  {{ transaction.transaction_reference || transaction.reference }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-4 flex justify-end">
+          <button 
+            @click="goToFullWalletView"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            <i class="fas fa-external-link-alt mr-2"></i>
+            Voir toutes les transactions
+          </button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref, reactive, nextTick, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUsersStore } from '../stores/users'
+import { useWalletsStore } from '../stores/wallets'
 import { useNotification } from '../services/notification'
 import ConfirmationModal from '../components/ConfirmationModal.vue'
 
 const usersStore = useUsersStore()
+const walletsStore = useWalletsStore()
+const router = useRouter()
 const activeDropdown = ref<number | null>(null)
 const actionLoading = reactive<Record<number, boolean>>({})
 const dropdownPosition = ref<{top: number, left: number}>({top: 0, left: 0})
@@ -296,6 +458,12 @@ const showKycModal = ref(false)
 const selectedUserForKyc = ref<User | null>(null)
 const kycStatus = ref<string>('')
 const kycRejectionReason = ref('')
+
+// Wallet Modal State
+const showWalletModal = ref(false)
+const selectedUserForWallet = ref<User | null>(null)
+const walletTransactionTypeFilter = ref('all')
+const walletStatusFilter = ref('all')
 
 interface User {
   id: number;
@@ -556,5 +724,92 @@ const confirmKycUpdate = async () => {
       actionLoading[selectedUserForKyc.value.id] = false
     }
   }
+}
+
+// Wallet Management
+const viewUserWallet = async (user: User) => {
+  selectedUserForWallet.value = user
+  showWalletModal.value = true
+  closeAllDropdowns()
+  
+  try {
+    await walletsStore.fetchUserTransactions(user.id, 1)
+  } catch (error) {
+    const notification = useNotification()
+    notification.addNotification('Erreur lors du chargement du wallet', 'error')
+  }
+}
+
+const closeWalletModal = () => {
+  showWalletModal.value = false
+  selectedUserForWallet.value = null
+  walletTransactionTypeFilter.value = 'all'
+  walletStatusFilter.value = 'all'
+  walletsStore.resetFilters()
+}
+
+const loadWalletTransactions = () => {
+  if (!selectedUserForWallet.value) return
+  
+  walletsStore.fetchUserTransactions(
+    selectedUserForWallet.value.id,
+    1,
+    walletTransactionTypeFilter.value === 'all' ? undefined : walletTransactionTypeFilter.value,
+    walletStatusFilter.value === 'all' ? undefined : walletStatusFilter.value
+  )
+}
+
+const goToFullWalletView = () => {
+  if (!selectedUserForWallet.value) return
+  closeWalletModal()
+  router.push({ name: 'wallets', query: { user_id: selectedUserForWallet.value.id.toString() } })
+}
+
+// Format helpers
+const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'XOF',
+    minimumFractionDigits: 0
+  }).format(amount)
+}
+
+const formatDateTime = (date: string): string => {
+  return new Date(date).toLocaleString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+const getTransactionTypeClass = (type: string): string => {
+  const classes: Record<string, string> = {
+    deposit: 'bg-green-100 text-green-800',
+    withdrawal: 'bg-red-100 text-red-800',
+    bonus: 'bg-blue-100 text-blue-800',
+    commission: 'bg-purple-100 text-purple-800',
+    refund: 'bg-yellow-100 text-yellow-800',
+    transfer: 'bg-gray-100 text-gray-800'
+  }
+  return classes[type] || 'bg-gray-100 text-gray-800'
+}
+
+const getAmountClass = (type: string): string => {
+  if (type === 'deposit' || type === 'bonus') {
+    return 'text-green-600'
+  }
+  return 'text-red-600'
+}
+
+const getStatusClass = (status: string): string => {
+  const classes: Record<string, string> = {
+    completed: 'bg-green-100 text-green-800',
+    pending: 'bg-yellow-100 text-yellow-800',
+    failed: 'bg-red-100 text-red-800',
+    cancelled: 'bg-gray-100 text-gray-800'
+  }
+  return classes[status] || 'bg-gray-100 text-gray-800'
 }
 </script>

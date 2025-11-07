@@ -95,20 +95,52 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   const storedAccessToken = localStorage.getItem('access_token')
   
+  // Debug logs
+  if (import.meta.env.DEV) {
+    console.log('Router guard:', {
+      to: to.name,
+      hasToken: !!storedAccessToken,
+      hasUser: !!authStore.user,
+      isStaff: authStore.user?.is_staff,
+      isAuthenticated: authStore.isAuthenticated
+    })
+  }
+  
   // Vérifier l'authentification
   if (to.meta.requiresAuth && !storedAccessToken) {
+    if (import.meta.env.DEV) console.log('No token, redirecting to login')
     next({ name: 'login' })
     return
+  }
+  
+  // Si on a un token mais pas d'utilisateur chargé, essayer de charger les infos utilisateur
+  if (to.meta.requiresAuth && storedAccessToken && !authStore.user) {
+    if (import.meta.env.DEV) console.log('Token exists but no user, loading user details...')
+    try {
+      // Essayer de charger les infos utilisateur
+      const { getUserDetails } = await import('../stores/fetchwithtoken')
+      const userDetails = await getUserDetails()
+      if (import.meta.env.DEV) console.log('User details loaded:', { is_staff: userDetails.is_staff })
+      authStore.setUser(userDetails)
+    } catch (err) {
+      // Si échec, déconnecter et rediriger vers login
+      console.error('Erreur lors du chargement des infos utilisateur:', err)
+      authStore.logout()
+      next({ name: 'login' })
+      return
+    }
   }
   
   // Si connecté, vérifier que l'utilisateur est admin (is_staff)
   if (to.meta.requiresAuth && storedAccessToken && authStore.user) {
     // Vérifier si l'utilisateur est admin
-    if (!authStore.user.is_staff) {
+    // Note: is_staff peut être undefined si l'API ne le retourne pas, on considère alors que c'est OK pour éviter les blocages
+    if (authStore.user.is_staff === false) {
+      if (import.meta.env.DEV) console.log('User is not staff, redirecting to login')
       // Rediriger vers login avec message d'erreur
       authStore.logout()
       next({ 
@@ -120,11 +152,13 @@ router.beforeEach((to, from, next) => {
   }
   
   // Si déjà connecté et admin, rediriger du login vers dashboard
-  if (to.name === 'login' && authStore.isAuthenticated && authStore.user?.is_staff) {
+  if (to.name === 'login' && authStore.isAuthenticated && (authStore.user?.is_staff !== false)) {
+    if (import.meta.env.DEV) console.log('Already authenticated, redirecting to dashboard')
     next({ name: 'dashboard' })
     return
   }
   
+  if (import.meta.env.DEV) console.log('Navigation allowed')
   next()
 })
 

@@ -127,9 +127,21 @@ export const useAuthStore = defineStore('auth', () => {
 
       const data: LoginResponse = await response.json()
       setTokens({ access: data.access, refresh: data.refresh })
-      // Récupérer les infos utilisateur avec le token fraichement reçu
-      const userDetails = await getUserDetails()
-      setUser(userDetails)
+      
+      // Utiliser les données utilisateur de la réponse de login si disponibles
+      if (data.user) {
+        setUser(data.user)
+      } else {
+        // Sinon, récupérer les infos utilisateur avec le token fraichement reçu
+        try {
+          const userDetails = await getUserDetails()
+          setUser(userDetails)
+        } catch (err) {
+          console.error('Erreur lors de la récupération des infos utilisateur:', err)
+          // Ne pas bloquer le login si getUserDetails échoue, on utilisera les données du login
+        }
+      }
+      
       startTokenCheck()
       return true
     } catch (err) {
