@@ -1,1 +1,1 @@
-export const API_BASE_URL = 'http://192.168.100.178:8000'
+export const API_BASE_URL = 'https://box.api.babilonbg.net'
