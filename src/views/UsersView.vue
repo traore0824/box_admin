@@ -225,10 +225,10 @@
   <ConfirmationModal :is-open="isModalOpen" :title="modalTitle" :message="modalMessage" @confirm="onModalConfirm"
     @cancel="onModalCancel" />
   
-  <!-- Modal KYC -->
+        <!-- Modal KYC -->
   <Teleport to="body">
-    <div v-if="showKycModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+    <div v-if="showKycModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
+      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-3xl mx-4 my-8">
         <h3 class="text-xl font-semibold text-gray-800 mb-4">Mettre à jour le statut KYC</h3>
         <div class="mb-4">
           <p class="text-sm text-gray-600 mb-2">
@@ -240,7 +240,33 @@
               {{ getKycStatusLabel(selectedUserForKyc?.status) }}
             </span>
           </p>
+          <p v-if="selectedUserForKyc?.card_id" class="text-sm text-gray-600 mt-1">
+            Numéro de carte: <span class="font-semibold">{{ selectedUserForKyc.card_id }}</span>
+          </p>
         </div>
+
+        <!-- Affichage des images KYC si disponibles -->
+        <div v-if="selectedUserForKyc?.user_cards && selectedUserForKyc.user_cards.length > 0" class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Documents soumis :</label>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div 
+              v-for="(imageUrl, index) in selectedUserForKyc.user_cards" 
+              :key="index"
+              class="relative group"
+            >
+              <img 
+                :src="imageUrl" 
+                :alt="`Document KYC ${index + 1}`"
+                class="w-full h-32 object-cover rounded-lg border border-gray-200 cursor-pointer hover:border-blue-500 transition-colors"
+                @click="openKycImageModal(imageUrl)"
+              />
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-opacity flex items-center justify-center">
+                <i class="fas fa-search-plus text-white opacity-0 group-hover:opacity-100 transition-opacity"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-2">Nouveau statut *</label>
           <select 
@@ -254,14 +280,19 @@
           </select>
         </div>
         <div v-if="kycStatus === 'reject'" class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Raison du rejet *</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Raison du rejet <span class="text-red-500">*</span>
+          </label>
           <textarea 
             v-model="kycRejectionReason"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows="3"
-            placeholder="Expliquez la raison du rejet..."
+            rows="4"
+            placeholder="Expliquez la raison du rejet (ex: Photo de la carte d'identité floue, veuillez renvoyer une photo plus claire)..."
             required
           ></textarea>
+          <p class="mt-1 text-xs text-gray-500">
+            Cette raison sera envoyée à l'utilisateur dans une notification
+          </p>
         </div>
         <div class="flex justify-end space-x-3">
           <button 
@@ -278,6 +309,26 @@
             Mettre à jour
           </button>
         </div>
+      </div>
+    </div>
+  </Teleport>
+
+  <!-- Modal Image KYC -->
+  <Teleport to="body">
+    <div v-if="selectedKycImage" class="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-90" @click="closeKycImageModal">
+      <div class="relative max-w-4xl max-h-[90vh] mx-4">
+        <button 
+          @click="closeKycImageModal"
+          class="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-75 z-10"
+        >
+          <i class="fas fa-times text-xl"></i>
+        </button>
+        <img 
+          :src="selectedKycImage" 
+          alt="Document KYC"
+          class="max-w-full max-h-[90vh] object-contain rounded-lg"
+          @click.stop
+        />
       </div>
     </div>
   </Teleport>
@@ -465,12 +516,17 @@ const selectedUserForWallet = ref<User | null>(null)
 const walletTransactionTypeFilter = ref('all')
 const walletStatusFilter = ref('all')
 
+// KYC Image Modal
+const selectedKycImage = ref<string | null>(null)
+
 interface User {
   id: number;
   is_block: boolean;
   first_name?: string | null; 
   last_name?: string | null;
   status?: string | null;
+  card_id?: string | null;
+  user_cards?: string[];
 }
 
 onMounted(() => {
@@ -811,5 +867,13 @@ const getStatusClass = (status: string): string => {
     cancelled: 'bg-gray-100 text-gray-800'
   }
   return classes[status] || 'bg-gray-100 text-gray-800'
+}
+
+const openKycImageModal = (imageUrl: string) => {
+  selectedKycImage.value = imageUrl
+}
+
+const closeKycImageModal = () => {
+  selectedKycImage.value = null
 }
 </script>

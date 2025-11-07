@@ -2,6 +2,11 @@ import { defineStore } from 'pinia'
 import { ref, computed, readonly } from 'vue'
 import { fetchWithAuth } from './fetchwithtoken'
 
+interface NetworkStats {
+  count: number
+  total_amount: number
+}
+
 interface DashboardStats {
   all_users: number
   agent_users: number
@@ -26,6 +31,44 @@ interface DashboardStats {
     total_caisses: number
     total_transactions: number
   }
+  // Nouvelles statistiques Wallet
+  total_wallets?: number
+  active_wallets?: number
+  total_wallets_balance?: number
+  avg_wallet_balance?: number
+  total_wallet_deposits?: number
+  total_wallet_withdrawals?: number
+  // Nouvelles statistiques Commissions
+  total_commissions_generated?: number
+  total_commissions_withdrawn?: number
+  commission_available?: number
+  commission_total?: number
+  // Nouvelles statistiques Bonus de Parrainage
+  total_referral_bonus_attributed?: number
+  total_referral_bonus_withdrawn?: number
+  total_referral_bonus_available?: number
+  // Nouvelles statistiques Transactions avancées
+  successful_transactions?: number
+  failed_transactions?: number
+  pending_transactions?: number
+  success_rate?: number
+  failure_rate?: number
+  avg_transaction_amount?: number
+  avg_deposit_amount?: number
+  avg_withdrawal_amount?: number
+  network_stats?: {
+    MOOV?: NetworkStats
+    MTN?: NetworkStats
+    Celtis?: NetworkStats
+  }
+  failed_withdrawal_attempts?: number
+  // Nouvelles statistiques KYC
+  kyc_verified?: number
+  kyc_pending?: number
+  kyc_rejected?: number
+  kyc_not_submitted?: number
+  // Nouvelles statistiques Sécurité
+  blocked_accounts?: number
 }
 
 export const useDashboardStore = defineStore('dashboard', () => {
@@ -52,7 +95,35 @@ export const useDashboardStore = defineStore('dashboard', () => {
       active_users: 0,
       total_caisses: 0,
       total_transactions: 0
-    }
+    },
+    // Nouvelles statistiques initialisées à 0
+    total_wallets: 0,
+    active_wallets: 0,
+    total_wallets_balance: 0,
+    avg_wallet_balance: 0,
+    total_wallet_deposits: 0,
+    total_wallet_withdrawals: 0,
+    total_commissions_generated: 0,
+    total_commissions_withdrawn: 0,
+    commission_available: 0,
+    commission_total: 0,
+    total_referral_bonus_attributed: 0,
+    total_referral_bonus_withdrawn: 0,
+    total_referral_bonus_available: 0,
+    successful_transactions: 0,
+    failed_transactions: 0,
+    pending_transactions: 0,
+    success_rate: 0,
+    failure_rate: 0,
+    avg_transaction_amount: 0,
+    avg_deposit_amount: 0,
+    avg_withdrawal_amount: 0,
+    failed_withdrawal_attempts: 0,
+    kyc_verified: 0,
+    kyc_pending: 0,
+    kyc_rejected: 0,
+    kyc_not_submitted: 0,
+    blocked_accounts: 0
   })
 
   const loading = ref(false)
@@ -92,7 +163,39 @@ export const useDashboardStore = defineStore('dashboard', () => {
           total_transactions: 0
         }
       }
-      stats.value = data
+      // Fusionner avec les valeurs par défaut pour les nouvelles statistiques
+      stats.value = {
+        ...stats.value,
+        ...data,
+        // S'assurer que les nouvelles stats ont des valeurs par défaut si absentes
+        total_wallets: data.total_wallets ?? 0,
+        active_wallets: data.active_wallets ?? 0,
+        total_wallets_balance: data.total_wallets_balance ?? 0,
+        avg_wallet_balance: data.avg_wallet_balance ?? 0,
+        total_wallet_deposits: data.total_wallet_deposits ?? 0,
+        total_wallet_withdrawals: data.total_wallet_withdrawals ?? 0,
+        total_commissions_generated: data.total_commissions_generated ?? 0,
+        total_commissions_withdrawn: data.total_commissions_withdrawn ?? 0,
+        commission_available: data.commission_available ?? 0,
+        commission_total: data.commission_total ?? 0,
+        total_referral_bonus_attributed: data.total_referral_bonus_attributed ?? 0,
+        total_referral_bonus_withdrawn: data.total_referral_bonus_withdrawn ?? 0,
+        total_referral_bonus_available: data.total_referral_bonus_available ?? 0,
+        successful_transactions: data.successful_transactions ?? 0,
+        failed_transactions: data.failed_transactions ?? 0,
+        pending_transactions: data.pending_transactions ?? 0,
+        success_rate: data.success_rate ?? 0,
+        failure_rate: data.failure_rate ?? 0,
+        avg_transaction_amount: data.avg_transaction_amount ?? 0,
+        avg_deposit_amount: data.avg_deposit_amount ?? 0,
+        avg_withdrawal_amount: data.avg_withdrawal_amount ?? 0,
+        failed_withdrawal_attempts: data.failed_withdrawal_attempts ?? 0,
+        kyc_verified: data.kyc_verified ?? 0,
+        kyc_pending: data.kyc_pending ?? 0,
+        kyc_rejected: data.kyc_rejected ?? 0,
+        kyc_not_submitted: data.kyc_not_submitted ?? 0,
+        blocked_accounts: data.blocked_accounts ?? 0
+      }
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erreur lors du chargement des statistiques'
       console.error('Erreur API:', err)
@@ -160,7 +263,34 @@ const transactionStats = computed(() => ({
         active_users: 0,
         total_caisses: 0,
         total_transactions: 0
-      }
+      },
+      total_wallets: 0,
+      active_wallets: 0,
+      total_wallets_balance: 0,
+      avg_wallet_balance: 0,
+      total_wallet_deposits: 0,
+      total_wallet_withdrawals: 0,
+      total_commissions_generated: 0,
+      total_commissions_withdrawn: 0,
+      commission_available: 0,
+      commission_total: 0,
+      total_referral_bonus_attributed: 0,
+      total_referral_bonus_withdrawn: 0,
+      total_referral_bonus_available: 0,
+      successful_transactions: 0,
+      failed_transactions: 0,
+      pending_transactions: 0,
+      success_rate: 0,
+      failure_rate: 0,
+      avg_transaction_amount: 0,
+      avg_deposit_amount: 0,
+      avg_withdrawal_amount: 0,
+      failed_withdrawal_attempts: 0,
+      kyc_verified: 0,
+      kyc_pending: 0,
+      kyc_rejected: 0,
+      kyc_not_submitted: 0,
+      blocked_accounts: 0
     }
     error.value = null
   }
@@ -180,7 +310,8 @@ const transactionStats = computed(() => ({
     resetStats
   }
 })
-function getPercentage(deposit_transactions: number, total_transactions: number): any {
-  throw new Error('Function not implemented.')
+function getPercentage(part: number, total: number): number {
+  if (!total || total === 0) return 0
+  return Math.round((part / total) * 100)
 }
 

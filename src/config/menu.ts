@@ -40,6 +40,11 @@ export const menuItems = [
     icon: 'fas fa-network-wired'
   },
   {
+    path: '/kyc-pending',
+    name: 'KYC en Attente',
+    icon: 'fas fa-id-card'
+  },
+  {
     path: '/notifications',
     name: 'Notifications',
     icon: 'fas fa-bell'

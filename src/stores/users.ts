@@ -31,6 +31,8 @@ interface User {
   reason_block: string | null
   pin_define: boolean
   pin_incorrect_count: number
+  status?: 'pending' | 'accept' | 'reject' | null
+  user_cards?: string[]
 }
 
 interface UsersResponse {

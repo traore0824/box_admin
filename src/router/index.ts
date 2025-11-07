@@ -11,6 +11,7 @@ import CommissionsView from '../views/CommissionsView.vue'
 import BonusView from '../views/BonusView.vue'
 import WalletsView from '../views/WalletsView.vue'
 import NetworksView from '../views/NetworksView.vue'
+import KYCPendingView from '../views/KYCPendingView.vue'
 import NotificationsView from '../views/NotificationsView.vue'
 import SendNotificationView from '../views/SendNotificationView.vue'
 import SettingsView from '../views/SettingsView.vue'
@@ -68,6 +69,12 @@ const routes = [
     path: '/networks',
     name: 'networks',
     component: NetworksView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/kyc-pending',
+    name: 'kyc-pending',
+    component: KYCPendingView,
     meta: { requiresAuth: true }
   },
   {

@@ -184,6 +184,202 @@
           </MetricGrid>
         </DashboardSection>
       </div>
+
+      <!-- Nouvelles statistiques - Wallet, Commissions, Bonus -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Wallet -->
+        <DashboardSection title="Statistiques Wallet">
+          <MetricGrid>
+            <MetricItem 
+              :value="stats.total_wallets || 0" 
+              label="Total Wallets" 
+              color="primary" 
+            />
+            <MetricItem 
+              :value="stats.active_wallets || 0" 
+              label="Wallets Actifs" 
+              color="success" 
+            />
+            <MetricItem 
+              :value="formatCurrency(stats.total_wallets_balance || 0)" 
+              label="Solde Total" 
+              color="info" 
+            />
+            <MetricItem 
+              :value="formatCurrency(stats.avg_wallet_balance || 0)" 
+              label="Solde Moyen" 
+              color="warning" 
+            />
+          </MetricGrid>
+          <div class="mt-4 space-y-4">
+            <AmountDisplay 
+              :value="stats.total_wallet_deposits || 0" 
+              label="Total Dépôts Wallet" 
+            />
+            <AmountDisplay 
+              :value="stats.total_wallet_withdrawals || 0" 
+              label="Total Retraits Wallet" 
+            />
+          </div>
+        </DashboardSection>
+
+        <!-- Commissions -->
+        <DashboardSection title="Statistiques Commissions">
+          <MetricGrid>
+            <MetricItem 
+              :value="formatCurrency(stats.commission_available || 0)" 
+              label="Commission Disponible" 
+              color="success" 
+            />
+            <MetricItem 
+              :value="formatCurrency(stats.commission_total || 0)" 
+              label="Commission Totale" 
+              color="primary" 
+            />
+          </MetricGrid>
+          <div class="mt-4 space-y-4">
+            <AmountDisplay 
+              :value="stats.total_commissions_generated || 0" 
+              label="Commissions Générées (Période)" 
+            />
+            <AmountDisplay 
+              :value="stats.total_commissions_withdrawn || 0" 
+              label="Commissions Retirées (Période)" 
+            />
+          </div>
+        </DashboardSection>
+
+        <!-- Bonus de Parrainage -->
+        <DashboardSection title="Bonus de Parrainage">
+          <MetricGrid>
+            <MetricItem 
+              :value="formatCurrency(stats.total_referral_bonus_available || 0)" 
+              label="Bonus Disponibles" 
+              color="success" 
+            />
+          </MetricGrid>
+          <div class="mt-4 space-y-4">
+            <AmountDisplay 
+              :value="stats.total_referral_bonus_attributed || 0" 
+              label="Bonus Attribués (Période)" 
+            />
+            <AmountDisplay 
+              :value="stats.total_referral_bonus_withdrawn || 0" 
+              label="Bonus Retirés (Période)" 
+            />
+          </div>
+        </DashboardSection>
+      </div>
+
+      <!-- Statistiques Transactions Avancées et KYC -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Transactions Avancées -->
+        <DashboardSection title="Transactions Avancées">
+          <MetricGrid>
+            <MetricItem 
+              :value="stats.successful_transactions || 0" 
+              label="Transactions Réussies" 
+              color="success" 
+            />
+            <MetricItem 
+              :value="stats.failed_transactions || 0" 
+              label="Transactions Échouées" 
+              color="danger" 
+            />
+            <MetricItem 
+              :value="stats.pending_transactions || 0" 
+              label="Transactions En Attente" 
+              color="warning" 
+            />
+            <MetricItem 
+              :value="`${stats.success_rate || 0}%`" 
+              label="Taux de Succès" 
+              color="info" 
+            />
+            <MetricItem 
+              :value="`${stats.failure_rate || 0}%`" 
+              label="Taux d'Échec" 
+              color="danger" 
+            />
+            <MetricItem 
+              :value="stats.failed_withdrawal_attempts || 0" 
+              label="Tentatives Retrait Échouées" 
+              color="danger" 
+            />
+          </MetricGrid>
+          <div class="mt-4 space-y-4">
+            <AmountDisplay 
+              :value="stats.avg_transaction_amount || 0" 
+              label="Montant Moyen Transaction" 
+            />
+            <AmountDisplay 
+              :value="stats.avg_deposit_amount || 0" 
+              label="Montant Moyen Dépôt" 
+            />
+            <AmountDisplay 
+              :value="stats.avg_withdrawal_amount || 0" 
+              label="Montant Moyen Retrait" 
+            />
+          </div>
+          <div v-if="stats.network_stats" class="mt-6">
+            <h4 class="font-medium text-gray-600 mb-4">Par Réseau</h4>
+            <div class="space-y-3">
+              <div v-if="stats.network_stats.MOOV" class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span class="font-medium">MOOV</span>
+                <div class="text-right">
+                  <div class="font-semibold">{{ stats.network_stats.MOOV.count }} transactions</div>
+                  <div class="text-sm text-gray-600">{{ formatCurrency(stats.network_stats.MOOV.total_amount) }}</div>
+                </div>
+              </div>
+              <div v-if="stats.network_stats.MTN" class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span class="font-medium">MTN</span>
+                <div class="text-right">
+                  <div class="font-semibold">{{ stats.network_stats.MTN.count }} transactions</div>
+                  <div class="text-sm text-gray-600">{{ formatCurrency(stats.network_stats.MTN.total_amount) }}</div>
+                </div>
+              </div>
+              <div v-if="stats.network_stats.Celtis" class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span class="font-medium">Celtis</span>
+                <div class="text-right">
+                  <div class="font-semibold">{{ stats.network_stats.Celtis.count }} transactions</div>
+                  <div class="text-sm text-gray-600">{{ formatCurrency(stats.network_stats.Celtis.total_amount) }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DashboardSection>
+
+        <!-- KYC et Sécurité -->
+        <DashboardSection title="KYC et Sécurité">
+          <MetricGrid>
+            <MetricItem 
+              :value="stats.kyc_verified || 0" 
+              label="KYC Vérifiés" 
+              color="success" 
+            />
+            <MetricItem 
+              :value="stats.kyc_pending || 0" 
+              label="KYC En Attente" 
+              color="warning" 
+            />
+            <MetricItem 
+              :value="stats.kyc_rejected || 0" 
+              label="KYC Rejetés" 
+              color="danger" 
+            />
+            <MetricItem 
+              :value="stats.kyc_not_submitted || 0" 
+              label="KYC Non Soumis" 
+              color="secondary" 
+            />
+            <MetricItem 
+              :value="stats.blocked_accounts || 0" 
+              label="Comptes Bloqués" 
+              color="danger" 
+            />
+          </MetricGrid>
+        </DashboardSection>
+      </div>
     </div>
   </div>
 </template>
