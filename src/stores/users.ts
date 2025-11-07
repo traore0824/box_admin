@@ -1,0 +1,191 @@
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import { useAuthStore } from './auth'
+import { API_BASE_URL } from '../config/api'
+import { fetchWithAuth } from './fetchwithtoken'
+import { useNotification } from '../services/notification'
+
+interface User {
+  id: number
+  first_name: string | null
+  last_name: string | null
+  email: string
+  phone: string
+  created_at: string
+  referral_code: string | null
+  birthday: string | null
+  user_referral_code: string | null
+  card_id: string | null
+  total_funds: number | string
+  push_notification: boolean
+  email_notification: boolean
+  updated_at: string | null
+  commission_amount: string
+  number_sponsor: number
+  sexe: string | null
+  total_box: number
+  available_amout: string
+  withdraw_amout: string
+  agent_client: boolean
+  is_block: boolean
+  reason_block: string | null
+  pin_define: boolean
+  pin_incorrect_count: number
+}
+
+interface UsersResponse {
+  count: number
+  next: string | null
+  previous: string | null
+  results: User[]
+}
+
+export const useUsersStore = defineStore('users', () => {
+  const authStore = useAuthStore()
+  const users = ref<User[]>([])
+  const isLoading = ref(false)
+  const error = ref<string | null>(null)
+  const searchQuery = ref('')
+  const totalUsers = ref(0)
+  const currentPage = ref(1)
+  const itemsPerPage = 10
+
+  const filteredUsers = computed(() => {
+    if (!searchQuery.value) return users.value
+    return users.value.filter(user =>
+      user.email?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      user.first_name?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      user.last_name?.toLowerCase().includes(searchQuery.value.toLowerCase())
+    )
+  })
+
+  async function fetchUsers(page = 1) {
+    try {
+      isLoading.value = true
+      error.value = null
+
+      const response = await fetchWithAuth('/auth/listUser/', {
+        queryParams: {
+          q: searchQuery.value,
+          page
+        }
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+
+        if (response.status === 401) {
+          throw new Error('Non autorisé. Veuillez vous reconnecter.')
+        }
+
+        if (data.message?.includes('ERR_NGROK')) {
+          const notification = useNotification()
+          notification.addNotification(
+            'Erreur de connexion au serveur. Veuillez vérifier votre connexion internet et réessayer.',
+            'error'
+          )
+          throw new Error('Erreur de connexion au serveur.')
+        }
+
+        const notification = useNotification()
+        notification.addNotification('Erreur lors de la récupération des utilisateurs', 'error')
+        throw new Error('Erreur lors de la récupération des utilisateurs')
+      }
+
+      const data: UsersResponse = await response.json()
+      users.value = data.results
+      totalUsers.value = data.count
+      currentPage.value = page
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Erreur lors de la récupération des utilisateurs'
+      console.error('Error fetching users:', err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  function updateSearchQuery(query: string) {
+    searchQuery.value = query
+    currentPage.value = 1
+    fetchUsers()
+  }
+
+  async function toggleUserBlockStatus(userId: number) {
+    try {
+      error.value = null
+
+      const response = await fetchWithAuth('/auth/toggle-block/', {
+        method: 'POST',
+        body: JSON.stringify({ user_id: userId }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        if (response.status === 401) {
+          throw new Error('Non autorisé. Veuillez vous reconnecter.')
+        }
+        throw new Error(data.detail || data.message || 'Erreur lors du changement de statut de blocage.')
+      }
+
+      const userIndex = users.value.findIndex(u => u.id === userId)
+      if (userIndex !== -1) {
+        users.value[userIndex].is_block = !users.value[userIndex].is_block
+      } else {
+        await fetchUsers(currentPage.value)
+      }
+
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Une erreur est survenue lors du blocage/déblocage.'
+      console.error('Error toggling block status:', err)
+      throw err
+    }
+  }
+
+  async function toggleUserAgentStatus(userId: number) {
+    try {
+      error.value = null
+
+      const response = await fetchWithAuth('/auth/toggle-agent/', {
+        method: 'POST',
+        body: JSON.stringify({ user_id: userId }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        if (response.status === 401) {
+          throw new Error('Non autorisé. Veuillez vous reconnecter.')
+        }
+        throw new Error(data.detail || data.message || "Erreur lors du changement de statut d'agent.")
+      }
+
+      const userIndex = users.value.findIndex(u => u.id === userId)
+      if (userIndex !== -1) {
+        users.value[userIndex].agent_client = !users.value[userIndex].agent_client
+      } else {
+        await fetchUsers(currentPage.value)
+      }
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : "Une erreur est survenue lors du changement de statut d'agent."
+      console.error('Error toggling agent status:', err)
+      throw err
+    }
+  }
+
+  return {
+    users,
+    isLoading,
+    error,
+    searchQuery,
+    totalUsers,
+    currentPage,
+    itemsPerPage,
+    filteredUsers,
+    fetchUsers,
+    updateSearchQuery,
+    toggleUserBlockStatus,
+    toggleUserAgentStatus
+  }
+})
