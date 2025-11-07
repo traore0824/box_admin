@@ -174,6 +174,85 @@ export const useUsersStore = defineStore('users', () => {
     }
   }
 
+  // Réinitialiser le PIN d'un utilisateur
+  async function resetUserPin(userId: number) {
+    try {
+      error.value = null
+
+      const response = await fetchWithAuth('/auth/reset-pin/', {
+        method: 'POST',
+        body: JSON.stringify({ user_id: userId }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        if (response.status === 401) {
+          throw new Error('Non autorisé. Veuillez vous reconnecter.')
+        }
+        throw new Error(data.detail || data.message || 'Erreur lors de la réinitialisation du PIN.')
+      }
+
+      const result = await response.json()
+      
+      // Mettre à jour l'utilisateur dans la liste
+      const userIndex = users.value.findIndex(u => u.id === userId)
+      if (userIndex !== -1) {
+        users.value[userIndex].pin_define = false
+        users.value[userIndex].pin_incorrect_count = 0
+      } else {
+        await fetchUsers(currentPage.value)
+      }
+
+      return result
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Une erreur est survenue lors de la réinitialisation du PIN.'
+      console.error('Error resetting PIN:', err)
+      throw err
+    }
+  }
+
+  // Mettre à jour le statut KYC d'un utilisateur
+  async function updateKycStatus(userId: number, status: 'pending' | 'accept' | 'reject' | 'null', rejectionReason?: string) {
+    try {
+      error.value = null
+
+      const body: any = {
+        user_id: userId,
+        status
+      }
+
+      if (status === 'reject' && rejectionReason) {
+        body.rejection_reason = rejectionReason
+      }
+
+      const response = await fetchWithAuth('/auth/update-kyc-status/', {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        if (response.status === 401) {
+          throw new Error('Non autorisé. Veuillez vous reconnecter.')
+        }
+        throw new Error(data.detail || data.message || 'Erreur lors de la mise à jour du statut KYC.')
+      }
+
+      const result = await response.json()
+      
+      // Rafraîchir la liste pour avoir les données à jour
+      await fetchUsers(currentPage.value)
+
+      return result
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Une erreur est survenue lors de la mise à jour du statut KYC.'
+      console.error('Error updating KYC status:', err)
+      throw err
+    }
+  }
+
   return {
     users,
     isLoading,
@@ -186,6 +265,8 @@ export const useUsersStore = defineStore('users', () => {
     fetchUsers,
     updateSearchQuery,
     toggleUserBlockStatus,
-    toggleUserAgentStatus
+    toggleUserAgentStatus,
+    resetUserPin,
+    updateKycStatus
   }
 })

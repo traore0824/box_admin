@@ -28,6 +28,7 @@ interface User {
   reason_block: string
   pin_define: boolean
   pin_incorrect_count: number
+  is_staff: boolean
 }
 
 interface LoginResponse {

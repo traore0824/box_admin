@@ -20,6 +20,26 @@ export const menuItems = [
     icon: 'fas fa-exchange-alt'
   },
   {
+    path: '/commissions',
+    name: 'Commissions',
+    icon: 'fas fa-money-bill-wave'
+  },
+  {
+    path: '/bonus',
+    name: 'Bonus Parrainage',
+    icon: 'fas fa-gift'
+  },
+  {
+    path: '/wallets',
+    name: 'Wallets',
+    icon: 'fas fa-wallet'
+  },
+  {
+    path: '/networks',
+    name: 'Réseaux de Paiement',
+    icon: 'fas fa-network-wired'
+  },
+  {
     path: '/notifications',
     name: 'Notifications',
     icon: 'fas fa-bell'

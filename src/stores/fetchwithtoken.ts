@@ -50,15 +50,22 @@ export async function fetchWithAuth(
 
   // Si 401, essayer de refresh une seule fois
   if (response.status === 401 && retry) {
-    console.log('Token expiré, tentative de refresh...')
+    // Ne pas logger les détails de sécurité en production
+    if (import.meta.env.DEV) {
+      console.log('Token expiré, tentative de refresh...')
+    }
     
     const refreshed = await refreshAccessToken()
     if (refreshed) {
-      console.log('Token refreshé avec succès, nouvelle tentative...')
+      if (import.meta.env.DEV) {
+        console.log('Token refreshé avec succès')
+      }
       // Réessayer avec nouveau token (retry = false pour éviter la boucle infinie)
       return fetchWithAuth(endpoint, options, false)
     } else {
-      console.log('Échec du refresh token, déconnexion...')
+      if (import.meta.env.DEV) {
+        console.log('Échec du refresh token')
+      }
       authStore.logout()
       
       // Redirection vers la page de login avec message d'erreur
@@ -70,7 +77,9 @@ export async function fetchWithAuth(
 
   // Gestion des autres erreurs d'authentification
   if (response.status === 403) {
-    console.log('Accès non autorisé')
+    if (import.meta.env.DEV) {
+      console.log('Accès non autorisé')
+    }
     authStore.logout()
     window.location.href = '/login?message=Accès+non+autorisé.+Veuillez+vous+reconnecter.'
     throw new Error('Accès non autorisé')
@@ -87,12 +96,16 @@ async function refreshAccessToken(): Promise<boolean> {
   const refreshToken = authStore.refreshToken
 
   if (!refreshToken) {
-    console.log('Aucun refresh token disponible')
+    if (import.meta.env.DEV) {
+      console.log('Aucun refresh token disponible')
+    }
     return false
   }
 
   try {
-    console.log('Tentative de refresh du token...')
+    if (import.meta.env.DEV) {
+      console.log('Tentative de refresh du token...')
+    }
     
     const response = await fetch(`${API_BASE_URL}/auth/refresh_token/`, {
       method: 'POST',
@@ -103,12 +116,16 @@ async function refreshAccessToken(): Promise<boolean> {
     })
 
     if (response.status === 401) {
-      console.log('Refresh token expiré (401)')
+      if (import.meta.env.DEV) {
+        console.log('Refresh token expiré')
+      }
       return false
     }
 
     if (!response.ok) {
-      console.log(`Erreur lors du refresh: ${response.status} ${response.statusText}`)
+      if (import.meta.env.DEV) {
+        console.log(`Erreur lors du refresh: ${response.status}`)
+      }
       return false
     }
 
@@ -116,14 +133,20 @@ async function refreshAccessToken(): Promise<boolean> {
 
     if (data.access && data.refresh) {
       authStore.setTokens({ access: data.access, refresh: data.refresh })
-      console.log('Tokens mis à jour avec succès')
+      if (import.meta.env.DEV) {
+        console.log('Tokens mis à jour')
+      }
       return true
     } else {
-      console.log('Réponse de refresh invalide:', data)
+      if (import.meta.env.DEV) {
+        console.log('Réponse de refresh invalide')
+      }
       return false
     }
   } catch (error) {
-    console.error('Erreur lors du refresh token:', error)
+    if (import.meta.env.DEV) {
+      console.error('Erreur lors du refresh token:', error)
+    }
     return false
   }
 }

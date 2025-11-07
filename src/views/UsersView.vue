@@ -140,6 +140,28 @@
                           ]"></i>
                           {{ user.agent_client ? 'Retirer Agent' : 'Nommer Agent' }}
                         </button>
+
+                        <!-- Separator -->
+                        <div class="border-t border-gray-100 my-1"></div>
+
+                        <!-- Action Reset PIN -->
+                        <button @click="handleResetPin(user)" :disabled="actionLoading[user.id]"
+                          class="group flex items-center w-full px-4 py-2 text-sm text-left hover:bg-gray-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed text-purple-700 hover:text-purple-800"
+                          role="menuitem">
+                          <i class="fas fa-key mr-3 w-4 text-center"></i>
+                          Réinitialiser PIN
+                        </button>
+
+                        <!-- Separator -->
+                        <div class="border-t border-gray-100 my-1"></div>
+
+                        <!-- Action KYC -->
+                        <button @click="openKycModal(user)" :disabled="actionLoading[user.id]"
+                          class="group flex items-center w-full px-4 py-2 text-sm text-left hover:bg-gray-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed text-indigo-700 hover:text-indigo-800"
+                          role="menuitem">
+                          <i class="fas fa-id-card mr-3 w-4 text-center"></i>
+                          Mettre à jour KYC
+                        </button>
                       </div>
                     </div>
                   </Teleport>
@@ -191,6 +213,63 @@
   </div>
   <ConfirmationModal :is-open="isModalOpen" :title="modalTitle" :message="modalMessage" @confirm="onModalConfirm"
     @cancel="onModalCancel" />
+  
+  <!-- Modal KYC -->
+  <Teleport to="body">
+    <div v-if="showKycModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Mettre à jour le statut KYC</h3>
+        <div class="mb-4">
+          <p class="text-sm text-gray-600 mb-2">
+            Utilisateur: <span class="font-semibold">{{ selectedUserForKyc?.first_name }} {{ selectedUserForKyc?.last_name }}</span>
+          </p>
+          <p class="text-sm text-gray-600">
+            Statut actuel: 
+            <span class="font-semibold" :class="getKycStatusClass(selectedUserForKyc?.status)">
+              {{ getKycStatusLabel(selectedUserForKyc?.status) }}
+            </span>
+          </p>
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Nouveau statut *</label>
+          <select 
+            v-model="kycStatus"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="null">Aucun document</option>
+            <option value="pending">En attente</option>
+            <option value="accept">Approuvé</option>
+            <option value="reject">Rejeté</option>
+          </select>
+        </div>
+        <div v-if="kycStatus === 'reject'" class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Raison du rejet *</label>
+          <textarea 
+            v-model="kycRejectionReason"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows="3"
+            placeholder="Expliquez la raison du rejet..."
+            required
+          ></textarea>
+        </div>
+        <div class="flex justify-end space-x-3">
+          <button 
+            @click="closeKycModal"
+            class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+          >
+            Annuler
+          </button>
+          <button 
+            @click="confirmKycUpdate"
+            :disabled="!kycStatus || (kycStatus === 'reject' && !kycRejectionReason.trim()) || usersStore.isLoading"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          >
+            Mettre à jour
+          </button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -212,12 +291,18 @@ const modalMessage = ref('')
 const pendingAction = ref<(() => Promise<void>) | null>(null)
 // const pendingUserForModal = ref<User | null>(null) // Optional: if user details needed directly in modal handlers beyond message
 
+// KYC Modal State
+const showKycModal = ref(false)
+const selectedUserForKyc = ref<User | null>(null)
+const kycStatus = ref<string>('')
+const kycRejectionReason = ref('')
+
 interface User {
   id: number;
   is_block: boolean;
-  agent_client: boolean;
   first_name?: string | null; 
   last_name?: string | null;
+  status?: string | null;
 }
 
 onMounted(() => {
@@ -389,5 +474,87 @@ const onModalCancel = () => {
   pendingAction.value = null
   // pendingUserForModal.value = null;
   closeAllDropdowns() // Ensure dropdown is closed if modal is cancelled from overlay or escape
+}
+
+// Reset PIN
+async function handleResetPin(user: User) {
+  const userName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'cet utilisateur'
+  modalTitle.value = 'Réinitialiser le PIN'
+  modalMessage.value = `Êtes-vous sûr de vouloir réinitialiser le PIN de ${userName} ?`
+  pendingAction.value = async () => {
+    actionLoading[user.id] = true
+    try {
+      await usersStore.resetUserPin(user.id)
+      const notification = useNotification()
+      notification.addNotification('PIN réinitialisé avec succès', 'success')
+    } catch (error: any) {
+      console.error('Erreur lors de la réinitialisation du PIN:', error)
+      const notification = useNotification()
+      notification.addNotification(`Erreur: ${error.message || 'Impossible de réinitialiser le PIN.'}`, 'error')
+    } finally {
+      actionLoading[user.id] = false
+    }
+  }
+  isModalOpen.value = true
+}
+
+// KYC Management
+const openKycModal = (user: User) => {
+  selectedUserForKyc.value = user
+  kycStatus.value = user.status || 'null'
+  kycRejectionReason.value = ''
+  showKycModal.value = true
+  closeAllDropdowns()
+}
+
+const closeKycModal = () => {
+  showKycModal.value = false
+  selectedUserForKyc.value = null
+  kycStatus.value = ''
+  kycRejectionReason.value = ''
+}
+
+const getKycStatusLabel = (status: string | null | undefined): string => {
+  const labels: Record<string, string> = {
+    null: 'Aucun document',
+    pending: 'En attente',
+    accept: 'Approuvé',
+    reject: 'Rejeté'
+  }
+  return labels[status || 'null'] || 'Inconnu'
+}
+
+const getKycStatusClass = (status: string | null | undefined): string => {
+  const classes: Record<string, string> = {
+    null: 'text-gray-600',
+    pending: 'text-yellow-600',
+    accept: 'text-green-600',
+    reject: 'text-red-600'
+  }
+  return classes[status || 'null'] || 'text-gray-600'
+}
+
+const confirmKycUpdate = async () => {
+  if (!selectedUserForKyc.value || !kycStatus.value) return
+  
+  try {
+    actionLoading[selectedUserForKyc.value.id] = true
+    await usersStore.updateKycStatus(
+      selectedUserForKyc.value.id,
+      kycStatus.value as 'pending' | 'accept' | 'reject' | 'null',
+      kycStatus.value === 'reject' ? kycRejectionReason.value : undefined
+    )
+    const notification = useNotification()
+    notification.addNotification('Statut KYC mis à jour avec succès', 'success')
+    closeKycModal()
+  } catch (error: any) {
+    console.error('Erreur lors de la mise à jour du statut KYC:', error)
+    const notification = useNotification()
+    notification.addNotification(`Erreur: ${error.message || 'Impossible de mettre à jour le statut KYC.'}`, 'error')
+  } finally {
+    if (selectedUserForKyc.value) {
+      actionLoading[selectedUserForKyc.value.id] = false
+    }
+  }
 }
 </script>
