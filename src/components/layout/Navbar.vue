@@ -79,7 +79,7 @@
               v-for="notification in recentNotifications" 
               :key="notification.id"
               class="p-4 border-b border-gray-100 flex hover:bg-gray-50"
-              :class="{ 'bg-blue-50': !notification.isRead }"
+              :class="{ 'bg-blue-50': (notification as any).status === 'pending' }"
             >
               <div 
                 class="w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0"
@@ -101,8 +101,8 @@
               </div>
               <div>
                 <p class="text-sm font-medium text-gray-800">{{ notification.title }}</p>
-                <p class="text-xs text-gray-500">{{ notification.message }}</p>
-                <p class="text-xs text-gray-400 mt-1">{{ notification.date }} · {{ notification.time }}</p>
+                <p class="text-xs text-gray-500">{{ notification.content }}</p>
+                <p class="text-xs text-gray-400 mt-1">{{ new Date(notification.created_at).toLocaleDateString('fr-FR') }} · {{ new Date(notification.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) }}</p>
               </div>
             </div>
           </div>
@@ -152,7 +152,7 @@
           class="flex items-center space-x-2 sm:space-x-4"
         >
           <AvatarIcon class="w-8 h-8 sm:w-10 sm:h-10" />
-          <span class="text-sm font-medium text-gray-700 hidden sm:block">{{ authStore.user?.name }}</span>
+          <span class="text-sm font-medium text-gray-700 hidden sm:block">{{ authStore.user?.name || `${authStore.user?.first_name || ''} ${authStore.user?.last_name || ''}`.trim() || authStore.user?.email }}</span>
           <i class="fas fa-chevron-down text-xs text-gray-500 hidden md:block"></i>
         </button>
         
@@ -199,8 +199,14 @@ const isProfileOpen = ref(false)
 const isMobileMenuOpen = ref(false)
 const isSettingsOpen = ref(false)
 
-const unreadCount = computed(() => notificationsStore.unreadCount)
-const recentNotifications = computed(() => notificationsStore.recentNotifications)
+const unreadCount = computed(() => {
+  // Calculer le nombre de notifications non lues
+  return notificationsStore.notifications.filter(n => (n as any).status === 'pending').length
+})
+const recentNotifications = computed(() => {
+  // Retourner les notifications récentes
+  return notificationsStore.notifications.slice(0, 5)
+})
 
 // Get all routes from router
 const routes = computed(() => {
@@ -239,7 +245,12 @@ const toggleProfile = () => {
 
 // Mark all notifications as read
 const markAllAsRead = () => {
-  notificationsStore.markAllAsRead()
+  // Mettre à jour le statut des notifications localement
+  notificationsStore.notifications.forEach(n => {
+    if ((n as any).status === 'pending') {
+      (n as any).status = 'sent'
+    }
+  })
 }
 
 // Logout function

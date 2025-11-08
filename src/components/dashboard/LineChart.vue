@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { Line } from 'vue-chartjs';
 import { 
   Chart as ChartJS, 
@@ -45,6 +45,7 @@ ChartJS.register(
   Filler
 );
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps<{
   title: string;
   chartData: {
@@ -109,7 +110,7 @@ const chartOptions = {
     }
   },
   interaction: {
-    mode: 'index',
+    mode: 'index' as const,
     intersect: false,
   },
   elements: {

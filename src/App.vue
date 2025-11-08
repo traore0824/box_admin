@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeMount, ref } from 'vue'
+import { onBeforeMount, ref } from 'vue'
 import { useAuthStore } from './stores/auth'
 import Sidebar from './components/layout/Sidebar.vue'
 import Navbar from './components/layout/Navbar.vue'

@@ -120,11 +120,11 @@
               label="Montant Actif des Caisses" 
             />
             <AmountDisplay 
-              :value="stats.total_deposit" 
+              :value="(stats as any).total_deposit || 0" 
               label="Total des Dépôts" 
             />
             <AmountDisplay 
-              :value="stats.total_withdra_amount" 
+              :value="(stats as any).total_withdra_amount || 0" 
               label="Total des Retraits" 
             />
           </div>
@@ -396,7 +396,7 @@ import StatCard from '../components/dashboard/StatCard.vue'
 import DashboardSection from '../components/dashboard/DashboardSection.vue'
 import MetricGrid from '../components/dashboard/MetricGrid.vue'
 import MetricItem from '../components/dashboard/MetricItem.vue'
-import SummaryCard from '../components/dashboard/SummaryCard.vue'
+// import SummaryCard from '../components/dashboard/SummaryCard.vue'
 import AmountDisplay from '../components/dashboard/AmountDisplay.vue'
 import { formatCurrency } from '../utils/currency'
 

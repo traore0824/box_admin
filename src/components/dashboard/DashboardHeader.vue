@@ -42,7 +42,7 @@
       <div class="inline-flex bg-white rounded-lg shadow-sm">
         <button 
           v-for="period in periods" 
-          :key="period" 
+          :key="String(period)" 
           @click="$emit('update:period', period)"
           class="px-4 py-2 text-sm font-medium transition-colors relative" 
           :class="{

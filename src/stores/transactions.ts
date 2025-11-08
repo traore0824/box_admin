@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { Transaction } from '../types/transaction'
-import { useAuthStore } from './auth'
+// import { useAuthStore } from './auth' // Non utilisé pour l'instant
 import { fetchWithAuth } from './fetchwithtoken'
 
 export const useTransactionsStore = defineStore('transactions', () => {
-  const authStore = useAuthStore()
+  // const authStore = useAuthStore() // Non utilisé pour l'instant
 
   const transactions = ref<Transaction[]>([])
   const isLoading = ref(false)

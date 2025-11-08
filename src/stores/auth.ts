@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed, onUnmounted, watch } from 'vue'
-import { API_BASE_URL } from '../config/api'
+import { ref, computed, onUnmounted } from 'vue'
 import { fetchWithAuth, getUserDetails } from './fetchwithtoken'
 
 interface User {
@@ -23,12 +22,14 @@ interface User {
   total_box: number
   available_amout: string
   withdraw_amout: string
-  agent_client: boolean
+  agent_client?: boolean
   is_block: boolean
   reason_block: string
   pin_define: boolean
   pin_incorrect_count: number
   is_staff: boolean
+  name?: string
+  avatar?: string
 }
 
 interface LoginResponse {
@@ -46,7 +47,8 @@ export const useAuthStore = defineStore('auth', () => {
   const error = ref<string | null>(null)
   const tokenCheckInterval = ref<number | undefined>(undefined)
 
-  // Vérifier si le token est expiré
+  // Vérifier si le token est expiré (fonction gardée pour usage futur)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function isTokenExpired(): boolean {
     if (!accessToken.value) return true
 

@@ -86,7 +86,7 @@
               <input v-model="searchQuery" type="text"
                 class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm"
                 placeholder="Rechercher par nom, prénom ou email..."
-                @input="debouncedSearch" />
+                @input="debouncedSearch && debouncedSearch()" />
               <i class="fas fa-search absolute left-3 top-2.5 h-4 w-4 text-gray-400"></i>
             </div>
           </div>
@@ -98,8 +98,8 @@
               <div v-for="userId in notification.selectedUsers" :key="userId"
                 class="flex items-center justify-between px-3 py-2 bg-blue-50 rounded-md border border-blue-200">
                 <div>
-                  <p class="text-sm font-medium text-gray-900">{{ getUserById(userId).name }}</p>
-                  <p class="text-xs text-gray-500">{{ getUserById(userId).email }}</p>
+                  <p class="text-sm font-medium text-gray-900">{{ getUserById(userId)?.first_name }} {{ getUserById(userId)?.last_name }}</p>
+                  <p class="text-xs text-gray-500">{{ getUserById(userId)?.email }}</p>
                 </div>
                 <button @click="removeUser(userId)" class="text-gray-400 hover:text-red-500 transition-colors">
                   <i class="fas fa-times"></i>
@@ -180,7 +180,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { debounce } from 'lodash'
 import { useUsersStore } from '../stores/users'
 import { useNotification } from '../services/notification'
@@ -238,11 +238,8 @@ const removeUser = (userId: number) => {
   notification.value.selectedUsers = notification.value.selectedUsers.filter(id => id !== userId)
 }
 
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { debounce } from 'lodash'
-
 // Débogage de la recherche
-const debouncedSearch = ref(null)
+const debouncedSearch = ref<ReturnType<typeof debounce> | null>(null)
 
 onMounted(() => {
   debouncedSearch.value = debounce(async () => {
@@ -264,7 +261,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (debouncedSearch.value) {
-    debouncedSearch.value.cancel()
+    debouncedSearch.value.cancel?.()
   }
 })
 

@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useAuthStore } from './auth'
-import { API_BASE_URL } from '../config/api'
 import { fetchWithAuth } from './fetchwithtoken'
 import { useNotification } from '../services/notification'
 
@@ -26,7 +24,7 @@ interface User {
   total_box: number
   available_amout: string
   withdraw_amout: string
-  agent_client: boolean
+  agent_client?: boolean
   is_block: boolean
   reason_block: string | null
   pin_define: boolean
@@ -43,7 +41,6 @@ interface UsersResponse {
 }
 
 export const useUsersStore = defineStore('users', () => {
-  const authStore = useAuthStore()
   const users = ref<User[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)

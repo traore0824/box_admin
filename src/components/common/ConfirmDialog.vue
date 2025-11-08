@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { watch } from 'vue';
 
 const props = defineProps<{
   isOpen: boolean;

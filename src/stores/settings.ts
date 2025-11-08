@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { useAuthStore } from './auth'
+// import { useAuthStore } from './auth' // Non utilisé pour l'instant
 import { fetchWithAuth } from './fetchwithtoken'
 
 export interface Setting {
@@ -31,7 +31,7 @@ export interface Setting {
 }
 
 export const useSettingsStore = defineStore('settings', () => {
-  const authStore = useAuthStore()
+  // const authStore = useAuthStore() // Non utilisé pour l'instant
 
   const settings = ref<Setting | null>(null)
   const loading = ref(false)

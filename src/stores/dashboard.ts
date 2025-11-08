@@ -213,7 +213,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
     if (!stats.value.all_users) return 0
     return Math.round((stats.value.active_users / stats.value.all_users) * 100)
   })
-// Ajoutez ces computed properties dans votre store
+// Ajoutez ces computed properties dans votre store (gardées pour usage futur)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const userStats = computed(() => ({
   total: stats.value.all_users,
   active: stats.value.active_users,
@@ -222,6 +223,7 @@ const userStats = computed(() => ({
   growth: stats.value.evolution?.all_users || 0
 }))
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const transactionStats = computed(() => ({
   total: stats.value.total_transactions,
   deposits: stats.value.deposit_transactions,

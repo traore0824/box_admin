@@ -58,12 +58,12 @@ interface WalletTransactionsResponse {
   summary: WalletSummary
 }
 
-interface WalletsListResponse {
-  count: number
-  next: string | null
-  previous: string | null
-  results: Wallet[]
-}
+// interface WalletsListResponse {
+//   count: number
+//   next: string | null
+//   previous: string | null
+//   results: Wallet[]
+// }
 
 export const useWalletsStore = defineStore('wallets', () => {
   const transactions = ref<WalletTransaction[]>([])

@@ -674,7 +674,7 @@ async function handleToggleBlock(user: User) {
 }
 
 async function handleToggleAgent(user: User) {
-  const actionText = user.agent_client ? 'retirer des agents' : 'nommer comme agent'
+  const actionText = (user as any).agent_client ? 'retirer des agents' : 'nommer comme agent'
   const userName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'cet utilisateur'
 
   modalTitle.value = `Confirmation de ${actionText}`;

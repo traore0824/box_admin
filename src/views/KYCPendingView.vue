@@ -218,7 +218,6 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref } from 'vue'
 import { useKYCStore } from '../stores/kyc'
-import { useNotification } from '../services/notification'
 import ConfirmationModal from '../components/ConfirmationModal.vue'
 import { debounce } from 'lodash'
 

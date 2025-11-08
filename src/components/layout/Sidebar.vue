@@ -26,7 +26,7 @@
       <div class="flex items-center space-x-3">
         <AvatarIcon class="w-10 h-10" />
         <div>
-          <p class="font-medium text-gray-800">{{ authStore.user?.name }}</p>
+          <p class="font-medium text-gray-800">{{ authStore.user?.name || `${authStore.user?.first_name || ''} ${authStore.user?.last_name || ''}`.trim() || authStore.user?.email }}</p>
           <p class="text-xs text-gray-500">{{ authStore.user?.email }}</p>
         </div>
       </div>
@@ -81,7 +81,7 @@
       <div class="flex items-center space-x-3">
         <img :src="authStore.user?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="User Avatar" class="w-10 h-10 rounded-full">
         <div>
-          <p class="font-medium text-gray-800">{{ authStore.user?.name }}</p>
+          <p class="font-medium text-gray-800">{{ authStore.user?.name || `${authStore.user?.first_name || ''} ${authStore.user?.last_name || ''}`.trim() || authStore.user?.email }}</p>
           <p class="text-xs text-gray-500">{{ authStore.user?.email }}</p>
         </div>
       </div>

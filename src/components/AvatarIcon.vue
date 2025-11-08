@@ -7,12 +7,11 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue'
-
 interface Props {
   size?: string
   color?: string
 }
 
-const props = defineProps<Props>()
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+defineProps<Props>()
 </script>

@@ -1,4 +1,4 @@
-import { useSettingsStore } from '../stores/settings'
+// import { useSettingsStore } from '../stores/settings' // Non utilisé pour l'instant
 
 /**
  * Helper pour formater les montants en currency
@@ -26,7 +26,7 @@ export function formatCurrency(amount: number | string, currency: string = 'XOF'
 export function getCurrency(): string {
   // Pour l'instant, on utilise XOF par défaut
   // Si les settings contiennent une currency plus tard, on pourra l'utiliser ici
-  const settingsStore = useSettingsStore()
+  // const settingsStore = useSettingsStore() // Non utilisé pour l'instant
   // TODO: Ajouter currency dans les settings si nécessaire
   // if (settingsStore.settings?.currency) {
   //   return settingsStore.settings.currency

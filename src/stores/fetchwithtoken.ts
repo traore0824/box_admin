@@ -1,10 +1,9 @@
-import { ref } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { API_BASE_URL } from '../config/api'
-import { useRouter } from 'vue-router'
 
-interface FetchWithAuthOptions extends RequestInit {
+interface FetchWithAuthOptions extends Omit<RequestInit, 'body'> {
   queryParams?: Record<string, string | number | boolean>
+  body?: BodyInit | Record<string, unknown> | null
 }
 
 /**
@@ -38,15 +37,19 @@ export async function fetchWithAuth(
   }
 
   // Si le body est un objet, on le stringifie automatiquement
-  if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
+  let body: BodyInit | null | undefined = options.body as BodyInit | null | undefined
+  if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData) && !(options.body instanceof URLSearchParams) && !(options.body instanceof Blob) && !ArrayBuffer.isView(options.body)) {
     headers.set('Content-Type', 'application/json')
-    options.body = JSON.stringify(options.body)
+    body = JSON.stringify(options.body)
   }
 
-  const response = await fetch(url, {
+  const fetchOptions: RequestInit = {
     ...options,
+    body,
     headers,
-  })
+  }
+
+  const response = await fetch(url, fetchOptions)
 
   // Si 401, essayer de refresh une seule fois
   if (response.status === 401 && retry) {

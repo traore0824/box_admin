@@ -19,7 +19,7 @@
 
             <!-- Périodes -->
             <div class="inline-flex bg-white rounded-lg shadow-sm">
-                <button v-for="period in periods" :key="period" @click="$emit('update:period', period)"
+                <button v-for="period in periods" :key="String(period)" @click="$emit('update:period', period)"
                     class="px-3 py-2 text-sm font-medium transition-colors" :class="{
                         'bg-primary-500 text-white': activePeriod === period,
                         'text-gray-500 hover:bg-gray-50': activePeriod !== period,

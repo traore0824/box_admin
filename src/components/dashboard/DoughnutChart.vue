@@ -28,12 +28,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Doughnut } from 'vue-chartjs';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { 
   Chart as ChartJS, 
   ArcElement,
   Tooltip, 
   Legend
 } from 'chart.js';
+// Les imports sont utilisés via ChartJS.register
 
 ChartJS.register(
   ArcElement,
@@ -41,6 +43,7 @@ ChartJS.register(
   Legend
 );
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps<{
   title: string;
   chartData: {

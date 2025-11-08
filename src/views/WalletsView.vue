@@ -343,12 +343,11 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useWalletsStore } from '../stores/wallets'
-import { useUsersStore } from '../stores/users'
+// import { useUsersStore } from '../stores/users' // Non utilisé pour l'instant
 import { useNotification } from '../services/notification'
 import { formatCurrency } from '../utils/currency'
 
 const walletsStore = useWalletsStore()
-const usersStore = useUsersStore()
 const route = useRoute()
 const viewMode = ref<'list' | 'history'>('list')
 const userIdInput = ref<number | null>(null)
@@ -417,6 +416,7 @@ const getStatusClass = (status: string): string => {
 }
 
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const loadUserTransactions = async () => {
   if (!userIdInput.value) return
   
