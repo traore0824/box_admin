@@ -43,6 +43,9 @@
                 Date de demande
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Notes
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -51,8 +54,8 @@
             <tr v-for="withdrawal in bonusStore.withdrawals" :key="withdrawal.id">
               <td class="px-6 py-4 whitespace-nowrap">
                 <div>
-                  <p class="text-sm font-medium text-gray-900">{{ withdrawal.user.fullname }}</p>
-                  <p class="text-sm text-gray-500">{{ withdrawal.user.email }}</p>
+                  <p class="text-sm font-medium text-gray-900">Utilisateur #{{ withdrawal.user }}</p>
+                  <p class="text-sm text-gray-500">{{ withdrawal.user_email }}</p>
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
@@ -74,24 +77,44 @@
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ formatDate(withdrawal.created_at) }}
+                <div>
+                  <p>{{ formatDate(withdrawal.created_at) }}</p>
+                  <p v-if="withdrawal.processed_at" class="text-xs text-gray-400">
+                    Traité: {{ formatDate(withdrawal.processed_at) }}
+                  </p>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500">
+                <p v-if="withdrawal.notes" class="max-w-xs truncate" :title="withdrawal.notes">
+                  {{ withdrawal.notes }}
+                </p>
+                <span v-else class="text-gray-400">-</span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div v-if="withdrawal.status === 'pending'" class="flex space-x-2">
                   <button 
                     @click="openAcceptModal(withdrawal)"
                     class="text-green-600 hover:text-green-900"
+                    title="Accepter"
                   >
                     <i class="fas fa-check-circle"></i>
                   </button>
                   <button 
                     @click="openRejectModal(withdrawal)"
                     class="text-red-600 hover:text-red-900"
+                    title="Rejeter"
                   >
                     <i class="fas fa-times-circle"></i>
                   </button>
                 </div>
-                <span v-else class="text-gray-400">-</span>
+                <div v-else class="text-sm">
+                  <p v-if="withdrawal.processed_by_email" class="text-gray-600">
+                    Par: {{ withdrawal.processed_by_email }}
+                  </p>
+                  <p v-if="withdrawal.rejection_reason" class="text-xs text-red-600 mt-1">
+                    {{ withdrawal.rejection_reason }}
+                  </p>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -203,7 +226,7 @@ const formatDate = (date: string): string => {
 
 const openAcceptModal = (withdrawal: any) => {
   selectedWithdrawal.value = withdrawal
-  acceptModalMessage.value = `Êtes-vous sûr de vouloir accepter la demande de retrait de ${formatCurrency(parseFloat(withdrawal.amount))} de ${withdrawal.user.fullname} ?`
+  acceptModalMessage.value = `Êtes-vous sûr de vouloir accepter la demande de retrait de ${formatCurrency(parseFloat(withdrawal.amount))} de ${withdrawal.user_email} ?`
   showAcceptModal.value = true
 }
 
@@ -216,7 +239,7 @@ const confirmAccept = async () => {
   if (!selectedWithdrawal.value) return
   
   try {
-    await bonusStore.processWithdrawal(selectedWithdrawal.value.id, 'accept')
+    await bonusStore.processWithdrawal(selectedWithdrawal.value.id, 'completed')
     closeAcceptModal()
   } catch (error) {
     // L'erreur est déjà gérée dans le store
@@ -225,7 +248,7 @@ const confirmAccept = async () => {
 
 const openRejectModal = (withdrawal: any) => {
   selectedWithdrawal.value = withdrawal
-  rejectModalMessage.value = `Rejeter la demande de retrait de ${formatCurrency(parseFloat(withdrawal.amount))} de ${withdrawal.user.fullname} ?`
+  rejectModalMessage.value = `Rejeter la demande de retrait de ${formatCurrency(parseFloat(withdrawal.amount))} de ${withdrawal.user_email} ?`
   showRejectModal.value = true
 }
 
@@ -241,7 +264,7 @@ const confirmReject = async () => {
   try {
     await bonusStore.processWithdrawal(
       selectedWithdrawal.value.id, 
-      'reject', 
+      'rejected', 
       rejectionReason.value.trim()
     )
     closeRejectModal()

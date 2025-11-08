@@ -109,7 +109,7 @@ export const useWalletsStore = defineStore('wallets', () => {
         params.status = status
       }
 
-      const response = await fetchWithAuth('/box/admin/wallet/transactions', {
+      const response = await fetchWithAuth('/box/wallet/admin/transactions', {
         method: 'GET',
         queryParams: params
       })

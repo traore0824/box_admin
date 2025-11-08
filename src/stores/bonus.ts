@@ -5,16 +5,17 @@ import { useNotification } from '../services/notification'
 
 interface BonusWithdrawal {
   id: number
-  user: {
-    id: number
-    email: string
-    fullname: string
-  }
+  user: number
+  user_email: string
+  reward: number | null
   amount: string
   status: 'pending' | 'completed' | 'rejected' | 'cancelled'
-  created_at: string
   notes: string | null
   rejection_reason: string | null
+  processed_by: number | null
+  processed_by_email: string | null
+  created_at: string
+  processed_at: string | null
 }
 
 export const useBonusStore = defineStore('bonus', () => {
@@ -88,19 +89,19 @@ export const useBonusStore = defineStore('bonus', () => {
   }
 
   // Traiter une demande (accepter ou rejeter)
-  async function processWithdrawal(id: number, action: 'accept' | 'reject', rejectionReason?: string, notes?: string) {
+  async function processWithdrawal(id: number, status: 'completed' | 'rejected', rejectionReason?: string) {
     try {
       isLoading.value = true
       error.value = null
 
-      const body: any = { action }
-      if (notes) body.notes = notes
-      if (action === 'reject' && rejectionReason) {
+      const body: { status: string; rejection_reason?: string } = { status }
+      
+      if (status === 'rejected' && rejectionReason) {
         body.rejection_reason = rejectionReason
       }
 
       const response = await fetchWithAuth(`/box/reward/withdrawal/${id}/process`, {
-        method: 'POST',
+        method: 'PATCH',
         body
       })
 
@@ -112,7 +113,7 @@ export const useBonusStore = defineStore('bonus', () => {
       const result = await response.json()
       const notification = useNotification()
       
-      if (action === 'accept') {
+      if (status === 'completed') {
         notification.addNotification('Demande de retrait approuvée avec succès', 'success')
       } else {
         notification.addNotification('Demande de retrait rejetée', 'info')
