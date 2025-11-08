@@ -315,20 +315,26 @@
 
   <!-- Modal Image KYC -->
   <Teleport to="body">
-    <div v-if="selectedKycImage" class="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-90" @click="closeKycImageModal">
-      <div class="relative max-w-4xl max-h-[90vh] mx-4">
+    <div v-if="selectedKycImage" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-95" @click="closeKycImageModal">
+      <div class="relative w-full h-full flex items-center justify-center p-4">
         <button 
           @click="closeKycImageModal"
-          class="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-75 z-10"
+          class="absolute top-4 right-4 text-white bg-black bg-opacity-70 rounded-full p-3 hover:bg-opacity-90 z-10 transition-all"
+          title="Fermer (Échap)"
         >
           <i class="fas fa-times text-xl"></i>
         </button>
-        <img 
-          :src="selectedKycImage" 
-          alt="Document KYC"
-          class="max-w-full max-h-[90vh] object-contain rounded-lg"
-          @click.stop
-        />
+        <div class="relative max-w-[95vw] max-h-[95vh] flex items-center justify-center">
+          <img 
+            :src="selectedKycImage" 
+            alt="Document KYC"
+            class="max-w-full max-h-[95vh] object-contain rounded-lg shadow-2xl"
+            @click.stop
+          />
+        </div>
+        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black bg-opacity-50 px-4 py-2 rounded-lg">
+          Cliquez en dehors de l'image pour fermer
+        </div>
       </div>
     </div>
   </Teleport>
@@ -543,12 +549,19 @@ onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleEscape)
   window.removeEventListener('scroll', handleScroll, true)
   window.removeEventListener('resize', closeAllDropdowns)
+  // S'assurer que le scroll est réactivé
+  document.body.style.overflow = ''
 })
 
 // Gestion de la fermeture par Escape
 function handleEscape(event: KeyboardEvent) {
   if (event.key === 'Escape') {
-    closeAllDropdowns()
+    // Si une image KYC est ouverte, la fermer en priorité
+    if (selectedKycImage.value) {
+      closeKycImageModal()
+    } else {
+      closeAllDropdowns()
+    }
   }
 }
 
@@ -865,9 +878,15 @@ const getStatusClass = (status: string): string => {
 
 const openKycImageModal = (imageUrl: string) => {
   selectedKycImage.value = imageUrl
+  // Empêcher le scroll du body quand le modal est ouvert
+  document.body.style.overflow = 'hidden'
 }
 
 const closeKycImageModal = () => {
   selectedKycImage.value = null
+  // Réactiver le scroll du body
+  document.body.style.overflow = ''
 }
+
+// La gestion de la touche Échap est déjà intégrée dans handleEscape ci-dessus
 </script>

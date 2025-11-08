@@ -189,20 +189,26 @@
 
     <!-- Modal Image -->
     <Teleport to="body">
-      <div v-if="selectedImage" class="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-90" @click="closeImageModal">
-        <div class="relative max-w-4xl max-h-[90vh] mx-4">
+      <div v-if="selectedImage" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-95" @click="closeImageModal">
+        <div class="relative w-full h-full flex items-center justify-center p-4">
           <button 
             @click="closeImageModal"
-            class="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-75 z-10"
+            class="absolute top-4 right-4 text-white bg-black bg-opacity-70 rounded-full p-3 hover:bg-opacity-90 z-10 transition-all"
+            title="Fermer (Échap)"
           >
             <i class="fas fa-times text-xl"></i>
           </button>
-          <img 
-            :src="selectedImage" 
-            alt="Document KYC"
-            class="max-w-full max-h-[90vh] object-contain rounded-lg"
-            @click.stop
-          />
+          <div class="relative max-w-[95vw] max-h-[95vh] flex items-center justify-center">
+            <img 
+              :src="selectedImage" 
+              alt="Document KYC"
+              class="max-w-full max-h-[95vh] object-contain rounded-lg shadow-2xl"
+              @click.stop
+            />
+          </div>
+          <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black bg-opacity-50 px-4 py-2 rounded-lg">
+            Cliquez en dehors de l'image pour fermer
+          </div>
         </div>
       </div>
     </Teleport>
@@ -210,7 +216,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, onBeforeUnmount, ref } from 'vue'
 import { useKYCStore } from '../stores/kyc'
 import { useNotification } from '../services/notification'
 import ConfirmationModal from '../components/ConfirmationModal.vue'
@@ -226,8 +232,20 @@ const acceptModalMessage = ref('')
 const rejectModalMessage = ref('')
 const selectedImage = ref<string | null>(null)
 
+// Gestion de la touche Échap pour fermer le modal d'image
+const handleEscape = (event: KeyboardEvent) => {
+  if (event.key === 'Escape' && selectedImage.value) {
+    closeImageModal()
+  }
+}
+
 onMounted(async () => {
   await kycStore.fetchPendingKYCs(1)
+  window.addEventListener('keydown', handleEscape)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleEscape)
 })
 
 const formatDate = (date: string): string => {
