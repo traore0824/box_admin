@@ -18,13 +18,34 @@ interface BonusWithdrawal {
   processed_at: string | null
 }
 
+interface BonusAttribution {
+  id: number
+  parrain: {
+    id: number
+    email: string
+    fullname: string
+  }
+  filleul: {
+    id: number
+    email: string
+    fullname: string
+  }
+  amount: string
+  transaction_reference: string
+  created_at: string
+}
+
 export const useBonusStore = defineStore('bonus', () => {
   const withdrawals = ref<BonusWithdrawal[]>([])
+  const attributions = ref<BonusAttribution[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const currentPage = ref(1)
+  const currentAttributionPage = ref(1)
   const totalWithdrawals = ref(0)
+  const totalAttributions = ref(0)
   const statusFilter = ref<string>('all')
+  const attributionSearchQuery = ref('')
 
   // Récupérer les demandes de retrait de bonus
   async function fetchWithdrawals(page = 1, status?: string) {
@@ -133,14 +154,68 @@ export const useBonusStore = defineStore('bonus', () => {
     }
   }
 
+  // Récupérer les attributions de bonus
+  async function fetchAttributions(page = 1, search?: string) {
+    try {
+      isLoading.value = true
+      error.value = null
+
+      const params: Record<string, string> = {
+        page: page.toString(),
+        page_size: '20'
+      }
+
+      if (search && search.trim()) {
+        params.q = search.trim()
+      }
+
+      const response = await fetchWithAuth('/box/reward/attributions', {
+        method: 'GET',
+        queryParams: params
+      })
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des attributions de bonus')
+      }
+
+      const data = await response.json()
+      
+      // Gérer différents formats de réponse
+      if (Array.isArray(data)) {
+        attributions.value = data
+        totalAttributions.value = data.length
+      } else if (data.results && Array.isArray(data.results)) {
+        attributions.value = data.results
+        totalAttributions.value = data.count || data.results.length
+      } else {
+        attributions.value = []
+        totalAttributions.value = 0
+      }
+      
+      currentAttributionPage.value = page
+      if (search) attributionSearchQuery.value = search
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
+      console.error('Error fetching bonus attributions:', err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     withdrawals,
+    attributions,
     isLoading,
     error,
     currentPage,
+    currentAttributionPage,
     totalWithdrawals,
+    totalAttributions,
     statusFilter,
+    attributionSearchQuery,
     fetchWithdrawals,
+    fetchAttributions,
     fetchWithdrawalDetails,
     processWithdrawal
   }
