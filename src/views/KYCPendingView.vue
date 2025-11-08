@@ -64,15 +64,15 @@
                 <div 
                   v-for="(imageUrl, index) in user.user_cards" 
                   :key="index"
-                  class="relative group"
+                  class="relative group cursor-pointer"
+                  @click="openImageModal(imageUrl)"
                 >
                   <img 
                     :src="imageUrl" 
                     :alt="`Document KYC ${index + 1}`"
-                    class="w-full h-48 object-cover rounded-lg border border-gray-200 cursor-pointer hover:border-blue-500 transition-colors"
-                    @click="openImageModal(imageUrl)"
+                    class="w-full h-48 object-cover rounded-lg border border-gray-200 hover:border-blue-500 transition-colors pointer-events-none"
                   />
-                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-opacity flex items-center justify-center">
+                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-opacity flex items-center justify-center pointer-events-none">
                     <i class="fas fa-search-plus text-white opacity-0 group-hover:opacity-100 transition-opacity"></i>
                   </div>
                 </div>
