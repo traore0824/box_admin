@@ -36,11 +36,11 @@ interface WalletSummary {
 
 interface Wallet {
   id: number
-  user: {
+  user?: {
     id: number
     email: string
     fullname: string
-  }
+  } | null
   balance: string
   total_deposits: string
   total_withdrawals: string
@@ -151,9 +151,31 @@ export const useWalletsStore = defineStore('wallets', () => {
         throw new Error('Erreur lors de la récupération de la liste des wallets')
       }
 
-      const data: WalletsListResponse = await response.json()
-      wallets.value = data.results
-      totalWallets.value = data.count
+      const data = await response.json()
+      
+      // Log pour debug (uniquement en dev)
+      if (import.meta.env.DEV) {
+        console.log('API Response:', data)
+      }
+      
+      // Gérer différents formats de réponse
+      if (Array.isArray(data)) {
+        // Si l'API retourne directement un tableau
+        wallets.value = data
+        totalWallets.value = data.length
+      } else if (data.results && Array.isArray(data.results)) {
+        // Si l'API retourne un objet avec results
+        wallets.value = data.results
+        totalWallets.value = data.count || data.results.length
+      } else {
+        // Format inattendu
+        wallets.value = []
+        totalWallets.value = 0
+        if (import.meta.env.DEV) {
+          console.warn('Format de réponse inattendu:', data)
+        }
+      }
+      
       currentPage.value = page
       if (search) searchQuery.value = search
     } catch (err) {

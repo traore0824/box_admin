@@ -60,9 +60,12 @@
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="wallet in walletsStore.wallets" :key="wallet.id">
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div>
-                    <p class="text-sm font-medium text-gray-900">{{ wallet.user.fullname }}</p>
-                    <p class="text-sm text-gray-500">{{ wallet.user.email }}</p>
+                  <div v-if="wallet.user">
+                    <p class="text-sm font-medium text-gray-900">{{ wallet.user.fullname || 'N/A' }}</p>
+                    <p class="text-sm text-gray-500">{{ wallet.user.email || 'N/A' }}</p>
+                  </div>
+                  <div v-else>
+                    <p class="text-sm text-gray-500">Utilisateur #{{ wallet.id }}</p>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -85,12 +88,14 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button 
+                    v-if="wallet.user"
                     @click="viewWalletHistory(wallet.user.id)"
                     class="text-blue-600 hover:text-blue-900"
                   >
                     <i class="fas fa-history mr-1"></i>
                     Voir historique
                   </button>
+                  <span v-else class="text-gray-400">-</span>
                 </td>
               </tr>
             </tbody>
