@@ -3,6 +3,8 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
       <h1 class="text-2xl font-bold text-gray-900">Gestion des Commissions</h1>
+      <!-- Bouton de réconciliation commenté -->
+      <!--
       <div class="mt-4 sm:mt-0 flex space-x-3">
         <button 
           @click="handleReconcile"
@@ -13,6 +15,7 @@
           Réconcilier
         </button>
       </div>
+      -->
     </div>
 
     <!-- Commission Totale -->

@@ -13,106 +13,26 @@
       </button>
     </div>
 
-    <!-- Statistiques Wallet -->
-    <div v-if="viewMode === 'list' && walletsStore.stats" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="bg-white rounded-lg shadow-sm p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-600">Total Wallets</p>
-            <p class="text-2xl font-bold text-gray-900">{{ walletsStore.stats.total_wallets }}</p>
-          </div>
-          <div class="bg-blue-100 p-3 rounded-full">
-            <i class="fas fa-wallet text-blue-600 text-xl"></i>
-          </div>
-        </div>
-      </div>
-      <div class="bg-white rounded-lg shadow-sm p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-600">Total Soldes</p>
-            <p class="text-2xl font-bold text-green-600">
-              {{ formatCurrency(parseFloat(walletsStore.stats.total_balance)) }}
-            </p>
-          </div>
-          <div class="bg-green-100 p-3 rounded-full">
-            <i class="fas fa-coins text-green-600 text-xl"></i>
-          </div>
-        </div>
-      </div>
-      <div class="bg-white rounded-lg shadow-sm p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-600">Total Dépôts</p>
-            <p class="text-2xl font-bold text-blue-600">
-              {{ formatCurrency(parseFloat(walletsStore.stats.total_deposits)) }}
-            </p>
-          </div>
-          <div class="bg-blue-100 p-3 rounded-full">
-            <i class="fas fa-arrow-down text-blue-600 text-xl"></i>
-          </div>
-        </div>
-      </div>
-      <div class="bg-white rounded-lg shadow-sm p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-600">Total Retraits</p>
-            <p class="text-2xl font-bold text-red-600">
-              {{ formatCurrency(parseFloat(walletsStore.stats.total_withdrawals)) }}
-            </p>
-          </div>
-          <div class="bg-red-100 p-3 rounded-full">
-            <i class="fas fa-arrow-up text-red-600 text-xl"></i>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Note: Les statistiques wallet sont disponibles dans le Dashboard via /box/statistic -->
 
     <!-- Vue Liste des Wallets -->
     <div v-if="viewMode === 'list'">
-      <!-- Recherche par ID Utilisateur -->
+      <!-- Recherche -->
       <div class="bg-white rounded-lg shadow-sm p-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">Rechercher un wallet</h2>
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Liste des Wallets</h2>
         <div class="flex gap-4">
           <input 
-            type="number"
-            v-model="userIdInput"
-            placeholder="ID de l'utilisateur"
-            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            type="text"
+            v-model="searchQuery"
+            @input="handleSearch"
+            placeholder="Rechercher par email ou ID utilisateur..."
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <button 
-            @click="loadUserTransactions"
-            :disabled="!userIdInput || walletsStore.isLoading"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-          >
-            <i class="fas fa-search mr-2"></i>
-            Charger
-          </button>
         </div>
-        <p class="mt-2 text-sm text-gray-500">
-          Entrez l'ID d'un utilisateur pour voir son wallet et son historique de transactions
-        </p>
       </div>
 
-      <!-- Statistiques (si disponibles) -->
-      <div v-if="walletsStore.stats && walletsStore.stats.total_wallets > 0" class="bg-white rounded-lg shadow-sm p-4">
-        <p class="text-sm text-gray-600 mb-2">
-          <i class="fas fa-info-circle mr-2"></i>
-          Note: La liste complète des wallets nécessite un endpoint dédié. Utilisez la recherche par ID pour voir les wallets individuels.
-        </p>
-      </div>
-
-      <!-- Message d'aide si aucun wallet chargé -->
-      <div v-if="walletsStore.wallets.length === 0" class="bg-white rounded-lg shadow-sm p-12 text-center">
-        <i class="fas fa-wallet text-6xl text-gray-300 mb-4"></i>
-        <p class="text-gray-500 mb-2">Recherchez un wallet par ID utilisateur</p>
-        <p class="text-sm text-gray-400">Entrez l'ID d'un utilisateur ci-dessus pour voir son wallet</p>
-      </div>
-
-      <!-- Liste des Wallets (si disponible) -->
+      <!-- Liste des Wallets -->
       <div v-if="walletsStore.wallets.length > 0" class="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-800">Liste des Wallets</h2>
-        </div>
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
@@ -184,14 +104,14 @@
           </div>
           <div class="flex space-x-2">
             <button 
-              @click="walletsStore.fetchWalletsList(walletsStore.currentPage - 1, searchEmail)"
+              @click="loadWalletsPage(walletsStore.currentPage - 1)"
               :disabled="walletsStore.currentPage === 1 || walletsStore.isLoading"
               class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <i class="fas fa-chevron-left"></i>
             </button>
             <button 
-              @click="walletsStore.fetchWalletsList(walletsStore.currentPage + 1, searchEmail)"
+              @click="loadWalletsPage(walletsStore.currentPage + 1)"
               :disabled="walletsStore.currentPage * 20 >= walletsStore.totalWallets || walletsStore.isLoading"
               class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -199,6 +119,13 @@
             </button>
           </div>
         </div>
+      </div>
+
+      <!-- Message si aucun wallet -->
+      <div v-else-if="!walletsStore.isLoading" class="bg-white rounded-lg shadow-sm p-12 text-center">
+        <i class="fas fa-wallet text-6xl text-gray-300 mb-4"></i>
+        <p class="text-gray-500 mb-2">Aucun wallet trouvé</p>
+        <p class="text-sm text-gray-400">Essayez de modifier votre recherche</p>
       </div>
     </div>
 
@@ -413,15 +340,14 @@ import { useRoute } from 'vue-router'
 import { useWalletsStore } from '../stores/wallets'
 import { useUsersStore } from '../stores/users'
 import { useNotification } from '../services/notification'
-import { debounce } from 'lodash'
 import { formatCurrency } from '../utils/currency'
 
 const walletsStore = useWalletsStore()
 const usersStore = useUsersStore()
 const route = useRoute()
 const viewMode = ref<'list' | 'history'>('list')
-const searchEmail = ref('')
 const userIdInput = ref<number | null>(null)
+const searchQuery = ref('')
 const transactionTypeFilter = ref('all')
 const statusFilter = ref('all')
 const dateFromFilter = ref('')
@@ -485,9 +411,6 @@ const getStatusClass = (status: string): string => {
   return classes[status] || 'bg-gray-100 text-gray-800'
 }
 
-const debouncedSearch = debounce(() => {
-  walletsStore.fetchWalletsList(1, searchEmail.value)
-}, 300)
 
 const loadUserTransactions = async () => {
   if (!userIdInput.value) return
@@ -554,15 +477,21 @@ onMounted(async () => {
     }
   }
   
-  try {
-    await walletsStore.fetchWalletStats()
-    await walletsStore.fetchWalletsList(1)
-  } catch (error) {
-    // Si les endpoints de liste/stats n'existent pas, on continue sans erreur
-    // L'utilisateur pourra toujours rechercher par ID
-    if (import.meta.env.DEV) {
-      console.log('Note: Les endpoints de liste/stats peuvent ne pas exister encore')
-    }
-  }
+  // Charger la liste des wallets au montage
+  await walletsStore.fetchWalletsList(1)
 })
+
+// Recherche avec debounce
+let searchTimeout: ReturnType<typeof setTimeout> | null = null
+const handleSearch = () => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    walletsStore.fetchWalletsList(1, searchQuery.value || undefined)
+  }, 500)
+}
+
+// Charger une page de la liste
+const loadWalletsPage = (page: number) => {
+  walletsStore.fetchWalletsList(page, searchQuery.value || undefined)
+}
 </script>
