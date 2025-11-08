@@ -286,6 +286,7 @@ import { onMounted, ref } from 'vue'
 import { useCommissionsStore } from '../stores/commissions'
 import { useNotification } from '../services/notification'
 import ConfirmationModal from '../components/ConfirmationModal.vue'
+import { formatCurrency } from '../utils/currency'
 
 const commissionsStore = useCommissionsStore()
 const selectedTransactions = ref<number[]>([])
@@ -301,13 +302,7 @@ onMounted(async () => {
   await commissionsStore.fetchWithdrawals()
 })
 
-const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XOF',
-    minimumFractionDigits: 0
-  }).format(amount)
-}
+// formatCurrency est importé depuis utils/currency
 
 const formatDate = (date: string): string => {
   return new Date(date).toLocaleDateString('fr-FR', {

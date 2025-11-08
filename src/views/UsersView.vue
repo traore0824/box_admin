@@ -64,7 +64,7 @@
                 {{ new Date(user.created_at).toLocaleDateString() }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                {{ user.total_funds }} FCFA
+                {{ formatAmount(user.total_funds) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 {{ user.total_box }} 
@@ -488,6 +488,7 @@ import { useUsersStore } from '../stores/users'
 import { useWalletsStore } from '../stores/wallets'
 import { useNotification } from '../services/notification'
 import ConfirmationModal from '../components/ConfirmationModal.vue'
+import { formatCurrency, formatAmount } from '../utils/currency'
 
 const usersStore = useUsersStore()
 const walletsStore = useWalletsStore()
@@ -821,14 +822,7 @@ const goToFullWalletView = () => {
   router.push({ name: 'wallets', query: { user_id: selectedUserForWallet.value.id.toString() } })
 }
 
-// Format helpers
-const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XOF',
-    minimumFractionDigits: 0
-  }).format(amount)
-}
+// Format helpers - formatCurrency et formatAmount sont importés depuis utils/currency
 
 const formatDateTime = (date: string): string => {
   return new Date(date).toLocaleString('fr-FR', {

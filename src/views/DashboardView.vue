@@ -398,6 +398,7 @@ import MetricGrid from '../components/dashboard/MetricGrid.vue'
 import MetricItem from '../components/dashboard/MetricItem.vue'
 import SummaryCard from '../components/dashboard/SummaryCard.vue'
 import AmountDisplay from '../components/dashboard/AmountDisplay.vue'
+import { formatCurrency } from '../utils/currency'
 
 // Store
 const dashboardStore = useDashboardStore()
@@ -434,14 +435,7 @@ const formatDateRange = computed(() => {
   return `Jusqu'au ${formatDate(dateTo.value)}`
 })
 
-// Helpers
-const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XOF',
-    minimumFractionDigits: 0
-  }).format(amount)
-}
+// Helpers - formatCurrency est importé depuis utils/currency
 
 const formatDate = (date: string): string => {
   return new Date(date).toLocaleDateString('fr-FR', {

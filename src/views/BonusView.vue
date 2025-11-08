@@ -174,6 +174,7 @@
 import { onMounted, ref } from 'vue'
 import { useBonusStore } from '../stores/bonus'
 import ConfirmationModal from '../components/ConfirmationModal.vue'
+import { formatCurrency } from '../utils/currency'
 
 const bonusStore = useBonusStore()
 const statusFilter = ref('all')
@@ -188,13 +189,7 @@ onMounted(async () => {
   await bonusStore.fetchWithdrawals(1)
 })
 
-const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XOF',
-    minimumFractionDigits: 0
-  }).format(amount)
-}
+// formatCurrency est importé depuis utils/currency
 
 const formatDate = (date: string): string => {
   return new Date(date).toLocaleDateString('fr-FR', {

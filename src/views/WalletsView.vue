@@ -414,6 +414,7 @@ import { useWalletsStore } from '../stores/wallets'
 import { useUsersStore } from '../stores/users'
 import { useNotification } from '../services/notification'
 import { debounce } from 'lodash'
+import { formatCurrency } from '../utils/currency'
 
 const walletsStore = useWalletsStore()
 const usersStore = useUsersStore()
@@ -435,13 +436,7 @@ const unprocessedCount = computed(() => {
   return walletsStore.transactions.filter(t => !t.is_processed).length
 })
 
-const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XOF',
-    minimumFractionDigits: 0
-  }).format(amount)
-}
+// formatCurrency est importé depuis utils/currency
 
 const formatDate = (date: string): string => {
   return new Date(date).toLocaleDateString('fr-FR', {
