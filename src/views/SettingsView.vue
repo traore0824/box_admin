@@ -90,7 +90,7 @@
           <h2 class="text-lg font-medium text-gray-900 mb-4">Commissions (%)</h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Commission d'annulation (%)</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Commission sur Caisse libre annuler (%)</label>
               <input 
                 v-model.number="settings.cancellation_commission" 
                 type="number" 
@@ -101,7 +101,7 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Commission de complétion (%)</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Commission sur caisse Terminer (%)</label>
               <input 
                 v-model.number="settings.done_commission" 
                 type="number" 
@@ -112,7 +112,7 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Commission de blocage (%)</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Commission sur caisse bloquer annuler (%)</label>
               <input 
                 v-model.number="settings.cancel_block_commission" 
                 type="number" 
@@ -160,53 +160,188 @@
 
         <!-- Reminders - Daily -->
         <div class="p-6">
-          <h2 class="text-lg font-medium text-gray-900 mb-4">Rappels Quotidiens</h2>
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Rappels Quotidiens (8h, 14h, 21h)</h2>
+          <p class="text-sm text-gray-600 mb-4">Messages envoyés aux utilisateurs avec des caisses quotidiennes en attente</p>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Matin</label>
-              <DaySelector v-model="settings.reminreminder_day_morning" />
+              <label class="block text-sm font-medium text-gray-700 mb-2">Matin (8h)</label>
+              <MessageListEditor v-model="settings.reminreminder_day_morning" />
+              <div class="mt-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
+                <input 
+                  v-model="settings.reminreminder_day_morning_image" 
+                  type="url" 
+                  placeholder="https://..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Après-midi</label>
-              <DaySelector v-model="settings.reminreminder_day_afternoon" />
+              <label class="block text-sm font-medium text-gray-700 mb-2">Après-midi (14h)</label>
+              <MessageListEditor v-model="settings.reminreminder_day_afternoon" />
+              <div class="mt-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
+                <input 
+                  v-model="settings.reminreminder_day_afternoon_image" 
+                  type="url" 
+                  placeholder="https://..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Soir</label>
-              <DaySelector v-model="settings.reminreminder_day_evening" />
+              <label class="block text-sm font-medium text-gray-700 mb-2">Soir (21h)</label>
+              <MessageListEditor v-model="settings.reminreminder_day_evening" />
+              <div class="mt-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
+                <input 
+                  v-model="settings.reminreminder_day_evening_image" 
+                  type="url" 
+                  placeholder="https://..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Reminders - Weekly -->
         <div class="p-6">
-          <h2 class="text-lg font-medium text-gray-900 mb-4">Rappels Hebdomadaires</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Rappels Hebdomadaires (8h, 14h, 21h)</h2>
+          <p class="text-sm text-gray-600 mb-4">Messages envoyés aux utilisateurs avec des caisses hebdomadaires en attente</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Matin</label>
-              <DaySelector v-model="settings.reminreminder_week_morning" />
+              <label class="block text-sm font-medium text-gray-700 mb-2">Matin (8h)</label>
+              <MessageListEditor v-model="settings.reminreminder_week_morning" />
+              <div class="mt-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
+                <input 
+                  v-model="settings.reminreminder_week_morning_image" 
+                  type="url" 
+                  placeholder="https://..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Après-midi</label>
-              <DaySelector v-model="settings.reminreminder_week_afternoon" />
+              <label class="block text-sm font-medium text-gray-700 mb-2">Après-midi (14h)</label>
+              <MessageListEditor v-model="settings.reminreminder_week_afternoon" />
+              <div class="mt-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
+                <input 
+                  v-model="settings.reminreminder_week_afternoon_image" 
+                  type="url" 
+                  placeholder="https://..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Soir (21h)</label>
+              <MessageListEditor v-model="settings.reminreminder_week_evening" />
+              <div class="mt-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
+                <input 
+                  v-model="settings.reminreminder_week_evening_image" 
+                  type="url" 
+                  placeholder="https://..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Reminders - Monthly -->
         <div class="p-6">
-          <h2 class="text-lg font-medium text-gray-900 mb-4">Rappels Mensuels</h2>
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Rappels Mensuels (8h, 14h, 21h)</h2>
+          <p class="text-sm text-gray-600 mb-4">Messages envoyés aux utilisateurs avec des caisses mensuelles en attente</p>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Matin</label>
-              <MonthDaySelector v-model="settings.reminreminder_month_morning" />
+              <label class="block text-sm font-medium text-gray-700 mb-2">Matin (8h)</label>
+              <MessageListEditor v-model="settings.reminreminder_month_morning" />
+              <div class="mt-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
+                <input 
+                  v-model="settings.reminreminder_month_morning_image" 
+                  type="url" 
+                  placeholder="https://..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Après-midi</label>
-              <MonthDaySelector v-model="settings.reminreminder_month_afternoon" />
+              <label class="block text-sm font-medium text-gray-700 mb-2">Après-midi (14h)</label>
+              <MessageListEditor v-model="settings.reminreminder_month_afternoon" />
+              <div class="mt-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
+                <input 
+                  v-model="settings.reminreminder_month_afternoon_image" 
+                  type="url" 
+                  placeholder="https://..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Soir</label>
-              <MonthDaySelector v-model="settings.reminreminder_month_evening" />
+              <label class="block text-sm font-medium text-gray-700 mb-2">Soir (21h)</label>
+              <MessageListEditor v-model="settings.reminreminder_month_evening" />
+              <div class="mt-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
+                <input 
+                  v-model="settings.reminreminder_month_evening_image" 
+                  type="url" 
+                  placeholder="https://..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Motivation Messages -->
+        <div class="p-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Messages de Motivation (8h, 14h, 21h)</h2>
+          <p class="text-sm text-gray-600 mb-4">Messages envoyés aux utilisateurs actifs qui n'ont aucune caisse en attente pour les motiver à en créer une</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Matin (8h)</label>
+              <MessageListEditor v-model="settings.motivation_no_caisse_morning" />
+              <div class="mt-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
+                <input 
+                  v-model="settings.motivation_no_caisse_morning_image" 
+                  type="url" 
+                  placeholder="https://..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Après-midi (14h)</label>
+              <MessageListEditor v-model="settings.motivation_no_caisse_afternoon" />
+              <div class="mt-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
+                <input 
+                  v-model="settings.motivation_no_caisse_afternoon_image" 
+                  type="url" 
+                  placeholder="https://..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Soir (21h)</label>
+              <MessageListEditor v-model="settings.motivation_no_caisse_evening" />
+              <div class="mt-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
+                <input 
+                  v-model="settings.motivation_no_caisse_evening_image" 
+                  type="url" 
+                  placeholder="https://..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -312,8 +447,7 @@
 import { ref, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useSettingsStore } from '../stores/settings'
-import DaySelector from '../components/settings/DaySelector.vue'
-import MonthDaySelector from '../components/settings/MonthDaySelector.vue'
+import MessageListEditor from '../components/settings/MessageListEditor.vue'
 
 const settingsStore = useSettingsStore()
 const { settings, loading, error } = storeToRefs(settingsStore)

@@ -15,14 +15,34 @@ export interface Setting {
   cancellation_commission: string
   done_commission: string
   cancel_block_commission: string
-  reminreminder_day_morning: number[]
-  reminreminder_day_afternoon: number[]
-  reminreminder_day_evening: number[]
-  reminreminder_week_morning: number[]
-  reminreminder_week_afternoon: number[]
-  reminreminder_month_morning: number[]
-  reminreminder_month_afternoon: number[]
-  reminreminder_month_evening: number[]
+  // Rappels quotidiens (tableaux de messages)
+  reminreminder_day_morning: string[]
+  reminreminder_day_afternoon: string[]
+  reminreminder_day_evening: string[]
+  reminreminder_day_morning_image: string | null
+  reminreminder_day_afternoon_image: string | null
+  reminreminder_day_evening_image: string | null
+  // Rappels hebdomadaires
+  reminreminder_week_morning: string[]
+  reminreminder_week_afternoon: string[]
+  reminreminder_week_evening: string[]
+  reminreminder_week_morning_image: string | null
+  reminreminder_week_afternoon_image: string | null
+  reminreminder_week_evening_image: string | null
+  // Rappels mensuels
+  reminreminder_month_morning: string[]
+  reminreminder_month_afternoon: string[]
+  reminreminder_month_evening: string[]
+  reminreminder_month_morning_image: string | null
+  reminreminder_month_afternoon_image: string | null
+  reminreminder_month_evening_image: string | null
+  // Messages de motivation pour utilisateurs sans caisse
+  motivation_no_caisse_morning: string[]
+  motivation_no_caisse_afternoon: string[]
+  motivation_no_caisse_evening: string[]
+  motivation_no_caisse_morning_image: string | null
+  motivation_no_caisse_afternoon_image: string | null
+  motivation_no_caisse_evening_image: string | null
   test_mode: boolean
   min_version: number
   last_version: number
@@ -53,14 +73,34 @@ export const useSettingsStore = defineStore('settings', () => {
       cancellation_commission: data.cancellation_commission || '0.00',
       done_commission: data.done_commission || '0.00',
       cancel_block_commission: data.cancel_block_commission || '0.00',
+      // Rappels quotidiens
       reminreminder_day_morning: Array.isArray(data.reminreminder_day_morning) ? data.reminreminder_day_morning : [],
       reminreminder_day_afternoon: Array.isArray(data.reminreminder_day_afternoon) ? data.reminreminder_day_afternoon : [],
       reminreminder_day_evening: Array.isArray(data.reminreminder_day_evening) ? data.reminreminder_day_evening : [],
+      reminreminder_day_morning_image: data.reminreminder_day_morning_image || null,
+      reminreminder_day_afternoon_image: data.reminreminder_day_afternoon_image || null,
+      reminreminder_day_evening_image: data.reminreminder_day_evening_image || null,
+      // Rappels hebdomadaires
       reminreminder_week_morning: Array.isArray(data.reminreminder_week_morning) ? data.reminreminder_week_morning : [],
       reminreminder_week_afternoon: Array.isArray(data.reminreminder_week_afternoon) ? data.reminreminder_week_afternoon : [],
+      reminreminder_week_evening: Array.isArray(data.reminreminder_week_evening) ? data.reminreminder_week_evening : [],
+      reminreminder_week_morning_image: data.reminreminder_week_morning_image || null,
+      reminreminder_week_afternoon_image: data.reminreminder_week_afternoon_image || null,
+      reminreminder_week_evening_image: data.reminreminder_week_evening_image || null,
+      // Rappels mensuels
       reminreminder_month_morning: Array.isArray(data.reminreminder_month_morning) ? data.reminreminder_month_morning : [],
       reminreminder_month_afternoon: Array.isArray(data.reminreminder_month_afternoon) ? data.reminreminder_month_afternoon : [],
       reminreminder_month_evening: Array.isArray(data.reminreminder_month_evening) ? data.reminreminder_month_evening : [],
+      reminreminder_month_morning_image: data.reminreminder_month_morning_image || null,
+      reminreminder_month_afternoon_image: data.reminreminder_month_afternoon_image || null,
+      reminreminder_month_evening_image: data.reminreminder_month_evening_image || null,
+      // Messages de motivation
+      motivation_no_caisse_morning: Array.isArray(data.motivation_no_caisse_morning) ? data.motivation_no_caisse_morning : [],
+      motivation_no_caisse_afternoon: Array.isArray(data.motivation_no_caisse_afternoon) ? data.motivation_no_caisse_afternoon : [],
+      motivation_no_caisse_evening: Array.isArray(data.motivation_no_caisse_evening) ? data.motivation_no_caisse_evening : [],
+      motivation_no_caisse_morning_image: data.motivation_no_caisse_morning_image || null,
+      motivation_no_caisse_afternoon_image: data.motivation_no_caisse_afternoon_image || null,
+      motivation_no_caisse_evening_image: data.motivation_no_caisse_evening_image || null,
       test_mode: data.test_mode ?? false,
       min_version: data.min_version || 1,
       last_version: data.last_version || 1,
