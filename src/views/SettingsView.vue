@@ -168,12 +168,7 @@
               <MessageListEditor v-model="settings.reminreminder_day_morning" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
-                <input 
-                  v-model="settings.reminreminder_day_morning_image" 
-                  type="url" 
-                  placeholder="https://..."
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <ImageUploader v-model="settings.reminreminder_day_morning_image" />
               </div>
             </div>
             <div>
@@ -181,12 +176,7 @@
               <MessageListEditor v-model="settings.reminreminder_day_afternoon" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
-                <input 
-                  v-model="settings.reminreminder_day_afternoon_image" 
-                  type="url" 
-                  placeholder="https://..."
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <ImageUploader v-model="settings.reminreminder_day_afternoon_image" />
               </div>
             </div>
             <div>
@@ -194,12 +184,7 @@
               <MessageListEditor v-model="settings.reminreminder_day_evening" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
-                <input 
-                  v-model="settings.reminreminder_day_evening_image" 
-                  type="url" 
-                  placeholder="https://..."
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <ImageUploader v-model="settings.reminreminder_day_evening_image" />
               </div>
             </div>
           </div>
@@ -215,12 +200,7 @@
               <MessageListEditor v-model="settings.reminreminder_week_morning" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
-                <input 
-                  v-model="settings.reminreminder_week_morning_image" 
-                  type="url" 
-                  placeholder="https://..."
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <ImageUploader v-model="settings.reminreminder_week_morning_image" />
               </div>
             </div>
             <div>
@@ -228,12 +208,7 @@
               <MessageListEditor v-model="settings.reminreminder_week_afternoon" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
-                <input 
-                  v-model="settings.reminreminder_week_afternoon_image" 
-                  type="url" 
-                  placeholder="https://..."
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <ImageUploader v-model="settings.reminreminder_week_afternoon_image" />
               </div>
             </div>
             <div>
@@ -241,12 +216,7 @@
               <MessageListEditor v-model="settings.reminreminder_week_evening" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
-                <input 
-                  v-model="settings.reminreminder_week_evening_image" 
-                  type="url" 
-                  placeholder="https://..."
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <ImageUploader v-model="settings.reminreminder_week_evening_image" />
               </div>
             </div>
           </div>
@@ -262,12 +232,7 @@
               <MessageListEditor v-model="settings.reminreminder_month_morning" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
-                <input 
-                  v-model="settings.reminreminder_month_morning_image" 
-                  type="url" 
-                  placeholder="https://..."
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <ImageUploader v-model="settings.reminreminder_month_morning_image" />
               </div>
             </div>
             <div>
@@ -275,12 +240,7 @@
               <MessageListEditor v-model="settings.reminreminder_month_afternoon" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
-                <input 
-                  v-model="settings.reminreminder_month_afternoon_image" 
-                  type="url" 
-                  placeholder="https://..."
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <ImageUploader v-model="settings.reminreminder_month_afternoon_image" />
               </div>
             </div>
             <div>
@@ -288,12 +248,7 @@
               <MessageListEditor v-model="settings.reminreminder_month_evening" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
-                <input 
-                  v-model="settings.reminreminder_month_evening_image" 
-                  type="url" 
-                  placeholder="https://..."
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <ImageUploader v-model="settings.reminreminder_month_evening_image" />
               </div>
             </div>
           </div>
@@ -309,12 +264,7 @@
               <MessageListEditor v-model="settings.motivation_no_caisse_morning" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
-                <input 
-                  v-model="settings.motivation_no_caisse_morning_image" 
-                  type="url" 
-                  placeholder="https://..."
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <ImageUploader v-model="settings.motivation_no_caisse_morning_image" />
               </div>
             </div>
             <div>
@@ -322,12 +272,7 @@
               <MessageListEditor v-model="settings.motivation_no_caisse_afternoon" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
-                <input 
-                  v-model="settings.motivation_no_caisse_afternoon_image" 
-                  type="url" 
-                  placeholder="https://..."
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <ImageUploader v-model="settings.motivation_no_caisse_afternoon_image" />
               </div>
             </div>
             <div>
@@ -335,12 +280,7 @@
               <MessageListEditor v-model="settings.motivation_no_caisse_evening" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
-                <input 
-                  v-model="settings.motivation_no_caisse_evening_image" 
-                  type="url" 
-                  placeholder="https://..."
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <ImageUploader v-model="settings.motivation_no_caisse_evening_image" />
               </div>
             </div>
           </div>
@@ -448,6 +388,7 @@ import { ref, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useSettingsStore } from '../stores/settings'
 import MessageListEditor from '../components/settings/MessageListEditor.vue'
+import ImageUploader from '../components/settings/ImageUploader.vue'
 
 const settingsStore = useSettingsStore()
 const { settings, loading, error } = storeToRefs(settingsStore)
