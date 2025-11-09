@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-      <h1 class="text-2xl font-bold text-gray-900">Paramètres</h1>
+      <h1 class="text-2xl font-bold text-gray-900">Paramètres Globaux</h1>
     </div>
 
     <!-- Loading State -->
@@ -23,12 +23,22 @@
           <h2 class="text-lg font-medium text-gray-900 mb-4">Informations de contact</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input v-model="settings.email" type="email" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email support</label>
+              <input 
+                v-model="settings.email" 
+                type="email" 
+                maxlength="100"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+              />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
-              <input v-model="settings.phone" type="tel" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone support</label>
+              <input 
+                v-model="settings.phone" 
+                type="tel" 
+                maxlength="120"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+              />
             </div>
           </div>
         </div>
@@ -38,47 +48,165 @@
           <h2 class="text-lg font-medium text-gray-900 mb-4">Paramètres des montants</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Montant minimum</label>
-              <input v-model="settings.minimum_amount" type="number" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              <label class="block text-sm font-medium text-gray-700 mb-1">Montant minimum transaction</label>
+              <input 
+                v-model.number="settings.minimum_amount" 
+                type="number" 
+                step="0.01"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+              />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Montant minimum objectif</label>
-              <input v-model="settings.minimum_amount_obj" type="number" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              <label class="block text-sm font-medium text-gray-700 mb-1">Montant minimum objectif caisse</label>
+              <input 
+                v-model.number="settings.minimum_amount_obj" 
+                type="number" 
+                step="0.01"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+              />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Bonus de parrainage</label>
-              <input v-model="settings.referral_bonus_amount" type="number" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              <input 
+                v-model.number="settings.referral_bonus_amount" 
+                type="number" 
+                step="0.01"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+              />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Commission annulation</label>
-              <input v-model="settings.cancellation_commission" type="number" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Commission terminée</label>
-              <input v-model="settings.done_commission" type="number" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              <label class="block text-sm font-medium text-gray-700 mb-1">Nombre minimum de jours</label>
+              <input 
+                v-model.number="settings.minimum_days" 
+                type="number" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+              />
             </div>
           </div>
         </div>
 
-        <!-- Days Settings -->
+        <!-- Commissions -->
         <div class="p-6">
-          <h2 class="text-lg font-medium text-gray-900 mb-4">Paramètres des jours</h2>
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Commissions (%)</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Commission d'annulation (%)</label>
+              <input 
+                v-model.number="settings.cancellation_commission" 
+                type="number" 
+                step="0.01"
+                min="0"
+                max="100"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Commission de complétion (%)</label>
+              <input 
+                v-model.number="settings.done_commission" 
+                type="number" 
+                step="0.01"
+                min="0"
+                max="100"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Commission de blocage (%)</label>
+              <input 
+                v-model.number="settings.cancel_block_commission" 
+                type="number" 
+                step="0.01"
+                min="0"
+                max="100"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Other Settings -->
+        <div class="p-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Autres paramètres</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nombre minimum de jours</label>
-              <input v-model="settings.minimum_days" type="number" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              <label class="block text-sm font-medium text-gray-700 mb-1">Seuls les agents peuvent partager</label>
+              <div class="mt-1">
+                <label class="inline-flex items-center">
+                  <input 
+                    v-model="settings.only_agente_can_share" 
+                    type="checkbox" 
+                    class="form-checkbox h-5 w-5 text-blue-600 rounded"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">Activé</span>
+                </label>
+              </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Mode test</label>
               <div class="mt-1">
-                <input v-model="settings.test_mode" type="checkbox" class="form-checkbox h-5 w-5 text-blue-600">
+                <label class="inline-flex items-center">
+                  <input 
+                    v-model="settings.test_mode" 
+                    type="checkbox" 
+                    class="form-checkbox h-5 w-5 text-blue-600 rounded"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">Activé</span>
+                </label>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Reminders - Daily -->
+        <div class="p-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Rappels Quotidiens</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Seuls les agents peuvent partager</label>
-              <div class="mt-1">
-                <input v-model="settings.only_agente_can_share" type="checkbox" class="form-checkbox h-5 w-5 text-blue-600">
-              </div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Matin</label>
+              <DaySelector v-model="settings.reminreminder_day_morning" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Après-midi</label>
+              <DaySelector v-model="settings.reminreminder_day_afternoon" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Soir</label>
+              <DaySelector v-model="settings.reminreminder_day_evening" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Reminders - Weekly -->
+        <div class="p-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Rappels Hebdomadaires</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Matin</label>
+              <DaySelector v-model="settings.reminreminder_week_morning" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Après-midi</label>
+              <DaySelector v-model="settings.reminreminder_week_afternoon" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Reminders - Monthly -->
+        <div class="p-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Rappels Mensuels</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Matin</label>
+              <MonthDaySelector v-model="settings.reminreminder_month_morning" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Après-midi</label>
+              <MonthDaySelector v-model="settings.reminreminder_month_afternoon" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Soir</label>
+              <MonthDaySelector v-model="settings.reminreminder_month_evening" />
             </div>
           </div>
         </div>
@@ -88,32 +216,79 @@
           <h2 class="text-lg font-medium text-gray-900 mb-4">Paramètres de version</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Version minimale</label>
-              <input v-model="settings.min_version" type="number" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              <label class="block text-sm font-medium text-gray-700 mb-1">Version minimale requise</label>
+              <input 
+                v-model.number="settings.min_version" 
+                type="number" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+              />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Dernière version</label>
-              <input v-model="settings.last_version" type="number" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              <label class="block text-sm font-medium text-gray-700 mb-1">Dernière version disponible</label>
+              <input 
+                v-model.number="settings.last_version" 
+                type="number" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+              />
             </div>
             <div class="col-span-2">
               <label class="block text-sm font-medium text-gray-700 mb-1">Message de mise à jour</label>
-              <textarea v-model="settings.update_message" rows="3" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+              <textarea 
+                v-model="settings.update_message" 
+                rows="3" 
+                maxlength="250"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Message affiché lors de la mise à jour..."
+              ></textarea>
             </div>
-            <div class="col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">URL APK Android</label>
-              <input v-model="settings.dowload_android_apk" type="url" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+          </div>
+        </div>
+
+        <!-- Download Links -->
+        <div class="p-6">
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Liens de téléchargement</h2>
+          <div class="grid grid-cols-1 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Lien téléchargement Android</label>
+              <input 
+                v-model="settings.dowload_android_apk" 
+                type="url" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                placeholder="https://..."
+              />
             </div>
-            <div class="col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">URL APK iOS</label>
-              <input v-model="settings.dowload_ios_apk" type="url" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Lien téléchargement iOS</label>
+              <input 
+                v-model="settings.dowload_ios_apk" 
+                type="url" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                placeholder="https://..."
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Lien téléchargement générique</label>
+              <input 
+                v-model="settings.dowload_apk_link" 
+                type="url" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                placeholder="https://..."
+              />
             </div>
           </div>
         </div>
 
         <!-- Submit Button -->
-        <div class="p-6">
-          <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" :disabled="loading">
-            <span v-if="!loading">Sauvegarder les modifications</span>
+        <div class="p-6 bg-gray-50">
+          <button 
+            type="submit" 
+            class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" 
+            :disabled="loading"
+          >
+            <span v-if="!loading" class="flex items-center">
+              <i class="fas fa-save mr-2"></i>
+              Sauvegarder les modifications
+            </span>
             <span v-else class="flex items-center">
               <i class="fas fa-spinner animate-spin mr-2"></i>
               Enregistrement...
@@ -121,17 +296,11 @@
           </button>
         </div>
 
-        <!-- Success/Error Message -->
-        <div v-if="successMessage" class="p-6">
-          <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4" role="alert">
-            <p class="font-bold">Succès</p>
+        <!-- Success Message -->
+        <div v-if="successMessage" class="p-6 bg-green-50">
+          <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg" role="alert">
+            <p class="font-bold">✓ Succès</p>
             <p>{{ successMessage }}</p>
-          </div>
-        </div>
-        <div v-if="error" class="p-6">
-          <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4" role="alert">
-            <p class="font-bold">Erreur</p>
-            <p>{{ error }}</p>
           </div>
         </div>
       </form>
@@ -143,6 +312,8 @@
 import { ref, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useSettingsStore } from '../stores/settings'
+import DaySelector from '../components/settings/DaySelector.vue'
+import MonthDaySelector from '../components/settings/MonthDaySelector.vue'
 
 const settingsStore = useSettingsStore()
 const { settings, loading, error } = storeToRefs(settingsStore)
@@ -156,18 +327,16 @@ onMounted(() => {
 const handleSubmit = async () => {
   if (settings.value) {
     try {
-      loading.value = true
+      successMessage.value = null
       const success = await updateSettings(settings.value)
       if (success) {
         successMessage.value = 'Les paramètres ont été mis à jour avec succès'
         setTimeout(() => {
           successMessage.value = null
-        }, 3000)
+        }, 5000)
       }
     } catch (err) {
-      error.value = 'Erreur lors de la mise à jour des paramètres'
-    } finally {
-      loading.value = false
+      console.error('Erreur lors de la soumission:', err)
     }
   }
 }

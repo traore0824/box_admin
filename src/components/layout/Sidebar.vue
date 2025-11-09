@@ -1,12 +1,12 @@
 <template>
-  <div class="bg-white border-r border-gray-200 w-[260px] hidden md:block">
+  <div class="bg-white border-r border-gray-200 w-[260px] hidden md:block relative h-screen flex flex-col">
     <!-- Logo -->
-    <div class="h-16 border-b border-gray-200 flex items-center justify-center">
+    <div class="h-16 border-b border-gray-200 flex items-center justify-center flex-shrink-0">
       <h1 class="text-2xl font-bold text-primary">BOX Admin</h1>
     </div>
     
     <!-- Navigation -->
-    <nav class="mt-6 px-4">
+    <nav class="mt-6 px-4 flex-1 overflow-y-auto pb-32">
       <ul class="space-y-1">
         <li v-for="item in menuItems" :key="item.path">
           <router-link 
@@ -14,25 +14,25 @@
             class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors"
             :class="{ 'bg-primary-50 text-primary font-medium': isActive(item.path) }"
           >
-            <i :class="item.icon" class="mr-3 text-lg"></i>
-            <span>{{ item.name }}</span>
+            <i :class="item.icon" class="mr-3 text-lg flex-shrink-0"></i>
+            <span class="truncate">{{ item.name }}</span>
           </router-link>
         </li>
       </ul>
     </nav>
     
     <!-- User Section -->
-    <div class="absolute bottom-0 w-[260px] border-t border-gray-200 py-4 px-6">
-      <div class="flex items-center space-x-3">
-        <AvatarIcon class="w-10 h-10" />
-        <div>
-          <p class="font-medium text-gray-800">{{ authStore.user?.name || `${authStore.user?.first_name || ''} ${authStore.user?.last_name || ''}`.trim() || authStore.user?.email }}</p>
-          <p class="text-xs text-gray-500">{{ authStore.user?.email }}</p>
+    <div class="border-t border-gray-200 py-4 px-6 bg-white flex-shrink-0">
+      <div class="flex items-center space-x-3 mb-4">
+        <AvatarIcon class="w-10 h-10 flex-shrink-0" />
+        <div class="min-w-0 flex-1">
+          <p class="font-medium text-gray-800 truncate">{{ authStore.user?.name || `${authStore.user?.first_name || ''} ${authStore.user?.last_name || ''}`.trim() || authStore.user?.email }}</p>
+          <p class="text-xs text-gray-500 truncate">{{ authStore.user?.email }}</p>
         </div>
       </div>
       <button 
         @click="logout" 
-        class="mt-4 flex items-center text-gray-600 hover:text-primary transition-colors"
+        class="flex items-center text-gray-600 hover:text-primary transition-colors w-full"
       >
         <i class="fas fa-sign-out-alt mr-2"></i> Logout
       </button>
@@ -49,15 +49,15 @@
   <!-- Mobile Menu -->
   <div 
     v-if="isMobileMenuOpen" 
-    class="fixed inset-y-0 left-0 w-full bg-white z-40 md:hidden"
+    class="fixed inset-y-0 left-0 w-full bg-white z-40 md:hidden flex flex-col"
   >
     <!-- Logo -->
-    <div class="h-16 border-b border-gray-200 flex items-center justify-center">
+    <div class="h-16 border-b border-gray-200 flex items-center justify-center flex-shrink-0">
       <h1 class="text-2xl font-bold text-primary">BOX Admin</h1>
     </div>
     
     <!-- Navigation -->
-    <nav class="mt-6 px-4">
+    <nav class="mt-6 px-4 flex-1 overflow-y-auto pb-40">
       <ul class="space-y-1">
         <li v-for="item in menuItems" :key="item.path">
           <router-link 
@@ -69,25 +69,29 @@
             } : {}"
             @click="selectOption(item.path); isMobileMenuOpen = false"
           >
-            <i :class="item.icon" class="mr-3 text-lg"></i>
-            <span>{{ item.name }}</span>
+            <i :class="item.icon" class="mr-3 text-lg flex-shrink-0"></i>
+            <span class="truncate">{{ item.name }}</span>
           </router-link>
         </li>
       </ul>
     </nav>
     
     <!-- Mobile User Section -->
-    <div class="absolute bottom-0 w-full border-t border-gray-200 py-4 px-6">
-      <div class="flex items-center space-x-3">
-        <img :src="authStore.user?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="User Avatar" class="w-10 h-10 rounded-full">
-        <div>
-          <p class="font-medium text-gray-800">{{ authStore.user?.name || `${authStore.user?.first_name || ''} ${authStore.user?.last_name || ''}`.trim() || authStore.user?.email }}</p>
-          <p class="text-xs text-gray-500">{{ authStore.user?.email }}</p>
+    <div class="border-t border-gray-200 py-4 px-6 bg-white flex-shrink-0">
+      <div class="flex items-center space-x-3 mb-4">
+        <img 
+          :src="authStore.user?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" 
+          alt="User Avatar" 
+          class="w-10 h-10 rounded-full flex-shrink-0"
+        >
+        <div class="min-w-0 flex-1">
+          <p class="font-medium text-gray-800 truncate">{{ authStore.user?.name || `${authStore.user?.first_name || ''} ${authStore.user?.last_name || ''}`.trim() || authStore.user?.email }}</p>
+          <p class="text-xs text-gray-500 truncate">{{ authStore.user?.email }}</p>
         </div>
       </div>
       <button 
         @click="logout" 
-        class="mt-4 flex items-center text-gray-600 hover:text-primary transition-colors"
+        class="flex items-center text-gray-600 hover:text-primary transition-colors w-full"
       >
         <i class="fas fa-sign-out-alt mr-2"></i> Logout
       </button>

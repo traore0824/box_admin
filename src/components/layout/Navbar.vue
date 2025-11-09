@@ -151,9 +151,9 @@
           @click="toggleProfile" 
           class="flex items-center space-x-2 sm:space-x-4"
         >
-          <AvatarIcon class="w-8 h-8 sm:w-10 sm:h-10" />
-          <span class="text-sm font-medium text-gray-700 hidden sm:block">{{ authStore.user?.name || `${authStore.user?.first_name || ''} ${authStore.user?.last_name || ''}`.trim() || authStore.user?.email }}</span>
-          <i class="fas fa-chevron-down text-xs text-gray-500 hidden md:block"></i>
+          <AvatarIcon class="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0" />
+          <span class="text-sm font-medium text-gray-700 hidden sm:block truncate max-w-[120px] md:max-w-none">{{ authStore.user?.name || `${authStore.user?.first_name || ''} ${authStore.user?.last_name || ''}`.trim() || authStore.user?.email }}</span>
+          <i class="fas fa-chevron-down text-xs text-gray-500 hidden md:block flex-shrink-0"></i>
         </button>
         
         <!-- Dropdown -->
