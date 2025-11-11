@@ -33,11 +33,22 @@ export const useTransactionsStore = defineStore('transactions', () => {
       params.status = statusFilter.value
     }
 
-    if (typeTransFilter.value !== 'all') {
-      params.type_trans = typeTransFilter.value
-    }
-
     return params
+  }
+
+  // 🔗 Détermine l'endpoint à utiliser selon le type de transaction
+  function getTransactionEndpoint(): string {
+    switch (typeTransFilter.value) {
+      case 'deposit':
+        return '/box/transaction-deposit'
+      case 'withdrawal':
+        return '/box/transaction-withdrawal'
+      case 'cancellation':
+        return '/box/transaction-cancellation'
+      case 'all':
+      default:
+        return '/box/all-transaction'
+    }
   }
 
   // 📡 Requête API avec fetchWithAuth
@@ -46,7 +57,8 @@ export const useTransactionsStore = defineStore('transactions', () => {
       isLoading.value = true
       error.value = null
 
-      const response = await fetchWithAuth('/box/transaction/list', {
+      const endpoint = getTransactionEndpoint()
+      const response = await fetchWithAuth(endpoint, {
         queryParams: buildQueryParams(page)
       })
 
