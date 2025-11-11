@@ -62,13 +62,16 @@ export const useUsersStore = defineStore('users', () => {
   }
 
   // Watcher pour appliquer automatiquement les filtres quand ils changent
-  // On évite le déclenchement initial avec { immediate: false }
+  let isInitialLoad = true
   watch([blockFilter, agentFilter], () => {
-    // Ne pas appliquer les filtres si on est déjà en train de charger ou si c'est le montage initial
-    if (!isLoading.value) {
-      applyFilters()
+    // Ignorer le premier déclenchement (montage initial)
+    if (isInitialLoad) {
+      isInitialLoad = false
+      return
     }
-  }, { immediate: false })
+    // Appliquer les filtres automatiquement
+    applyFilters()
+  })
 
   async function fetchUsers(page = 1) {
     try {
