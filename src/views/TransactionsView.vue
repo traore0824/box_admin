@@ -21,7 +21,7 @@
               <i class="fas fa-search text-gray-400"></i>
             </div>
             <input type="text" id="search" class="input pl-10" placeholder="Référence, téléphone, caisse ou email"
-              v-model="transactionsStore.searchQuery" @input="transactionsStore.fetchTransactions(1)" />
+              v-model="transactionsStore.searchQuery" @input="transactionsStore.updateSearchQuery(transactionsStore.searchQuery)" />
           </div>
         </div>
 
@@ -29,7 +29,7 @@
         <div>
           <label for="status-filter" class="block text-sm font-medium text-gray-700">Statut</label>
           <select id="status-filter" class="input mt-1" v-model="transactionsStore.statusFilter"
-            @change="transactionsStore.fetchTransactions(1)">
+            @change="transactionsStore.applyFilters">
             <option value="all">Tous les statuts</option>
             <option value="accept">Accepté</option>
             <option value="error">Erreur</option>
@@ -41,10 +41,11 @@
         <div>
           <label for="type-filter" class="block text-sm font-medium text-gray-700">Type</label>
           <select id="type-filter" class="input mt-1" v-model="transactionsStore.typeTransFilter"
-            @change="transactionsStore.fetchTransactions(1)">
+            @change="transactionsStore.applyFilters">
             <option value="all">Tous les types</option>
             <option value="deposit">Dépôt</option>
             <option value="withdrawal">Retrait</option>
+            <option value="cancellation">Annulation</option>
           </select>
         </div>
       </div>
@@ -72,7 +73,8 @@
               <td>{{ new Date(transaction.created_at).toLocaleDateString() }}</td>
               <td :class="{
                 'text-success': transaction.type_trans === 'deposit',
-                'text-danger': transaction.type_trans === 'withdrawal'
+                'text-danger': transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation',
+                'text-warning': transaction.type_trans === 'cancellation'
               }">
                 {{ transaction.type_trans === 'deposit' ? '+' : '-' }}{{ transaction.amount.toLocaleString() }} XOF
               </td>
@@ -80,9 +82,10 @@
               <td>
                 <span class="badge" :class="{
                   'bg-success-light text-success-dark': transaction.type_trans === 'deposit',
-                  'bg-warning-light text-warning-dark': transaction.type_trans === 'withdrawal'
+                  'bg-warning-light text-warning-dark': transaction.type_trans === 'withdrawal',
+                  'bg-red-100 text-red-800': transaction.type_trans === 'cancellation'
                 }">
-                  {{ transaction.type_trans }}
+                  {{ transaction.type_trans === 'deposit' ? 'Dépôt' : transaction.type_trans === 'withdrawal' ? 'Retrait' : 'Annulation' }}
                 </span>
               </td>
               <td>

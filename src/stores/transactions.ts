@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { Transaction } from '../types/transaction'
 // import { useAuthStore } from './auth' // Non utilisé pour l'instant
 import { fetchWithAuth } from './fetchwithtoken'
@@ -46,7 +46,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
       isLoading.value = true
       error.value = null
 
-      const response = await fetchWithAuth('/box/transaction', {
+      const response = await fetchWithAuth('/box/transaction/list', {
         queryParams: buildQueryParams(page)
       })
 
@@ -83,6 +83,24 @@ export const useTransactionsStore = defineStore('transactions', () => {
     fetchTransactions(1)
   }
 
+  function applyFilters() {
+    // Réinitialiser à la page 1 et recharger les transactions avec les nouveaux filtres
+    currentPage.value = 1
+    fetchTransactions(1)
+  }
+
+  // Watcher pour appliquer automatiquement les filtres quand ils changent
+  let isInitialLoad = true
+  watch([statusFilter, typeTransFilter], () => {
+    // Ignorer le premier déclenchement (montage initial)
+    if (isInitialLoad) {
+      isInitialLoad = false
+      return
+    }
+    // Appliquer les filtres automatiquement
+    applyFilters()
+  })
+
   // 🔎 Local filtering (optionnel selon cas)
   function getFilteredTransactions() {
     return transactions.value
@@ -102,6 +120,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     updateSearchQuery,
     updateStatusFilter,
     updateTypeTransFilter,
+    applyFilters,
     getFilteredTransactions
   }
 })
