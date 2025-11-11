@@ -67,8 +67,8 @@
           </MetricGrid>
           <div class="amounts-section">
             <AmountDisplay :value="stats.caisse_active_amount" label="Montant Actif des Caisses" />
-            <AmountDisplay :value="stats.total_deposit" label="Total des Dépôts" />
-            <AmountDisplay :value="stats.total_withdra_amount" label="Total des Retraits" />
+            <AmountDisplay :value="stats.total_wallet_deposits || 0" label="Total des Dépôts" />
+            <AmountDisplay :value="stats.total_wallet_withdrawals || 0" label="Total des Retraits" />
           </div>
         </DashboardSection>
 
@@ -162,7 +162,7 @@
                   <i :class="getNetworkIcon(network)" class="network-icon"></i>
                   <span>{{ network }}</span>
                 </div>
-                <div class="network-data">
+                <div class="network-data" v-if="data">
                   <div class="transaction-count">{{ data.count }} transactions</div>
                   <div class="transaction-amount">{{ formatCurrency(data.total_amount) }}</div>
                 </div>
@@ -239,32 +239,28 @@ const mainKPIs = computed(() => [
     title: "Total Utilisateurs",
     value: stats.value.all_users,
     icon: "users",
-    color: "primary",
-    subtitle: `${stats.value.active_users} actifs`,
+    color: "primary" as const,
     growth: stats.value.evolution?.all_users || 0
   },
   {
     title: "Utilisateurs Actifs",
     value: stats.value.active_users,
     icon: "user-check",
-    color: "success",
-    subtitle: `${stats.value.agent_users} agents`,
+    color: "success" as const,
     growth: stats.value.evolution?.active_users || 0
   },
   {
     title: "Total Caisses",
     value: stats.value.total_caisses,
     icon: "piggy-bank",
-    color: "warning",
-    subtitle: `${stats.value.caisse_pending} en cours`,
+    color: "warning" as const,
     growth: stats.value.evolution?.total_caisses || 0
   },
   {
     title: "Total Transactions",
     value: stats.value.total_transactions,
     icon: "exchange-alt",
-    color: "info",
-    subtitle: `${formatCurrency(stats.value.caisse_active_amount)} actif`,
+    color: "info" as const,
     growth: stats.value.evolution?.total_transactions || 0
   }
 ])
