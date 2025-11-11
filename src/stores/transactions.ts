@@ -43,8 +43,6 @@ export const useTransactionsStore = defineStore('transactions', () => {
         return '/box/transaction-deposit'
       case 'withdrawal':
         return '/box/transaction-withdrawal'
-      case 'cancellation':
-        return '/box/transaction-cancellation'
       case 'all':
       default:
         return '/box/all-transaction'
@@ -80,19 +78,19 @@ export const useTransactionsStore = defineStore('transactions', () => {
   function updateSearchQuery(query: string) {
     searchQuery.value = query
     currentPage.value = 1
-    fetchTransactions(1)
+    // Le watcher va déclencher fetchTransactions automatiquement
   }
 
   function updateStatusFilter(status: string) {
     statusFilter.value = status
     currentPage.value = 1
-    fetchTransactions(1)
+    // Le watcher va déclencher fetchTransactions automatiquement
   }
 
   function updateTypeTransFilter(type: string) {
     typeTransFilter.value = type
     currentPage.value = 1
-    fetchTransactions(1)
+    // Le watcher va déclencher fetchTransactions automatiquement
   }
 
   function applyFilters() {
@@ -103,14 +101,15 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
   // Watcher pour appliquer automatiquement les filtres quand ils changent
   let isInitialLoad = true
-  watch([statusFilter, typeTransFilter], () => {
+  watch([statusFilter, typeTransFilter, searchQuery], () => {
     // Ignorer le premier déclenchement (montage initial)
     if (isInitialLoad) {
       isInitialLoad = false
       return
     }
     // Appliquer les filtres automatiquement
-    applyFilters()
+    currentPage.value = 1
+    fetchTransactions(1)
   })
 
   // 🔎 Local filtering (optionnel selon cas)

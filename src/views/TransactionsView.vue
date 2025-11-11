@@ -31,9 +31,11 @@
           <select id="status-filter" class="input mt-1" v-model="transactionsStore.statusFilter"
             @change="transactionsStore.applyFilters">
             <option value="all">Tous les statuts</option>
-            <option value="accept">Accepté</option>
+            <option value="accept">Success</option>
             <option value="error">Erreur</option>
-            <option value="pending">En attente</option>
+            <option value="pending">Pending</option>
+            <option value="expired">Expired</option>
+            <option value="timeout">Timeout</option>
           </select>
         </div>
 
@@ -43,9 +45,8 @@
           <select id="type-filter" class="input mt-1" v-model="transactionsStore.typeTransFilter"
             @change="transactionsStore.applyFilters">
             <option value="all">Tous les types</option>
-            <option value="deposit">Dépôt</option>
+            <option value="deposit">Deposit</option>
             <option value="withdrawal">Retrait</option>
-            <option value="cancellation">Annulation</option>
           </select>
         </div>
       </div>
@@ -73,8 +74,7 @@
               <td>{{ new Date(transaction.created_at).toLocaleDateString() }}</td>
               <td :class="{
                 'text-success': transaction.type_trans === 'deposit',
-                'text-danger': transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation',
-                'text-warning': transaction.type_trans === 'cancellation'
+                'text-danger': transaction.type_trans === 'withdrawal'
               }">
                 {{ transaction.type_trans === 'deposit' ? '+' : '-' }}{{ transaction.amount.toLocaleString() }} XOF
               </td>
@@ -82,19 +82,20 @@
               <td>
                 <span class="badge" :class="{
                   'bg-success-light text-success-dark': transaction.type_trans === 'deposit',
-                  'bg-warning-light text-warning-dark': transaction.type_trans === 'withdrawal',
-                  'bg-red-100 text-red-800': transaction.type_trans === 'cancellation'
+                  'bg-warning-light text-warning-dark': transaction.type_trans === 'withdrawal'
                 }">
-                  {{ transaction.type_trans === 'deposit' ? 'Dépôt' : transaction.type_trans === 'withdrawal' ? 'Retrait' : 'Annulation' }}
+                  {{ transaction.type_trans === 'deposit' ? 'Deposit' : transaction.type_trans === 'withdrawal' ? 'Retrait' : transaction.type_trans }}
                 </span>
               </td>
               <td>
                 <span class="badge" :class="{
                   'badge-success': transaction.status === 'accept',
                   'badge-danger': transaction.status === 'error',
-                  'bg-gray-100 text-gray-800': transaction.status === 'pending'
+                  'bg-gray-100 text-gray-800': transaction.status === 'pending',
+                  'bg-orange-100 text-orange-800': transaction.status === 'expired',
+                  'bg-yellow-100 text-yellow-800': transaction.status === 'timeout'
                 }">
-                  {{ transaction.status }}
+                  {{ transaction.status === 'accept' ? 'Success' : transaction.status === 'error' ? 'Erreur' : transaction.status === 'pending' ? 'Pending' : transaction.status === 'expired' ? 'Expired' : transaction.status === 'timeout' ? 'Timeout' : transaction.status }}
                 </span>
               </td>
               <td>{{ transaction.caisse.created_by.email }}</td>
