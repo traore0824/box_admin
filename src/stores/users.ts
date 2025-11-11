@@ -45,29 +45,52 @@ export const useUsersStore = defineStore('users', () => {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const searchQuery = ref('')
+  const blockFilter = ref<'all' | 'blocked' | 'unblocked'>('all')
+  const agentFilter = ref<'all' | 'agent' | 'client'>('all')
   const totalUsers = ref(0)
   const currentPage = ref(1)
   const itemsPerPage = 10
 
-  const filteredUsers = computed(() => {
-    if (!searchQuery.value) return users.value
-    return users.value.filter(user =>
-      user.email?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      user.first_name?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      user.last_name?.toLowerCase().includes(searchQuery.value.toLowerCase())
-    )
-  })
+  // Plus besoin de filteredUsers computed car le filtrage se fait côté backend
+  // On garde juste users.value qui contient déjà les résultats filtrés du backend
+  const filteredUsers = computed(() => users.value)
+
+  function applyFilters() {
+    // Réinitialiser à la page 1 et recharger les utilisateurs avec les nouveaux filtres
+    currentPage.value = 1
+    fetchUsers(1)
+  }
 
   async function fetchUsers(page = 1) {
     try {
       isLoading.value = true
       error.value = null
 
+      const queryParams: Record<string, string> = {
+        page: page.toString()
+      }
+
+      // Ajouter la recherche textuelle si présente
+      if (searchQuery.value) {
+        queryParams.q = searchQuery.value
+      }
+
+      // Ajouter le filtre de blocage
+      if (blockFilter.value === 'blocked') {
+        queryParams.is_block = 'true'
+      } else if (blockFilter.value === 'unblocked') {
+        queryParams.is_block = 'false'
+      }
+
+      // Ajouter le filtre agent/client
+      if (agentFilter.value === 'agent') {
+        queryParams.agent_client = 'true'
+      } else if (agentFilter.value === 'client') {
+        queryParams.agent_client = 'false'
+      }
+
       const response = await fetchWithAuth('/auth/listUser/', {
-        queryParams: {
-          q: searchQuery.value,
-          page
-        }
+        queryParams
       })
 
       if (!response.ok) {
@@ -257,12 +280,15 @@ export const useUsersStore = defineStore('users', () => {
     isLoading,
     error,
     searchQuery,
+    blockFilter,
+    agentFilter,
     totalUsers,
     currentPage,
     itemsPerPage,
     filteredUsers,
     fetchUsers,
     updateSearchQuery,
+    applyFilters,
     toggleUserBlockStatus,
     toggleUserAgentStatus,
     resetUserPin,

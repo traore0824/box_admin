@@ -5,11 +5,25 @@
       <h1 class="text-2xl font-bold text-gray-900">Gestion des Utilisateurs</h1>
 
       <!-- Search and Filters -->
-      <div class="mt-4 sm:mt-0 flex flex-col sm:flex-row space-y-4 sm:space-y-0 space-x-4">
+      <div class="mt-4 sm:mt-0 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
         <div class="relative flex-1 max-w-md">
           <input v-model="usersStore.searchQuery" type="text" placeholder="Rechercher un utilisateur..."
             class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
           <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        </div>
+        <div class="flex space-x-2">
+          <select v-model="usersStore.blockFilter" @change="usersStore.applyFilters"
+            class="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option value="all">Tous les statuts</option>
+            <option value="blocked">Bloqués</option>
+            <option value="unblocked">Non bloqués</option>
+          </select>
+          <select v-model="usersStore.agentFilter" @change="usersStore.applyFilters"
+            class="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option value="all">Tous les types</option>
+            <option value="agent">Agents</option>
+            <option value="client">Clients</option>
+          </select>
         </div>
       </div>
     </div>
@@ -43,6 +57,9 @@
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Statut Agent
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Statut
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
@@ -79,6 +96,31 @@
                 ]">
                   {{ user.agent_client ? 'Agent' : 'Client' }}
                 </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex flex-col space-y-1">
+                  <span :class="[
+                    'px-2 inline-flex text-xs leading-5 font-semibold rounded-full w-fit',
+                    user.is_block ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                  ]">
+                    <i :class="[
+                      'fas mr-1',
+                      user.is_block ? 'fa-lock' : 'fa-unlock'
+                    ]"></i>
+                    {{ user.is_block ? 'Bloqué' : 'Actif' }}
+                  </span>
+                  <div v-if="user.is_block && user.reason_block" class="relative group">
+                    <span class="text-xs text-gray-600 cursor-help underline decoration-dotted">
+                      Raison du blocage
+                    </span>
+                    <div class="absolute left-0 bottom-full mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                      <div class="relative">
+                        <p class="whitespace-normal">{{ user.reason_block }}</p>
+                        <div class="absolute -bottom-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <!-- Dropdown Component -->
@@ -529,6 +571,8 @@ const selectedKycImage = ref<string | null>(null)
 interface User {
   id: number;
   is_block: boolean;
+  reason_block?: string | null;
+  agent_client?: boolean;
   first_name?: string | null; 
   last_name?: string | null;
   status?: string | null;
