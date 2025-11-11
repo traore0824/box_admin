@@ -6,19 +6,22 @@
 
       <!-- Search and Filters -->
       <div class="mt-4 sm:mt-0">
-        <div class="flex flex-col lg:flex-row gap-4">
+        <div class="flex flex-col sm:flex-row gap-4 items-end">
           <!-- Barre de recherche -->
           <div class="relative flex-1 max-w-md">
-            <input v-model="usersStore.searchQuery" @input="() => usersStore.updateSearchQuery(usersStore.searchQuery)" type="text" placeholder="Rechercher un utilisateur..."
-              class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-            <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Rechercher</label>
+            <div class="relative">
+              <input v-model="usersStore.searchQuery" @input="() => usersStore.updateSearchQuery(usersStore.searchQuery)" type="text" placeholder="Rechercher un utilisateur..."
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
           </div>
           
           <!-- Filtres -->
           <div class="flex flex-col sm:flex-row gap-3">
             <div class="flex flex-col">
-              <label class="text-xs font-medium text-gray-700 mb-1">Statut de blocage</label>
-              <select v-model="usersStore.blockFilter" @change="usersStore.applyFilters"
+              <label class="block text-xs font-medium text-gray-700 mb-1">Statut de blocage</label>
+              <select v-model="usersStore.blockFilter"
                 class="px-4 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[160px]">
                 <option value="all">Tous les statuts</option>
                 <option value="blocked">Bloqués</option>
@@ -26,8 +29,8 @@
               </select>
             </div>
             <div class="flex flex-col">
-              <label class="text-xs font-medium text-gray-700 mb-1">Type d'utilisateur</label>
-              <select v-model="usersStore.agentFilter" @change="usersStore.applyFilters"
+              <label class="block text-xs font-medium text-gray-700 mb-1">Type d'utilisateur</label>
+              <select v-model="usersStore.agentFilter"
                 class="px-4 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[160px]">
                 <option value="all">Tous les types</option>
                 <option value="agent">Agents</option>

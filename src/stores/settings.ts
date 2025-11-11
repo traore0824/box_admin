@@ -15,6 +15,7 @@ export interface Setting {
   cancellation_commission: string
   done_commission: string
   cancel_block_commission: string
+  operation_fee: string
   // Rappels quotidiens (tableaux de messages)
   reminreminder_day_morning: string[]
   reminreminder_day_afternoon: string[]
@@ -73,6 +74,7 @@ export const useSettingsStore = defineStore('settings', () => {
       cancellation_commission: data.cancellation_commission || '0.00',
       done_commission: data.done_commission || '0.00',
       cancel_block_commission: data.cancel_block_commission || '0.00',
+      operation_fee: data.operation_fee || '0.00',
       // Rappels quotidiens
       reminreminder_day_morning: Array.isArray(data.reminreminder_day_morning) ? data.reminreminder_day_morning : [],
       reminreminder_day_afternoon: Array.isArray(data.reminreminder_day_afternoon) ? data.reminreminder_day_afternoon : [],
@@ -149,7 +151,8 @@ export const useSettingsStore = defineStore('settings', () => {
         'referral_bonus_amount',
         'cancellation_commission',
         'done_commission',
-        'cancel_block_commission'
+        'cancel_block_commission',
+        'operation_fee'
       ]
 
       decimalFields.forEach(field => {
