@@ -84,9 +84,9 @@ export const useUsersStore = defineStore('users', () => {
 
       // Ajouter le filtre agent/client
       if (agentFilter.value === 'agent') {
-        queryParams.agent_client = 'true'
+        queryParams.is_agent_client = 'true'
       } else if (agentFilter.value === 'client') {
-        queryParams.agent_client = 'false'
+        queryParams.is_agent_client = 'false'
       }
 
       const response = await fetchWithAuth('/auth/listUser/', {
