@@ -41,7 +41,15 @@
 
       <!-- Cartes KPI principales -->
       <section class="kpi-cards">
-        <StatCard v-for="kpi in mainKPIs" :key="kpi.title" v-bind="kpi" />
+        <StatCard 
+          v-for="kpi in mainKPIs" 
+          :key="kpi.title" 
+          :title="kpi.title"
+          :value="kpi.value"
+          :icon="kpi.icon"
+          :color="kpi.color"
+          :growth="kpi.growth"
+        />
       </section>
 
       <!-- Statistiques Utilisateurs -->
