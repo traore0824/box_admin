@@ -68,10 +68,10 @@ export const useKYCStore = defineStore('kyc', () => {
     }
   }
 
-  // Mettre à jour le statut KYC (approuver ou rejeter)
+  // Mettre à jour le statut KYC (approuver, rejeter, mettre en attente ou réinitialiser)
   async function updateKycStatus(
     userId: number, 
-    status: 'accept' | 'reject', 
+    status: 'accept' | 'reject' | 'pending' | 'null', 
     rejectionReason?: string
   ) {
     try {
@@ -83,11 +83,11 @@ export const useKYCStore = defineStore('kyc', () => {
         status
       }
 
-      if (status === 'reject') {
-        body.rejection_reason = rejectionReason || 'Documents non conformes'
+      if (status === 'reject' && rejectionReason) {
+        body.rejection_reason = rejectionReason
       }
 
-      const response = await fetchWithAuth('/auth/update-kyc-status', {
+      const response = await fetchWithAuth('/auth/update-kyc-status/', {
         method: 'POST',
         body
       })
@@ -100,10 +100,19 @@ export const useKYCStore = defineStore('kyc', () => {
       const result = await response.json()
       const notification = useNotification()
       
-      if (status === 'accept') {
-        notification.addNotification('Demande KYC approuvée avec succès', 'success')
-      } else {
-        notification.addNotification('Demande KYC rejetée', 'info')
+      switch (status) {
+        case 'accept':
+          notification.addNotification('Demande KYC approuvée avec succès', 'success')
+          break
+        case 'reject':
+          notification.addNotification('Demande KYC rejetée', 'info')
+          break
+        case 'pending':
+          notification.addNotification('Statut KYC mis à jour: En attente', 'info')
+          break
+        case 'null':
+          notification.addNotification('Statut KYC réinitialisé', 'info')
+          break
       }
 
       // Rafraîchir la liste

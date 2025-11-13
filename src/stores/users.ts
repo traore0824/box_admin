@@ -262,8 +262,7 @@ export const useUsersStore = defineStore('users', () => {
 
       const response = await fetchWithAuth('/auth/update-kyc-status/', {
         method: 'POST',
-        body: JSON.stringify(body),
-        headers: { 'Content-Type': 'application/json' }
+        body
       })
 
       if (!response.ok) {
