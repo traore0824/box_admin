@@ -47,6 +47,7 @@
             <option value="all">Tous les types</option>
             <option value="deposit">Deposit</option>
             <option value="withdrawal">Retrait</option>
+            <option value="cancellation">Annulation</option>
           </select>
         </div>
       </div>
@@ -75,7 +76,8 @@
               <td>{{ new Date(transaction.created_at).toLocaleDateString() }}</td>
               <td :class="{
                 'text-success': transaction.type_trans === 'deposit',
-                'text-danger': transaction.type_trans === 'withdrawal'
+                'text-danger': transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation',
+                'text-warning': transaction.type_trans === 'cancellation'
               }">
                 {{ transaction.type_trans === 'deposit' ? '+' : '-' }}{{ transaction.amount.toLocaleString() }} XOF
               </td>
@@ -83,9 +85,10 @@
               <td>
                 <span class="badge" :class="{
                   'bg-success-light text-success-dark': transaction.type_trans === 'deposit',
-                  'bg-warning-light text-warning-dark': transaction.type_trans === 'withdrawal'
+                  'bg-warning-light text-warning-dark': transaction.type_trans === 'withdrawal',
+                  'bg-red-100 text-red-800': transaction.type_trans === 'cancellation'
                 }">
-                  {{ transaction.type_trans === 'deposit' ? 'Deposit' : transaction.type_trans === 'withdrawal' ? 'Retrait' : transaction.type_trans }}
+                  {{ transaction.type_trans === 'deposit' ? 'Deposit' : transaction.type_trans === 'withdrawal' ? 'Retrait' : transaction.type_trans === 'cancellation' ? 'Annulation' : transaction.type_trans }}
                 </span>
               </td>
               <td>

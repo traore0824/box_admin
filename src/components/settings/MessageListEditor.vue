@@ -12,7 +12,6 @@
           :placeholder="`Message ${index + 1}`"
           class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           @input="updateMessages"
-          @keyup.enter="handleEnter"
         />
         <button
           type="button"
@@ -52,7 +51,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:modelValue': [value: string[]]
-  'save': []
 }>()
 
 const messages = ref<string[]>([...props.modelValue])
@@ -74,11 +72,6 @@ const addMessage = () => {
 const removeMessage = (index: number) => {
   messages.value.splice(index, 1)
   updateMessages()
-}
-
-const handleEnter = () => {
-  // Émettre un événement pour déclencher la sauvegarde
-  emit('save')
 }
 </script>
 

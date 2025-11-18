@@ -175,7 +175,7 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Matin (8h)</label>
-              <MessageListEditor v-model="settings.reminreminder_day_morning" @save="handleSave" />
+              <MessageListEditor v-model="settings.reminreminder_day_morning" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
                 <ImageUploader v-model="settings.reminreminder_day_morning_image" />
@@ -183,7 +183,7 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Après-midi (14h)</label>
-              <MessageListEditor v-model="settings.reminreminder_day_afternoon" @save="handleSave" />
+              <MessageListEditor v-model="settings.reminreminder_day_afternoon" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
                 <ImageUploader v-model="settings.reminreminder_day_afternoon_image" />
@@ -191,7 +191,7 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Soir (21h)</label>
-              <MessageListEditor v-model="settings.reminreminder_day_evening" @save="handleSave" />
+              <MessageListEditor v-model="settings.reminreminder_day_evening" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
                 <ImageUploader v-model="settings.reminreminder_day_evening_image" />
@@ -207,7 +207,7 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Matin (8h)</label>
-              <MessageListEditor v-model="settings.reminreminder_week_morning" @save="handleSave" />
+              <MessageListEditor v-model="settings.reminreminder_week_morning" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
                 <ImageUploader v-model="settings.reminreminder_week_morning_image" />
@@ -215,7 +215,7 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Après-midi (14h)</label>
-              <MessageListEditor v-model="settings.reminreminder_week_afternoon" @save="handleSave" />
+              <MessageListEditor v-model="settings.reminreminder_week_afternoon" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
                 <ImageUploader v-model="settings.reminreminder_week_afternoon_image" />
@@ -223,7 +223,7 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Soir (21h)</label>
-              <MessageListEditor v-model="settings.reminreminder_week_evening" @save="handleSave" />
+              <MessageListEditor v-model="settings.reminreminder_week_evening" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
                 <ImageUploader v-model="settings.reminreminder_week_evening_image" />
@@ -239,7 +239,7 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Matin (8h)</label>
-              <MessageListEditor v-model="settings.reminreminder_month_morning" @save="handleSave" />
+              <MessageListEditor v-model="settings.reminreminder_month_morning" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
                 <ImageUploader v-model="settings.reminreminder_month_morning_image" />
@@ -247,7 +247,7 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Après-midi (14h)</label>
-              <MessageListEditor v-model="settings.reminreminder_month_afternoon" @save="handleSave" />
+              <MessageListEditor v-model="settings.reminreminder_month_afternoon" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
                 <ImageUploader v-model="settings.reminreminder_month_afternoon_image" />
@@ -255,7 +255,7 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Soir (21h)</label>
-              <MessageListEditor v-model="settings.reminreminder_month_evening" @save="handleSave" />
+              <MessageListEditor v-model="settings.reminreminder_month_evening" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
                 <ImageUploader v-model="settings.reminreminder_month_evening_image" />
@@ -271,7 +271,7 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Matin (8h)</label>
-              <MessageListEditor v-model="settings.motivation_no_caisse_morning" @save="handleSave" />
+              <MessageListEditor v-model="settings.motivation_no_caisse_morning" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
                 <ImageUploader v-model="settings.motivation_no_caisse_morning_image" />
@@ -279,7 +279,7 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Après-midi (14h)</label>
-              <MessageListEditor v-model="settings.motivation_no_caisse_afternoon" @save="handleSave" />
+              <MessageListEditor v-model="settings.motivation_no_caisse_afternoon" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
                 <ImageUploader v-model="settings.motivation_no_caisse_afternoon_image" />
@@ -287,7 +287,7 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Soir (21h)</label>
-              <MessageListEditor v-model="settings.motivation_no_caisse_evening" @save="handleSave" />
+              <MessageListEditor v-model="settings.motivation_no_caisse_evening" />
               <div class="mt-3">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Image (optionnel)</label>
                 <ImageUploader v-model="settings.motivation_no_caisse_evening_image" />
@@ -389,40 +389,25 @@
           </div>
         </div>
 
-        <!-- Auto-saving indicator -->
-        <div v-if="isAutoSaving" class="p-4 bg-blue-50 border-t border-blue-200">
-          <div class="flex items-center text-blue-700">
-            <i class="fas fa-spinner fa-spin mr-2"></i>
-            <span class="text-sm">Sauvegarde en cours...</span>
-          </div>
-        </div>
       </form>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useSettingsStore } from '../stores/settings'
 import MessageListEditor from '../components/settings/MessageListEditor.vue'
 import ImageUploader from '../components/settings/ImageUploader.vue'
-import { debounce } from 'lodash'
 
 const settingsStore = useSettingsStore()
 const { settings, loading, error } = storeToRefs(settingsStore)
 const { fetchSettings, updateSettings } = settingsStore
 const successMessage = ref<string | null>(null)
-const isAutoSaving = ref(false)
-const isInitialLoad = ref(true)
 
 onMounted(() => {
-  fetchSettings().then(() => {
-    // Attendre un peu après le chargement initial pour éviter la sauvegarde automatique
-    setTimeout(() => {
-      isInitialLoad.value = false
-    }, 1000)
-  })
+  fetchSettings()
 })
 
 const handleSubmit = async () => {
@@ -442,50 +427,4 @@ const handleSubmit = async () => {
   }
 }
 
-// Sauvegarde automatique avec debounce (2 secondes après la dernière modification)
-const debouncedAutoSave = debounce(async () => {
-  if (settings.value && !loading.value) {
-    try {
-      isAutoSaving.value = true
-      const success = await updateSettings(settings.value)
-      if (success) {
-        successMessage.value = 'Sauvegarde automatique réussie'
-        setTimeout(() => {
-          successMessage.value = null
-        }, 3000)
-      }
-    } catch (err) {
-      console.error('Erreur lors de la sauvegarde automatique:', err)
-    } finally {
-      isAutoSaving.value = false
-    }
-  }
-}, 2000)
-
-// Sauvegarde immédiate (pour la touche Entrée)
-const handleSave = async () => {
-  if (settings.value && !loading.value) {
-    try {
-      isAutoSaving.value = true
-      const success = await updateSettings(settings.value)
-      if (success) {
-        successMessage.value = 'Sauvegarde réussie'
-        setTimeout(() => {
-          successMessage.value = null
-        }, 3000)
-      }
-    } catch (err) {
-      console.error('Erreur lors de la sauvegarde:', err)
-    } finally {
-      isAutoSaving.value = false
-    }
-  }
-}
-
-// Surveiller les changements dans settings pour déclencher la sauvegarde automatique
-watch(() => settings.value, () => {
-  if (settings.value && !isInitialLoad.value) {
-    debouncedAutoSave()
-  }
-}, { deep: true })
 </script>
