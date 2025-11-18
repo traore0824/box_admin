@@ -66,6 +66,7 @@
               <th>Statut</th>
               <th>Utilisateur</th>
               <th>Caisse</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
@@ -100,6 +101,19 @@
               </td>
               <td>{{ transaction.caisse.created_by.email }}</td>
               <td>{{ transaction.caisse.name }}</td>
+              <td>
+                <button
+                  v-if="canApproveTransaction(transaction)"
+                  @click="openApproveModal(transaction)"
+                  :disabled="transactionsStore.isLoading || approvingTransactionId === transaction.id"
+                  class="btn btn-sm btn-success"
+                  :class="{ 'opacity-50 cursor-not-allowed': transactionsStore.isLoading || approvingTransactionId === transaction.id }"
+                >
+                  <i v-if="approvingTransactionId === transaction.id" class="fas fa-spinner fa-spin mr-1"></i>
+                  <i v-else class="fas fa-check mr-1"></i>
+                  Approuver
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -141,14 +155,77 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de confirmation d'approbation -->
+    <div v-if="showApproveModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4" @click.stop>
+        <div class="p-6">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Approuver la transaction</h3>
+          
+          <div v-if="selectedTransaction" class="space-y-3 mb-6">
+            <div>
+              <span class="text-sm text-gray-600">Référence:</span>
+              <span class="ml-2 font-medium">{{ selectedTransaction.public_reference }}</span>
+            </div>
+            <div>
+              <span class="text-sm text-gray-600">Type:</span>
+              <span class="ml-2 font-medium">
+                {{ selectedTransaction.type_trans === 'withdrawal' ? 'Retrait' : selectedTransaction.type_trans === 'cancellation' ? 'Annulation' : selectedTransaction.type_trans }}
+              </span>
+            </div>
+            <div>
+              <span class="text-sm text-gray-600">Montant:</span>
+              <span class="ml-2 font-medium text-lg" :class="{
+                'text-danger': selectedTransaction.type_trans === 'withdrawal' || selectedTransaction.type_trans === 'cancellation'
+              }">
+                -{{ selectedTransaction.amount.toLocaleString() }} XOF
+              </span>
+            </div>
+            <div>
+              <span class="text-sm text-gray-600">Caisse:</span>
+              <span class="ml-2 font-medium">{{ selectedTransaction.caisse.name }}</span>
+            </div>
+          </div>
+
+          <p class="text-gray-700 mb-6">
+            Êtes-vous sûr de vouloir approuver cette transaction ? Cette action vérifiera la cohérence des montants et changera le statut à "accept".
+          </p>
+
+          <div class="flex justify-end space-x-3">
+            <button
+              @click="closeApproveModal"
+              :disabled="transactionsStore.isLoading"
+              class="btn btn-outline"
+            >
+              Annuler
+            </button>
+            <button
+              @click="confirmApprove"
+              :disabled="transactionsStore.isLoading"
+              class="btn btn-success"
+            >
+              <i v-if="transactionsStore.isLoading" class="fas fa-spinner fa-spin mr-2"></i>
+              <i v-else class="fas fa-check mr-2"></i>
+              Approuver
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { useTransactionsStore } from '../stores/transactions'
+import { Transaction } from '../types/transaction'
 
 const transactionsStore = useTransactionsStore()
+
+// État du modal d'approbation
+const showApproveModal = ref(false)
+const selectedTransaction = ref<Transaction | null>(null)
+const approvingTransactionId = ref<number | null>(null)
 
 onMounted(() => {
   transactionsStore.fetchTransactions()
@@ -160,4 +237,41 @@ const hasNextPage = computed(() => {
   const total = transactionsStore.totalTransactions
   return currentPage * perPage < total
 })
+
+// Vérifier si une transaction peut être approuvée
+function canApproveTransaction(transaction: Transaction): boolean {
+  return (
+    (transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation') &&
+    transaction.status === 'pending'
+  )
+}
+
+// Ouvrir le modal d'approbation
+function openApproveModal(transaction: Transaction) {
+  selectedTransaction.value = transaction
+  showApproveModal.value = true
+}
+
+// Fermer le modal d'approbation
+function closeApproveModal() {
+  showApproveModal.value = false
+  selectedTransaction.value = null
+  approvingTransactionId.value = null
+}
+
+// Confirmer l'approbation
+async function confirmApprove() {
+  if (!selectedTransaction.value) return
+
+  try {
+    approvingTransactionId.value = selectedTransaction.value.id
+    await transactionsStore.approveWithdrawal(selectedTransaction.value.id)
+    closeApproveModal()
+  } catch (error) {
+    // L'erreur est déjà gérée dans le store avec une notification
+    console.error('Erreur lors de l\'approbation:', error)
+  } finally {
+    approvingTransactionId.value = null
+  }
+}
 </script>

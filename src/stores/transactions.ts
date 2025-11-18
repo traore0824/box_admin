@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import { Transaction } from '../types/transaction'
 // import { useAuthStore } from './auth' // Non utilisé pour l'instant
 import { fetchWithAuth } from './fetchwithtoken'
+import { useNotification } from '../services/notification'
 
 export const useTransactionsStore = defineStore('transactions', () => {
   // const authStore = useAuthStore() // Non utilisé pour l'instant
@@ -107,6 +108,48 @@ export const useTransactionsStore = defineStore('transactions', () => {
     return transactions.value
   }
 
+  // ✅ Approuver une transaction de retrait ou d'annulation
+  async function approveWithdrawal(transactionId: number) {
+    try {
+      isLoading.value = true
+      error.value = null
+
+      const response = await fetchWithAuth('/api/box/transaction/approve-withdrawal/', {
+        method: 'POST',
+        body: {
+          transaction_id: transactionId
+        }
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        const errorMessage = data.message || data.detail || 'Erreur lors de l\'approbation de la transaction'
+        throw new Error(errorMessage)
+      }
+
+      const result = await response.json()
+      const notification = useNotification()
+      
+      if (result.success) {
+        notification.addNotification(result.message || 'Transaction approuvée avec succès', 'success')
+        // Rafraîchir la liste des transactions
+        await fetchTransactions(currentPage.value)
+      } else {
+        throw new Error(result.message || 'Erreur lors de l\'approbation')
+      }
+
+      return result
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Une erreur est survenue lors de l\'approbation'
+      const notification = useNotification()
+      notification.addNotification(error.value, 'error')
+      console.error('Erreur lors de l\'approbation de la transaction:', err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     transactions,
     isLoading,
@@ -122,6 +165,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     updateStatusFilter,
     updateTypeTransFilter,
     applyFilters,
-    getFilteredTransactions
+    getFilteredTransactions,
+    approveWithdrawal
   }
 })
