@@ -60,7 +60,8 @@ watch(() => props.modelValue, (newValue) => {
 }, { deep: true })
 
 const updateMessages = () => {
-  emit('update:modelValue', messages.value.filter(m => m.trim() !== ''))
+  // Ne pas filtrer les messages vides pour permettre à l'utilisateur de les remplir
+  emit('update:modelValue', [...messages.value])
 }
 
 const addMessage = () => {

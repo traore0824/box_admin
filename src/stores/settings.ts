@@ -161,6 +161,28 @@ export const useSettingsStore = defineStore('settings', () => {
         }
       })
 
+      // Filtrer les messages vides des tableaux de messages avant l'envoi
+      const messageArrayFields = [
+        'reminreminder_day_morning',
+        'reminreminder_day_afternoon',
+        'reminreminder_day_evening',
+        'reminreminder_week_morning',
+        'reminreminder_week_afternoon',
+        'reminreminder_week_evening',
+        'reminreminder_month_morning',
+        'reminreminder_month_afternoon',
+        'reminreminder_month_evening',
+        'motivation_no_caisse_morning',
+        'motivation_no_caisse_afternoon',
+        'motivation_no_caisse_evening'
+      ]
+
+      messageArrayFields.forEach(field => {
+        if (Array.isArray(payload[field])) {
+          payload[field] = payload[field].filter((msg: string) => msg && msg.trim() !== '')
+        }
+      })
+
       const response = await fetchWithAuth('/box/setting', {
         method: 'PATCH',
         headers: {
