@@ -87,19 +87,21 @@
           <div class="lg:w-48 flex flex-col gap-3">
             <button 
               @click="openAcceptModal(user)"
-              :disabled="kycStore.isLoading"
+              :disabled="kycStore.isLoading || processingUserId === user.id"
               class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              <i class="fas fa-check-circle mr-2"></i>
-              Approuver
+              <i v-if="processingUserId === user.id && processingAction === 'accept'" class="fas fa-spinner fa-spin mr-2"></i>
+              <i v-else class="fas fa-check-circle mr-2"></i>
+              {{ processingUserId === user.id && processingAction === 'accept' ? 'Traitement...' : 'Approuver' }}
             </button>
             <button 
               @click="openRejectModal(user)"
-              :disabled="kycStore.isLoading"
+              :disabled="kycStore.isLoading || processingUserId === user.id"
               class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              <i class="fas fa-times-circle mr-2"></i>
-              Rejeter
+              <i v-if="processingUserId === user.id && processingAction === 'reject'" class="fas fa-spinner fa-spin mr-2"></i>
+              <i v-else class="fas fa-times-circle mr-2"></i>
+              {{ processingUserId === user.id && processingAction === 'reject' ? 'Traitement...' : 'Rejeter' }}
             </button>
           </div>
         </div>
@@ -122,16 +124,18 @@
         <button 
           @click="kycStore.fetchPendingKYCs(kycStore.currentPage - 1, searchQuery)"
           :disabled="kycStore.currentPage === 1 || kycStore.isLoading"
-          class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
         >
-          <i class="fas fa-chevron-left"></i>
+          <i v-if="kycStore.isLoading" class="fas fa-spinner fa-spin"></i>
+          <i v-else class="fas fa-chevron-left"></i>
         </button>
         <button 
           @click="kycStore.fetchPendingKYCs(kycStore.currentPage + 1, searchQuery)"
           :disabled="kycStore.currentPage * 20 >= kycStore.totalPending || kycStore.isLoading"
-          class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
         >
-          <i class="fas fa-chevron-right"></i>
+          <i v-if="kycStore.isLoading" class="fas fa-spinner fa-spin"></i>
+          <i v-else class="fas fa-chevron-right"></i>
         </button>
       </div>
     </div>
@@ -141,6 +145,7 @@
       :is-open="showAcceptModal"
       title="Approuver la demande KYC"
       :message="acceptModalMessage"
+      :loading="kycStore.isLoading || (processingUserId !== null && processingAction === 'accept')"
       @confirm="confirmAccept"
       @cancel="closeAcceptModal"
     />
@@ -177,10 +182,12 @@
             </button>
             <button 
               @click="confirmReject"
-              :disabled="!rejectionReason.trim() || kycStore.isLoading"
-              class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+              :disabled="!rejectionReason.trim() || kycStore.isLoading || processingUserId === selectedUser?.id"
+              class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              Rejeter
+              <i v-if="kycStore.isLoading || processingUserId === selectedUser?.id" class="fas fa-spinner fa-spin mr-2"></i>
+              <i v-else class="fas fa-times-circle mr-2"></i>
+              {{ kycStore.isLoading || processingUserId === selectedUser?.id ? 'Traitement...' : 'Rejeter' }}
             </button>
           </div>
         </div>
@@ -230,6 +237,8 @@ const rejectionReason = ref('')
 const acceptModalMessage = ref('')
 const rejectModalMessage = ref('')
 const selectedImage = ref<string | null>(null)
+const processingUserId = ref<number | null>(null)
+const processingAction = ref<'accept' | 'reject' | null>(null)
 
 // Gestion de la touche Échap pour fermer le modal d'image
 const handleEscape = (event: KeyboardEvent) => {
@@ -270,16 +279,23 @@ const openAcceptModal = (user: any) => {
 const closeAcceptModal = () => {
   showAcceptModal.value = false
   selectedUser.value = null
+  processingUserId.value = null
+  processingAction.value = null
 }
 
 const confirmAccept = async () => {
   if (!selectedUser.value) return
   
   try {
+    processingUserId.value = selectedUser.value.id
+    processingAction.value = 'accept'
     await kycStore.updateKycStatus(selectedUser.value.id, 'accept')
     closeAcceptModal()
   } catch (error) {
     // L'erreur est déjà gérée dans le store
+  } finally {
+    processingUserId.value = null
+    processingAction.value = null
   }
 }
 
@@ -294,12 +310,16 @@ const closeRejectModal = () => {
   showRejectModal.value = false
   selectedUser.value = null
   rejectionReason.value = ''
+  processingUserId.value = null
+  processingAction.value = null
 }
 
 const confirmReject = async () => {
   if (!selectedUser.value || !rejectionReason.value.trim()) return
   
   try {
+    processingUserId.value = selectedUser.value.id
+    processingAction.value = 'reject'
     await kycStore.updateKycStatus(
       selectedUser.value.id, 
       'reject', 
@@ -308,6 +328,9 @@ const confirmReject = async () => {
     closeRejectModal()
   } catch (error) {
     // L'erreur est déjà gérée dans le store
+  } finally {
+    processingUserId.value = null
+    processingAction.value = null
   }
 }
 

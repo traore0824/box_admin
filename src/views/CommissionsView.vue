@@ -163,16 +163,18 @@
           <button 
             @click="commissionsStore.fetchCommissionTransactions(commissionsStore.currentPage - 1, isWithdrawnFilter)"
             :disabled="commissionsStore.currentPage === 1 || commissionsStore.isLoading"
-            class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            <i class="fas fa-chevron-left"></i>
+            <i v-if="commissionsStore.isLoading" class="fas fa-spinner fa-spin"></i>
+            <i v-else class="fas fa-chevron-left"></i>
           </button>
           <button 
             @click="commissionsStore.fetchCommissionTransactions(commissionsStore.currentPage + 1, isWithdrawnFilter)"
             :disabled="commissionsStore.currentPage * 10 >= commissionsStore.totalTransactions || commissionsStore.isLoading"
-            class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            <i class="fas fa-chevron-right"></i>
+            <i v-if="commissionsStore.isLoading" class="fas fa-spinner fa-spin"></i>
+            <i v-else class="fas fa-chevron-right"></i>
           </button>
         </div>
       </div>
@@ -278,6 +280,7 @@
       :is-open="showReconcileModal"
       title="Réconcilier les commissions"
       message="Êtes-vous sûr de vouloir réconcilier les commissions ? Cette action vérifiera la cohérence entre le montant total et la somme des transactions."
+      :loading="commissionsStore.isLoading"
       @confirm="confirmReconcile"
       @cancel="showReconcileModal = false"
     />

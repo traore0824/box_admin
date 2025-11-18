@@ -47,11 +47,11 @@
         <button
           type="submit"
           :disabled="authStore.isLoading"
-          class="w-full bg-primary-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
+          class="w-full bg-primary-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 flex items-center justify-center"
           :class="{ 'opacity-50 cursor-not-allowed': authStore.isLoading }"
         >
-          <span v-if="!authStore.isLoading">Connexion</span>
-          <span v-else>Loading...</span>
+          <i v-if="authStore.isLoading" class="fas fa-spinner fa-spin mr-2"></i>
+          <span>{{ authStore.isLoading ? 'Connexion...' : 'Connexion' }}</span>
         </button>
       </form>
 

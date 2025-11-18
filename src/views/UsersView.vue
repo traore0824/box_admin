@@ -243,13 +243,15 @@
     <!-- Pagination -->
     <div class="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
       <div class="flex-1 flex justify-between sm:hidden">
-        <button @click="usersStore.fetchUsers(usersStore.currentPage - 1)" :disabled="usersStore.currentPage === 1"
-          class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+        <button @click="usersStore.fetchUsers(usersStore.currentPage - 1)" :disabled="usersStore.currentPage === 1 || usersStore.isLoading"
+          class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+          <i v-if="usersStore.isLoading" class="fas fa-spinner fa-spin mr-2"></i>
           Précédent
         </button>
         <button @click="usersStore.fetchUsers(usersStore.currentPage + 1)"
-          :disabled="usersStore.currentPage * usersStore.itemsPerPage >= usersStore.totalUsers"
-          class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+          :disabled="usersStore.currentPage * usersStore.itemsPerPage >= usersStore.totalUsers || usersStore.isLoading"
+          class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+          <i v-if="usersStore.isLoading" class="fas fa-spinner fa-spin mr-2"></i>
           Suivant
         </button>
       </div>
@@ -262,15 +264,17 @@
         </div>
         <div>
           <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-            <button @click="usersStore.fetchUsers(usersStore.currentPage - 1)" :disabled="usersStore.currentPage === 1"
-              class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-              <i class="fas fa-chevron-left"></i>
+            <button @click="usersStore.fetchUsers(usersStore.currentPage - 1)" :disabled="usersStore.currentPage === 1 || usersStore.isLoading"
+              class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              <i v-if="usersStore.isLoading" class="fas fa-spinner fa-spin"></i>
+              <i v-else class="fas fa-chevron-left"></i>
               <span class="sr-only">Précédent</span>
             </button>
             <button @click="usersStore.fetchUsers(usersStore.currentPage + 1)"
-              :disabled="usersStore.currentPage * usersStore.itemsPerPage >= usersStore.totalUsers"
-              class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-              <i class="fas fa-chevron-right"></i>
+              :disabled="usersStore.currentPage * usersStore.itemsPerPage >= usersStore.totalUsers || usersStore.isLoading"
+              class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              <i v-if="usersStore.isLoading" class="fas fa-spinner fa-spin"></i>
+              <i v-else class="fas fa-chevron-right"></i>
               <span class="sr-only">Suivant</span>
             </button>
           </nav>

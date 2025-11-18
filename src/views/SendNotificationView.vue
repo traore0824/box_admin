@@ -168,11 +168,12 @@
           class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
           Annuler
         </button>
-        <button @click="sendNotification" :disabled="!notification.title || !notification.content"
+        <button @click="sendNotification" :disabled="!notification.title || !notification.content || notificationStore.isLoading"
           class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          :class="{ 'opacity-50 cursor-not-allowed': !notification.title || !notification.content }">
-          <i class="fas fa-paper-plane"></i>
-          Envoyer
+          :class="{ 'opacity-50 cursor-not-allowed': !notification.title || !notification.content || notificationStore.isLoading }">
+          <i v-if="notificationStore.isLoading" class="fas fa-spinner fa-spin"></i>
+          <i v-else class="fas fa-paper-plane"></i>
+          {{ notificationStore.isLoading ? 'Envoi...' : 'Envoyer' }}
         </button>
       </div>
     </div>

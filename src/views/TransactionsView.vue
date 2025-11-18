@@ -142,15 +142,17 @@
 
         <!-- Contrôles -->
         <div class="flex space-x-2">
-          <button class="btn btn-sm" :class="{ 'opacity-50 cursor-not-allowed': transactionsStore.currentPage === 1 }"
-            :disabled="transactionsStore.currentPage === 1"
+          <button class="btn btn-sm" :class="{ 'opacity-50 cursor-not-allowed': transactionsStore.currentPage === 1 || transactionsStore.isLoading }"
+            :disabled="transactionsStore.currentPage === 1 || transactionsStore.isLoading"
             @click="transactionsStore.fetchTransactions(transactionsStore.currentPage - 1)">
-            <i class="fas fa-chevron-left mr-1"></i> Précédente
+            <i v-if="transactionsStore.isLoading" class="fas fa-spinner fa-spin mr-1"></i>
+            <i v-else class="fas fa-chevron-left mr-1"></i> Précédente
           </button>
 
-          <button class="btn btn-sm" :class="{ 'opacity-50 cursor-not-allowed': !hasNextPage }" :disabled="!hasNextPage"
+          <button class="btn btn-sm" :class="{ 'opacity-50 cursor-not-allowed': !hasNextPage || transactionsStore.isLoading }" :disabled="!hasNextPage || transactionsStore.isLoading"
             @click="transactionsStore.fetchTransactions(transactionsStore.currentPage + 1)">
-            Suivante <i class="fas fa-chevron-right ml-1"></i>
+            <i v-if="transactionsStore.isLoading" class="fas fa-spinner fa-spin ml-1"></i>
+            <i v-else class="fas fa-chevron-right ml-1"></i> Suivante
           </button>
         </div>
       </div>

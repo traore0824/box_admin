@@ -117,16 +117,18 @@
             <button
               @click="loadAttributionsPage(bonusStore.currentAttributionPage - 1)"
               :disabled="bonusStore.currentAttributionPage === 1 || bonusStore.isLoading"
-              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              <i class="fas fa-chevron-left"></i>
+              <i v-if="bonusStore.isLoading" class="fas fa-spinner fa-spin"></i>
+              <i v-else class="fas fa-chevron-left"></i>
             </button>
             <button
               @click="loadAttributionsPage(bonusStore.currentAttributionPage + 1)"
               :disabled="bonusStore.currentAttributionPage * 20 >= bonusStore.totalAttributions || bonusStore.isLoading"
-              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              <i class="fas fa-chevron-right"></i>
+              <i v-if="bonusStore.isLoading" class="fas fa-spinner fa-spin"></i>
+              <i v-else class="fas fa-chevron-right"></i>
             </button>
           </div>
         </div>
@@ -267,16 +269,18 @@
             <button
               @click="bonusStore.fetchWithdrawals(bonusStore.currentPage - 1, statusFilter === 'all' ? undefined : statusFilter)"
               :disabled="bonusStore.currentPage === 1 || bonusStore.isLoading"
-              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              <i class="fas fa-chevron-left"></i>
+              <i v-if="bonusStore.isLoading" class="fas fa-spinner fa-spin"></i>
+              <i v-else class="fas fa-chevron-left"></i>
             </button>
             <button
               @click="bonusStore.fetchWithdrawals(bonusStore.currentPage + 1, statusFilter === 'all' ? undefined : statusFilter)"
               :disabled="bonusStore.currentPage * 10 >= bonusStore.totalWithdrawals || bonusStore.isLoading"
-              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              <i class="fas fa-chevron-right"></i>
+              <i v-if="bonusStore.isLoading" class="fas fa-spinner fa-spin"></i>
+              <i v-else class="fas fa-chevron-right"></i>
             </button>
           </div>
         </div>
@@ -294,6 +298,7 @@
       :is-open="showAcceptModal"
       title="Accepter la demande de retrait"
       :message="acceptModalMessage"
+      :loading="bonusStore.isLoading"
       @confirm="confirmAccept"
       @cancel="closeAcceptModal"
     />
@@ -326,9 +331,11 @@
             <button
               @click="confirmReject"
               :disabled="!rejectionReason.trim() || bonusStore.isLoading"
-              class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+              class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              Rejeter
+              <i v-if="bonusStore.isLoading" class="fas fa-spinner fa-spin mr-2"></i>
+              <i v-else class="fas fa-times-circle mr-2"></i>
+              {{ bonusStore.isLoading ? 'Traitement...' : 'Rejeter' }}
             </button>
           </div>
         </div>

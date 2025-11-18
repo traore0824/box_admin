@@ -111,16 +111,18 @@
             <button 
               @click="loadWalletsPage(walletsStore.currentPage - 1)"
               :disabled="walletsStore.currentPage === 1 || walletsStore.isLoading"
-              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              <i class="fas fa-chevron-left"></i>
+              <i v-if="walletsStore.isLoading" class="fas fa-spinner fa-spin"></i>
+              <i v-else class="fas fa-chevron-left"></i>
             </button>
             <button 
               @click="loadWalletsPage(walletsStore.currentPage + 1)"
               :disabled="walletsStore.currentPage * 20 >= walletsStore.totalWallets || walletsStore.isLoading"
-              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              <i class="fas fa-chevron-right"></i>
+              <i v-if="walletsStore.isLoading" class="fas fa-spinner fa-spin"></i>
+              <i v-else class="fas fa-chevron-right"></i>
             </button>
           </div>
         </div>
@@ -321,16 +323,18 @@
             <button 
               @click="loadPage(walletsStore.currentPage - 1)"
               :disabled="walletsStore.currentPage === 1 || walletsStore.isLoading"
-              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              <i class="fas fa-chevron-left"></i>
+              <i v-if="walletsStore.isLoading" class="fas fa-spinner fa-spin"></i>
+              <i v-else class="fas fa-chevron-left"></i>
             </button>
             <button 
               @click="loadPage(walletsStore.currentPage + 1)"
               :disabled="walletsStore.currentPage * 10 >= walletsStore.totalTransactions || walletsStore.isLoading"
-              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              <i class="fas fa-chevron-right"></i>
+              <i v-if="walletsStore.isLoading" class="fas fa-spinner fa-spin"></i>
+              <i v-else class="fas fa-chevron-right"></i>
             </button>
           </div>
         </div>
