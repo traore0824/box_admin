@@ -114,7 +114,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
       isLoading.value = true
       error.value = null
 
-      const response = await fetchWithAuth('/api/box/transaction/approve-withdrawal/', {
+      const response = await fetchWithAuth('/api/box/transaction/approve-withdrawal', {
         method: 'POST',
         body: {
           transaction_id: transactionId
