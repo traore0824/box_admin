@@ -8,7 +8,7 @@
     <!-- Navigation -->
     <nav class="mt-6 px-4 flex-1 overflow-y-auto pb-32">
       <ul class="space-y-1">
-        <li v-for="item in menuItems" :key="item.path">
+        <li v-for="item in filteredMenuItems" :key="item.path">
           <router-link 
             :to="item.path" 
             class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors"
@@ -59,7 +59,7 @@
     <!-- Navigation -->
     <nav class="mt-6 px-4 flex-1 overflow-y-auto pb-40">
       <ul class="space-y-1">
-        <li v-for="item in menuItems" :key="item.path">
+        <li v-for="item in filteredMenuItems" :key="item.path">
           <router-link 
             :to="item.path" 
             class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors relative"
@@ -100,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { menuItems } from '../../config/menu'
 import AvatarIcon from '../AvatarIcon.vue'
@@ -111,9 +111,20 @@ const isMobileMenuOpen = ref(false)
 const selectedOption = ref('/')
 const route = useRoute()
 
-// Définir le dashboard comme option par défaut
+// Filtrer le menu selon le rôle : CustomerService ne voit pas le dashboard
+const filteredMenuItems = computed(() => {
+  const isStaff = authStore.user?.is_staff === true
+  if (isStaff) {
+    return menuItems
+  }
+  // CustomerService : masquer le dashboard
+  return menuItems.filter(item => item.path !== '/')
+})
+
+// Définir le dashboard comme option par défaut (ou users pour CustomerService)
 onMounted(() => {
-  selectedOption.value = '/'
+  const isStaff = authStore.user?.is_staff === true
+  selectedOption.value = isStaff ? '/' : '/users'
 })
 
 // Mise à jour de la sélection quand l'utilisateur change de page

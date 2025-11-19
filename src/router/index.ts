@@ -142,26 +142,28 @@ router.beforeEach(async (to, _from, next) => {
     }
   }
   
-  // Si connecté, vérifier que l'utilisateur est admin (is_staff)
+  // Si connecté, vérifier les permissions selon le rôle
   if (to.meta.requiresAuth && storedAccessToken && authStore.user) {
-    // Vérifier si l'utilisateur est admin
-    // Note: is_staff peut être undefined si l'API ne le retourne pas, on considère alors que c'est OK pour éviter les blocages
-    if (authStore.user.is_staff === false) {
-      if (import.meta.env.DEV) console.log('User is not staff, redirecting to login')
-      // Rediriger vers login avec message d'erreur
-      authStore.logout()
-      next({ 
-        name: 'login',
-        query: { message: 'Accès réservé aux administrateurs' }
-      })
+    const isStaff = authStore.user.is_staff === true
+    
+    // Bloquer l'accès au dashboard pour les non-staff (CustomerService)
+    // Rediriger automatiquement vers /users
+    if (to.path === '/' && !isStaff) {
+      if (import.meta.env.DEV) console.log('CustomerService cannot access dashboard, redirecting to users')
+      next({ name: 'users', replace: true })
       return
     }
+    
+    // Note: Les permissions backend gèrent les accès aux autres pages
+    // Si un CustomerService essaie d'accéder à une page non autorisée, le backend retournera une erreur
   }
   
-  // Si déjà connecté et admin, rediriger du login vers dashboard
-  if (to.name === 'login' && authStore.isAuthenticated && (authStore.user?.is_staff !== false)) {
-    if (import.meta.env.DEV) console.log('Already authenticated, redirecting to dashboard')
-    next({ name: 'dashboard' })
+  // Redirection après login selon le rôle
+  if (to.name === 'login' && authStore.isAuthenticated && authStore.user) {
+    const isStaff = authStore.user.is_staff === true
+    if (import.meta.env.DEV) console.log('Already authenticated, redirecting based on role')
+    // Staff -> dashboard, CustomerService -> users
+    next({ name: isStaff ? 'dashboard' : 'users' })
     return
   }
   
