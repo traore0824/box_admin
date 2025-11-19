@@ -114,13 +114,14 @@ export const useTransactionsStore = defineStore('transactions', () => {
       isLoading.value = true
       error.value = null
 
-      const response = await fetchWithAuth('/box/transaction/approve-withdrawal', {
+      const response = await fetchWithAuth('/box/transaction-approve-withdrawal', {
         method: 'POST',
         body: {
           transaction_id: transactionId
         }
       })
 
+      
       if (!response.ok) {
         const data = await response.json().catch(() => ({}))
         const errorMessage = data.message || data.detail || 'Erreur lors de l\'approbation de la transaction'
@@ -150,6 +151,36 @@ export const useTransactionsStore = defineStore('transactions', () => {
     }
   }
 
+  // 🔍 Vérifier le statut d'une transaction sur Feexpay
+  async function checkFeexpayStatus(transactionId: number) {
+    try {
+      isLoading.value = true
+      error.value = null
+
+      const response = await fetchWithAuth('/box/transaction-check-feexpay-status/', {
+        method: 'POST',
+        body: {
+          transaction_id: transactionId
+        }
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        const errorMessage = data.message || data.detail || 'Erreur lors de la vérification du statut Feexpay'
+        throw new Error(errorMessage)
+      }
+
+      const result = await response.json()
+      return result
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Une erreur est survenue lors de la vérification'
+      console.error('Erreur lors de la vérification du statut Feexpay:', err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     transactions,
     isLoading,
@@ -166,6 +197,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     updateTypeTransFilter,
     applyFilters,
     getFilteredTransactions,
-    approveWithdrawal
+    approveWithdrawal,
+    checkFeexpayStatus
   }
 })

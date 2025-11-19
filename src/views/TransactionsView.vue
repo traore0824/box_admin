@@ -105,17 +105,29 @@
               <td>{{ transaction.caisse.created_by.email }}</td>
               <td>{{ transaction.caisse.name }}</td>
               <td>
-                <button
-                  v-if="canApproveTransaction(transaction)"
-                  @click="openApproveModal(transaction)"
-                  :disabled="transactionsStore.isLoading || approvingTransactionId === transaction.id"
-                  class="btn btn-sm btn-success"
-                  :class="{ 'opacity-50 cursor-not-allowed': transactionsStore.isLoading || approvingTransactionId === transaction.id }"
-                >
-                  <i v-if="approvingTransactionId === transaction.id" class="fas fa-spinner fa-spin mr-1"></i>
-                  <i v-else class="fas fa-check mr-1"></i>
-                  Approuver
-                </button>
+                <div class="flex space-x-2">
+                  <button
+                    v-if="canApproveTransaction(transaction)"
+                    @click="openApproveModal(transaction)"
+                    :disabled="transactionsStore.isLoading || approvingTransactionId === transaction.id"
+                    class="btn btn-sm btn-success"
+                    :class="{ 'opacity-50 cursor-not-allowed': transactionsStore.isLoading || approvingTransactionId === transaction.id }"
+                  >
+                    <i v-if="approvingTransactionId === transaction.id" class="fas fa-spinner fa-spin mr-1"></i>
+                    <i v-else class="fas fa-check mr-1"></i>
+                    Approuver
+                  </button>
+                  <button
+                    @click="openFeexpayStatusModal(transaction)"
+                    :disabled="transactionsStore.isLoading || checkingFeexpayId === transaction.id"
+                    class="btn btn-sm btn-outline"
+                    :class="{ 'opacity-50 cursor-not-allowed': transactionsStore.isLoading || checkingFeexpayId === transaction.id }"
+                  >
+                    <i v-if="checkingFeexpayId === transaction.id" class="fas fa-spinner fa-spin mr-1"></i>
+                    <i v-else class="fas fa-search mr-1"></i>
+                    Vérifier Feexpay
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -217,6 +229,133 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de vérification du statut Feexpay -->
+    <div v-if="showFeexpayModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" @click="closeFeexpayModal">
+      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" @click.stop>
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">Statut Feexpay</h3>
+            <button @click="closeFeexpayModal" class="text-gray-400 hover:text-gray-600">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <!-- Loading State -->
+          <div v-if="checkingFeexpayId !== null && !feexpayStatusData" class="text-center py-8">
+            <i class="fas fa-spinner fa-spin text-2xl text-primary mb-2"></i>
+            <p class="text-gray-600">Vérification du statut en cours...</p>
+          </div>
+
+          <!-- Success State -->
+          <div v-else-if="feexpayStatusData && feexpayStatusData.success" class="space-y-4">
+            <div class="bg-success-light border border-success-dark rounded-lg p-4">
+              <div class="flex items-center mb-2">
+                <i class="fas fa-check-circle text-success-dark mr-2"></i>
+                <span class="font-semibold text-success-dark">Vérification réussie</span>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <span class="text-sm text-gray-600">Transaction ID:</span>
+                  <span class="ml-2 font-medium">{{ feexpayStatusData.transaction_id }}</span>
+                </div>
+                <div>
+                  <span class="text-sm text-gray-600">Référence:</span>
+                  <span class="ml-2 font-medium">{{ feexpayStatusData.reference }}</span>
+                </div>
+                <div>
+                  <span class="text-sm text-gray-600">Statut Feexpay:</span>
+                  <span class="ml-2 font-medium" :class="{
+                    'text-success': feexpayStatusData.feexpay_status === 'SUCCESSFUL',
+                    'text-danger': feexpayStatusData.feexpay_status !== 'SUCCESSFUL'
+                  }">
+                    {{ feexpayStatusData.feexpay_status }}
+                  </span>
+                </div>
+                <div>
+                  <span class="text-sm text-gray-600">Statut Local:</span>
+                  <span class="ml-2 font-medium">{{ feexpayStatusData.local_status }}</span>
+                </div>
+              </div>
+
+              <div v-if="feexpayStatusData.feexpay_data" class="mt-4">
+                <h4 class="font-semibold text-gray-800 mb-2">Détails Feexpay:</h4>
+                <div class="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+                  <div v-if="feexpayStatusData.feexpay_data.amount">
+                    <span class="text-gray-600">Montant:</span>
+                    <span class="ml-2 font-medium">{{ feexpayStatusData.feexpay_data.amount }} XOF</span>
+                  </div>
+                  <div v-if="feexpayStatusData.feexpay_data.phoneNumber">
+                    <span class="text-gray-600">Téléphone:</span>
+                    <span class="ml-2 font-medium">{{ feexpayStatusData.feexpay_data.phoneNumber }}</span>
+                  </div>
+                  <div v-if="feexpayStatusData.feexpay_data.status">
+                    <span class="text-gray-600">Statut:</span>
+                    <span class="ml-2 font-medium" :class="{
+                      'text-success': feexpayStatusData.feexpay_data.status === 'SUCCESSFUL',
+                      'text-danger': feexpayStatusData.feexpay_data.status !== 'SUCCESSFUL'
+                    }">
+                      {{ feexpayStatusData.feexpay_data.status }}
+                    </span>
+                  </div>
+                  <div v-if="feexpayStatusData.feexpay_data.responsecode">
+                    <span class="text-gray-600">Code de réponse:</span>
+                    <span class="ml-2 font-medium">{{ feexpayStatusData.feexpay_data.responsecode }}</span>
+                  </div>
+                  <div v-if="feexpayStatusData.feexpay_data.responsemsg">
+                    <span class="text-gray-600">Message:</span>
+                    <span class="ml-2 font-medium">{{ feexpayStatusData.feexpay_data.responsemsg }}</span>
+                  </div>
+                  <div v-if="feexpayStatusData.feexpay_data.date">
+                    <span class="text-gray-600">Date:</span>
+                    <span class="ml-2 font-medium">{{ new Date(feexpayStatusData.feexpay_data.date).toLocaleString() }}</span>
+                  </div>
+                  <div v-if="feexpayStatusData.feexpay_data.description">
+                    <span class="text-gray-600">Description:</span>
+                    <span class="ml-2 font-medium">{{ feexpayStatusData.feexpay_data.description }}</span>
+                  </div>
+                  <div v-if="feexpayStatusData.feexpay_data.type">
+                    <span class="text-gray-600">Type:</span>
+                    <span class="ml-2 font-medium">{{ feexpayStatusData.feexpay_data.type }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Error State -->
+          <div v-else-if="feexpayStatusData && !feexpayStatusData.success" class="space-y-4">
+            <div class="bg-danger-light border border-danger-dark rounded-lg p-4">
+              <div class="flex items-center mb-2">
+                <i class="fas fa-exclamation-circle text-danger-dark mr-2"></i>
+                <span class="font-semibold text-danger-dark">Erreur lors de la vérification</span>
+              </div>
+              <p class="text-sm text-gray-700 mt-2">{{ feexpayStatusData.message || 'Une erreur est survenue' }}</p>
+            </div>
+          </div>
+
+          <!-- Error from API -->
+          <div v-else-if="feexpayError" class="space-y-4">
+            <div class="bg-danger-light border border-danger-dark rounded-lg p-4">
+              <div class="flex items-center mb-2">
+                <i class="fas fa-exclamation-circle text-danger-dark mr-2"></i>
+                <span class="font-semibold text-danger-dark">Erreur</span>
+              </div>
+              <p class="text-sm text-gray-700 mt-2">{{ feexpayError }}</p>
+            </div>
+          </div>
+
+          <div class="flex justify-end mt-6">
+            <button @click="closeFeexpayModal" class="btn btn-outline">
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -224,6 +363,7 @@
 import { onMounted, computed, ref } from 'vue'
 import { useTransactionsStore } from '../stores/transactions'
 import { Transaction } from '../types/transaction'
+import { useNotification } from '../services/notification'
 
 const transactionsStore = useTransactionsStore()
 
@@ -231,6 +371,12 @@ const transactionsStore = useTransactionsStore()
 const showApproveModal = ref(false)
 const selectedTransaction = ref<Transaction | null>(null)
 const approvingTransactionId = ref<number | null>(null)
+
+// État du modal de vérification Feexpay
+const showFeexpayModal = ref(false)
+const checkingFeexpayId = ref<number | null>(null)
+const feexpayStatusData = ref<any>(null)
+const feexpayError = ref<string | null>(null)
 
 onMounted(() => {
   transactionsStore.fetchTransactions()
@@ -278,5 +424,32 @@ async function confirmApprove() {
   } finally {
     approvingTransactionId.value = null
   }
+}
+
+// Ouvrir le modal de vérification Feexpay
+async function openFeexpayStatusModal(transaction: Transaction) {
+  showFeexpayModal.value = true
+  checkingFeexpayId.value = transaction.id
+  feexpayStatusData.value = null
+  feexpayError.value = null
+
+  try {
+    const result = await transactionsStore.checkFeexpayStatus(transaction.id)
+    feexpayStatusData.value = result
+  } catch (error) {
+    feexpayError.value = error instanceof Error ? error.message : 'Une erreur est survenue'
+    const notification = useNotification()
+    notification.addNotification(feexpayError.value, 'error')
+  } finally {
+    checkingFeexpayId.value = null
+  }
+}
+
+// Fermer le modal de vérification Feexpay
+function closeFeexpayModal() {
+  showFeexpayModal.value = false
+  checkingFeexpayId.value = null
+  feexpayStatusData.value = null
+  feexpayError.value = null
 }
 </script>
