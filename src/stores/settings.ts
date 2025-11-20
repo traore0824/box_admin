@@ -225,12 +225,8 @@ export const useSettingsStore = defineStore('settings', () => {
           }
         })
       } else {
-        // SERVICE CLIENT (par défaut)
+        // SERVICE CLIENT (par défaut) - endpoint déjà défini au début
         console.log('✅ [updateSettings] BRANCHE SERVICE CLIENT ACTIVÉE')
-        console.log('✅ [updateSettings] BRANCHE SERVICE CLIENT ACTIVÉE')
-        endpoint = '/box/setting-messages'
-        method = 'POST'
-        
         console.log('🔵 [updateSettings] Service Client détecté - Utilisation de /box/setting-messages (POST)')
         console.log('🔵 [updateSettings] User:', { 
           is_staff: authStore.user?.is_staff, 
@@ -247,7 +243,10 @@ export const useSettingsStore = defineStore('settings', () => {
         })
         
         console.log('🔵 [updateSettings] Payload filtré (champs de messages uniquement):', Object.keys(payload))
-      } else {
+      }
+      
+      // Log final avant l'appel
+      console.log('🎯 [updateSettings] FINAL - endpoint:', endpoint, 'method:', method, 'isStaff:', isStaff) else {
         console.log('✅ [updateSettings] BRANCHE ADMIN ACTIVÉE')
         console.log('🟢 [updateSettings] Admin détecté - Utilisation de /box/setting (PATCH)')
         console.log('🟢 [updateSettings] User:', { 
