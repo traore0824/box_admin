@@ -145,8 +145,22 @@ export const useSettingsStore = defineStore('settings', () => {
 
       // Vérifier si l'utilisateur est service client
       const authStore = useAuthStore()
+      
+      // Logs détaillés pour déboguer
+      console.log('🔍 [updateSettings] Début de la fonction')
+      console.log('🔍 [updateSettings] authStore.user:', authStore.user)
+      console.log('🔍 [updateSettings] authStore.user?.is_staff:', authStore.user?.is_staff)
+      console.log('🔍 [updateSettings] typeof authStore.user?.is_staff:', typeof authStore.user?.is_staff)
+      console.log('🔍 [updateSettings] authStore.user?.is_staff === true:', authStore.user?.is_staff === true)
+      console.log('🔍 [updateSettings] authStore.user?.is_staff !== true:', authStore.user?.is_staff !== true)
+      
       // Service client = utilisateur authentifié qui n'est PAS staff
       const isCustomerService = authStore.user !== null && authStore.user !== undefined && authStore.user.is_staff !== true
+      
+      console.log('🔍 [updateSettings] isCustomerService calculé:', isCustomerService)
+      console.log('🔍 [updateSettings] Condition 1 (user !== null):', authStore.user !== null)
+      console.log('🔍 [updateSettings] Condition 2 (user !== undefined):', authStore.user !== undefined)
+      console.log('🔍 [updateSettings] Condition 3 (is_staff !== true):', authStore.user?.is_staff !== true)
 
       // Liste des champs de messages (20 champs)
       const messageFields = [
@@ -180,15 +194,20 @@ export const useSettingsStore = defineStore('settings', () => {
       let endpoint = '/box/setting'
       let method: 'POST' | 'PATCH' = 'PATCH'
 
+      console.log('🔍 [updateSettings] Avant condition - endpoint:', endpoint, 'method:', method)
+
       // Si service client, utiliser l'endpoint dédié et filtrer uniquement les champs de messages
       if (isCustomerService) {
+        console.log('✅ [updateSettings] BRANCHE SERVICE CLIENT ACTIVÉE')
         endpoint = '/box/setting-messages'
         method = 'POST'
         
-        if (import.meta.env.DEV) {
-          console.log('🔵 Service Client détecté - Utilisation de /box/setting-messages (POST)')
-          console.log('User:', { is_staff: authStore.user?.is_staff, email: authStore.user?.email })
-        }
+        console.log('🔵 [updateSettings] Service Client détecté - Utilisation de /box/setting-messages (POST)')
+        console.log('🔵 [updateSettings] User:', { 
+          is_staff: authStore.user?.is_staff, 
+          email: authStore.user?.email,
+          id: authStore.user?.id 
+        })
         
         // Filtrer pour ne garder que les champs de messages
         payload = {}
@@ -197,11 +216,16 @@ export const useSettingsStore = defineStore('settings', () => {
             payload[field] = data[field as keyof Setting]
           }
         })
+        
+        console.log('🔵 [updateSettings] Payload filtré (champs de messages uniquement):', Object.keys(payload))
       } else {
-        if (import.meta.env.DEV) {
-          console.log('🟢 Admin détecté - Utilisation de /box/setting (PATCH)')
-          console.log('User:', { is_staff: authStore.user?.is_staff, email: authStore.user?.email })
-        }
+        console.log('✅ [updateSettings] BRANCHE ADMIN ACTIVÉE')
+        console.log('🟢 [updateSettings] Admin détecté - Utilisation de /box/setting (PATCH)')
+        console.log('🟢 [updateSettings] User:', { 
+          is_staff: authStore.user?.is_staff, 
+          email: authStore.user?.email,
+          id: authStore.user?.id 
+        })
         // Pour admin, convertir les décimales en strings
         const decimalFields = [
           'minimum_amount',
@@ -242,9 +266,11 @@ export const useSettingsStore = defineStore('settings', () => {
         }
       })
 
-      if (import.meta.env.DEV) {
-        console.log('📤 Appel API:', { endpoint, method, payloadKeys: Object.keys(payload) })
-      }
+      console.log('📤 [updateSettings] Appel API final:')
+      console.log('📤 [updateSettings] - endpoint:', endpoint)
+      console.log('📤 [updateSettings] - method:', method)
+      console.log('📤 [updateSettings] - payloadKeys:', Object.keys(payload))
+      console.log('📤 [updateSettings] - payload (preview):', JSON.stringify(payload).substring(0, 200))
 
       const response = await fetchWithAuth(endpoint, {
         method: method,
@@ -252,6 +278,13 @@ export const useSettingsStore = defineStore('settings', () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
+      })
+      
+      console.log('📥 [updateSettings] Réponse reçue:', {
+        ok: response.ok,
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url
       })
 
       if (!response.ok) {
