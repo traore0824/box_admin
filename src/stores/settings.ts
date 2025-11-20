@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-// import { useAuthStore } from './auth' // Non utilisé pour l'instant
+import { useAuthStore } from './auth'
 import { fetchWithAuth } from './fetchwithtoken'
 
 export interface Setting {
@@ -137,29 +137,78 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
-  // 📡 PATCH settings
+  // 📡 PATCH settings (pour admin) ou POST setting-messages (pour service client)
   const updateSettings = async (data: Partial<Setting>) => {
     try {
       loading.value = true
       error.value = null
 
-      // Convertir les décimales en strings pour l'API
-      const payload: any = { ...data }
-      const decimalFields = [
-        'minimum_amount',
-        'minimum_amount_obj',
-        'referral_bonus_amount',
-        'cancellation_commission',
-        'done_commission',
-        'cancel_block_commission',
-        'operation_fee'
+      // Vérifier si l'utilisateur est service client
+      const authStore = useAuthStore()
+      const isCustomerService = authStore.user && !authStore.user.is_staff
+
+      // Liste des champs de messages (20 champs)
+      const messageFields = [
+        'reminreminder_day_morning',
+        'reminreminder_day_morning_image',
+        'reminreminder_day_afternoon',
+        'reminreminder_day_afternoon_image',
+        'reminreminder_day_evening',
+        'reminreminder_day_evening_image',
+        'reminreminder_week_morning',
+        'reminreminder_week_morning_image',
+        'reminreminder_week_afternoon',
+        'reminreminder_week_afternoon_image',
+        'reminreminder_week_evening',
+        'reminreminder_week_evening_image',
+        'reminreminder_month_morning',
+        'reminreminder_month_morning_image',
+        'reminreminder_month_afternoon',
+        'reminreminder_month_afternoon_image',
+        'reminreminder_month_evening',
+        'reminreminder_month_evening_image',
+        'motivation_no_caisse_morning',
+        'motivation_no_caisse_morning_image',
+        'motivation_no_caisse_afternoon',
+        'motivation_no_caisse_afternoon_image',
+        'motivation_no_caisse_evening',
+        'motivation_no_caisse_evening_image',
       ]
 
-      decimalFields.forEach(field => {
-        if (payload[field] !== undefined && payload[field] !== null) {
-          payload[field] = String(payload[field])
-        }
-      })
+      let payload: any = { ...data }
+      let endpoint = '/box/setting'
+      let method = 'PATCH'
+
+      // Si service client, utiliser l'endpoint dédié et filtrer uniquement les champs de messages
+      if (isCustomerService) {
+        endpoint = '/box/setting-messages'
+        method = 'POST'
+        
+        // Filtrer pour ne garder que les champs de messages
+        payload = {}
+        messageFields.forEach(field => {
+          if (data[field as keyof Setting] !== undefined) {
+            payload[field] = data[field as keyof Setting]
+          }
+        })
+      } else {
+        // Pour admin, convertir les décimales en strings
+        const decimalFields = [
+          'minimum_amount',
+          'minimum_amount_obj',
+          'referral_bonus_amount',
+          'cancellation_commission',
+          'done_commission',
+          'cancel_block_commission',
+          'operation_fee'
+        ]
+
+        decimalFields.forEach(field => {
+          if (payload[field] !== undefined && payload[field] !== null) {
+            payload[field] = String(payload[field])
+          }
+        })
+      }
 
       // Filtrer les messages vides des tableaux de messages avant l'envoi
       const messageArrayFields = [
@@ -183,8 +232,8 @@ export const useSettingsStore = defineStore('settings', () => {
         }
       })
 
-      const response = await fetchWithAuth('/box/setting', {
-        method: 'PATCH',
+      const response = await fetchWithAuth(endpoint, {
+        method: method as 'POST' | 'PATCH',
         headers: {
           'Content-Type': 'application/json'
         },
@@ -193,12 +242,17 @@ export const useSettingsStore = defineStore('settings', () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || 'Erreur lors de la mise à jour des paramètres')
+        throw new Error(errorData.detail || errorData.message || 'Erreur lors de la mise à jour des paramètres')
       }
 
       const result = await response.json()
       if (result.data) {
-        settings.value = normalizeSettings(result.data)
+        // Si service client, fusionner les données mises à jour avec les settings existants
+        if (isCustomerService) {
+          settings.value = normalizeSettings({ ...settings.value, ...result.data })
+        } else {
+          settings.value = normalizeSettings(result.data)
+        }
       } else {
         await fetchSettings()
       }
