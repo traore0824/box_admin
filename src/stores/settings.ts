@@ -246,31 +246,7 @@ export const useSettingsStore = defineStore('settings', () => {
       }
       
       // Log final avant l'appel
-      console.log('🎯 [updateSettings] FINAL - endpoint:', endpoint, 'method:', method, 'isStaff:', isStaff) else {
-        console.log('✅ [updateSettings] BRANCHE ADMIN ACTIVÉE')
-        console.log('🟢 [updateSettings] Admin détecté - Utilisation de /box/setting (PATCH)')
-        console.log('🟢 [updateSettings] User:', { 
-          is_staff: authStore.user?.is_staff, 
-          email: authStore.user?.email,
-          id: authStore.user?.id 
-        })
-        // Pour admin, convertir les décimales en strings
-        const decimalFields = [
-          'minimum_amount',
-          'minimum_amount_obj',
-          'referral_bonus_amount',
-          'cancellation_commission',
-          'done_commission',
-          'cancel_block_commission',
-          'operation_fee'
-        ]
-
-        decimalFields.forEach(field => {
-          if (payload[field] !== undefined && payload[field] !== null) {
-            payload[field] = String(payload[field])
-          }
-        })
-      }
+      console.log('🎯 [updateSettings] FINAL - endpoint:', endpoint, 'method:', method, 'isStaff:', isStaff)
 
       // Filtrer les messages vides des tableaux de messages avant l'envoi
       const messageArrayFields = [
