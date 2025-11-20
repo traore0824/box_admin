@@ -148,19 +148,17 @@ export const useSettingsStore = defineStore('settings', () => {
       
       // Logs détaillés pour déboguer
       console.log('🔍 [updateSettings] Début de la fonction')
-      console.log('🔍 [updateSettings] authStore.user:', authStore.user)
-      console.log('🔍 [updateSettings] authStore.user?.is_staff:', authStore.user?.is_staff)
-      console.log('🔍 [updateSettings] typeof authStore.user?.is_staff:', typeof authStore.user?.is_staff)
-      console.log('🔍 [updateSettings] authStore.user?.is_staff === true:', authStore.user?.is_staff === true)
-      console.log('🔍 [updateSettings] authStore.user?.is_staff !== true:', authStore.user?.is_staff !== true)
+      console.log('🔍 [updateSettings] authStore.user:', JSON.stringify(authStore.user, null, 2))
       
       // Service client = utilisateur authentifié qui n'est PAS staff
-      const isCustomerService = authStore.user !== null && authStore.user !== undefined && authStore.user.is_staff !== true
+      // Simplification : si is_staff est false, undefined, ou null, c'est un service client
+      const isStaff = authStore.user?.is_staff === true
+      const isCustomerService = !isStaff && authStore.user !== null
       
-      console.log('🔍 [updateSettings] isCustomerService calculé:', isCustomerService)
-      console.log('🔍 [updateSettings] Condition 1 (user !== null):', authStore.user !== null)
-      console.log('🔍 [updateSettings] Condition 2 (user !== undefined):', authStore.user !== undefined)
-      console.log('🔍 [updateSettings] Condition 3 (is_staff !== true):', authStore.user?.is_staff !== true)
+      console.log('🔍 [updateSettings] isStaff (=== true):', isStaff)
+      console.log('🔍 [updateSettings] isCustomerService (!isStaff && user !== null):', isCustomerService)
+      console.log('🔍 [updateSettings] Valeur brute is_staff:', authStore.user?.is_staff)
+      console.log('🔍 [updateSettings] Type de is_staff:', typeof authStore.user?.is_staff)
 
       // Liste des champs de messages (20 champs)
       const messageFields = [
@@ -191,13 +189,44 @@ export const useSettingsStore = defineStore('settings', () => {
       ]
 
       let payload: any = { ...data }
-      let endpoint = '/box/setting'
-      let method: 'POST' | 'PATCH' = 'PATCH'
+      // PAR DÉFAUT, on utilise l'endpoint service client pour être sûr
+      // On bascule vers admin seulement si is_staff est explicitement true
+      let endpoint = '/box/setting-messages'
+      let method: 'POST' | 'PATCH' = 'POST'
 
-      console.log('🔍 [updateSettings] Avant condition - endpoint:', endpoint, 'method:', method)
+      console.log('🔍 [updateSettings] Avant condition - endpoint par défaut:', endpoint, 'method:', method)
 
-      // Si service client, utiliser l'endpoint dédié et filtrer uniquement les champs de messages
-      if (isCustomerService) {
+      // Si ADMIN (is_staff === true), utiliser l'endpoint admin
+      if (isStaff) {
+        console.log('✅ [updateSettings] BRANCHE ADMIN ACTIVÉE')
+        endpoint = '/box/setting'
+        method = 'PATCH'
+        console.log('🟢 [updateSettings] Admin détecté - Utilisation de /box/setting (PATCH)')
+        console.log('🟢 [updateSettings] User:', { 
+          is_staff: authStore.user?.is_staff, 
+          email: authStore.user?.email,
+          id: authStore.user?.id 
+        })
+        
+        // Pour admin, convertir les décimales en strings
+        const decimalFields = [
+          'minimum_amount',
+          'minimum_amount_obj',
+          'referral_bonus_amount',
+          'cancellation_commission',
+          'done_commission',
+          'cancel_block_commission',
+          'operation_fee'
+        ]
+
+        decimalFields.forEach(field => {
+          if (payload[field] !== undefined && payload[field] !== null) {
+            payload[field] = String(payload[field])
+          }
+        })
+      } else {
+        // SERVICE CLIENT (par défaut)
+        console.log('✅ [updateSettings] BRANCHE SERVICE CLIENT ACTIVÉE')
         console.log('✅ [updateSettings] BRANCHE SERVICE CLIENT ACTIVÉE')
         endpoint = '/box/setting-messages'
         method = 'POST'
