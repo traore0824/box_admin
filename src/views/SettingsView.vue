@@ -2,7 +2,9 @@
   <div class="space-y-6">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-      <h1 class="text-2xl font-bold text-gray-900">Paramètres Globaux</h1>
+      <h1 class="text-2xl font-bold text-gray-900">
+        {{ isCustomerService ? 'Gestion des Messages de Rappel' : 'Paramètres Globaux' }}
+      </h1>
     </div>
 
     <!-- Loading State -->
@@ -19,7 +21,7 @@
     <div v-if="settings" class="bg-white rounded-lg shadow overflow-hidden">
       <form @submit.prevent="handleSubmit" class="divide-y divide-gray-200">
         <!-- Contact Information -->
-        <div class="p-6">
+        <div v-if="isStaff" class="p-6">
           <h2 class="text-lg font-medium text-gray-900 mb-4">Informations de contact</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -44,7 +46,7 @@
         </div>
 
         <!-- Amount Settings -->
-        <div class="p-6">
+        <div v-if="isStaff" class="p-6">
           <h2 class="text-lg font-medium text-gray-900 mb-4">Paramètres des montants</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -96,7 +98,7 @@
         </div>
 
         <!-- Commissions -->
-        <div class="p-6">
+        <div v-if="isStaff" class="p-6">
           <h2 class="text-lg font-medium text-gray-900 mb-4">Commissions (%)</h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
@@ -136,7 +138,7 @@
         </div>
 
         <!-- Other Settings -->
-        <div class="p-6">
+        <div v-if="isStaff" class="p-6">
           <h2 class="text-lg font-medium text-gray-900 mb-4">Autres paramètres</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -297,7 +299,7 @@
         </div>
 
         <!-- Version Settings -->
-        <div class="p-6">
+        <div v-if="isStaff" class="p-6">
           <h2 class="text-lg font-medium text-gray-900 mb-4">Paramètres de version</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -330,7 +332,7 @@
         </div>
 
         <!-- Download Links -->
-        <div class="p-6">
+        <div v-if="isStaff" class="p-6">
           <h2 class="text-lg font-medium text-gray-900 mb-4">Liens de téléchargement</h2>
           <div class="grid grid-cols-1 gap-6">
             <div>
@@ -395,16 +397,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useSettingsStore } from '../stores/settings'
+import { useAuthStore } from '../stores/auth'
 import MessageListEditor from '../components/settings/MessageListEditor.vue'
 import ImageUploader from '../components/settings/ImageUploader.vue'
 
 const settingsStore = useSettingsStore()
+const authStore = useAuthStore()
 const { settings, loading, error } = storeToRefs(settingsStore)
 const { fetchSettings, updateSettings } = settingsStore
 const successMessage = ref<string | null>(null)
+
+// Vérifier si l'utilisateur est admin (staff) ou service client
+const isStaff = computed(() => authStore.user?.is_staff === true)
+const isCustomerService = computed(() => !isStaff.value)
 
 onMounted(() => {
   fetchSettings()
