@@ -145,7 +145,8 @@ export const useSettingsStore = defineStore('settings', () => {
 
       // Vérifier si l'utilisateur est service client
       const authStore = useAuthStore()
-      const isCustomerService = authStore.user && !authStore.user.is_staff
+      // Service client = utilisateur authentifié qui n'est PAS staff
+      const isCustomerService = authStore.user !== null && authStore.user !== undefined && authStore.user.is_staff !== true
 
       // Liste des champs de messages (20 champs)
       const messageFields = [
@@ -177,12 +178,17 @@ export const useSettingsStore = defineStore('settings', () => {
 
       let payload: any = { ...data }
       let endpoint = '/box/setting'
-      let method = 'PATCH'
+      let method: 'POST' | 'PATCH' = 'PATCH'
 
       // Si service client, utiliser l'endpoint dédié et filtrer uniquement les champs de messages
       if (isCustomerService) {
         endpoint = '/box/setting-messages'
         method = 'POST'
+        
+        if (import.meta.env.DEV) {
+          console.log('🔵 Service Client détecté - Utilisation de /box/setting-messages (POST)')
+          console.log('User:', { is_staff: authStore.user?.is_staff, email: authStore.user?.email })
+        }
         
         // Filtrer pour ne garder que les champs de messages
         payload = {}
@@ -192,6 +198,10 @@ export const useSettingsStore = defineStore('settings', () => {
           }
         })
       } else {
+        if (import.meta.env.DEV) {
+          console.log('🟢 Admin détecté - Utilisation de /box/setting (PATCH)')
+          console.log('User:', { is_staff: authStore.user?.is_staff, email: authStore.user?.email })
+        }
         // Pour admin, convertir les décimales en strings
         const decimalFields = [
           'minimum_amount',
@@ -232,8 +242,12 @@ export const useSettingsStore = defineStore('settings', () => {
         }
       })
 
+      if (import.meta.env.DEV) {
+        console.log('📤 Appel API:', { endpoint, method, payloadKeys: Object.keys(payload) })
+      }
+
       const response = await fetchWithAuth(endpoint, {
-        method: method as 'POST' | 'PATCH',
+        method: method,
         headers: {
           'Content-Type': 'application/json'
         },
