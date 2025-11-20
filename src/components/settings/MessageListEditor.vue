@@ -10,16 +10,16 @@
           v-model="messages[index]"
           type="text"
           :placeholder="`Message ${index + 1}`"
-          class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="flex-1 min-w-0 px-2 sm:px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           @input="updateMessages"
         />
         <button
           type="button"
           @click="removeMessage(index)"
-          class="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          class="px-2 sm:px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
           title="Supprimer ce message"
         >
-          <i class="fas fa-trash"></i>
+          <i class="fas fa-trash text-sm sm:text-base"></i>
         </button>
       </div>
     </div>

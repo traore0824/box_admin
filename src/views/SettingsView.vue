@@ -1,8 +1,8 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4 sm:space-y-6 px-2 sm:px-0">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-      <h1 class="text-2xl font-bold text-gray-900">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 break-words">
         {{ isCustomerService ? 'Gestion des Messages de Rappel' : 'Paramètres Globaux' }}
       </h1>
     </div>
@@ -18,12 +18,12 @@
     </div>
 
     <!-- Settings Form -->
-    <div v-if="settings" class="bg-white rounded-lg shadow overflow-hidden">
+    <div v-if="settings" class="bg-white rounded-lg shadow overflow-hidden -mx-2 sm:mx-0">
       <form @submit.prevent="handleSubmit" class="divide-y divide-gray-200">
         <!-- Contact Information -->
-        <div v-if="isStaff" class="p-4 sm:p-6">
-          <h2 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Informations de contact</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <div v-if="isStaff" class="p-3 sm:p-4 md:p-6">
+          <h2 class="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-2 sm:mb-3 md:mb-4">Informations de contact</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Email support</label>
               <input 
@@ -46,9 +46,9 @@
         </div>
 
         <!-- Amount Settings -->
-        <div v-if="isStaff" class="p-4 sm:p-6">
-          <h2 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Paramètres des montants</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <div v-if="isStaff" class="p-3 sm:p-4 md:p-6">
+          <h2 class="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-2 sm:mb-3 md:mb-4">Paramètres des montants</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Montant minimum transaction</label>
               <input 
@@ -98,9 +98,9 @@
         </div>
 
         <!-- Commissions -->
-        <div v-if="isStaff" class="p-4 sm:p-6">
-          <h2 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Commissions (%)</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div v-if="isStaff" class="p-3 sm:p-4 md:p-6">
+          <h2 class="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-2 sm:mb-3 md:mb-4">Commissions (%)</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Commission sur Caisse libre annuler (%)</label>
               <input 
@@ -138,9 +138,9 @@
         </div>
 
         <!-- Other Settings -->
-        <div v-if="isStaff" class="p-4 sm:p-6">
-          <h2 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Autres paramètres</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <div v-if="isStaff" class="p-3 sm:p-4 md:p-6">
+          <h2 class="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-2 sm:mb-3 md:mb-4">Autres paramètres</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Seuls les agents peuvent partager</label>
               <div class="mt-1">
@@ -171,10 +171,10 @@
         </div>
 
         <!-- Reminders - Daily -->
-        <div class="p-4 sm:p-6">
-          <h2 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Rappels Quotidiens (8h, 14h, 21h)</h2>
+        <div class="p-3 sm:p-4 md:p-6">
+          <h2 class="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-2 sm:mb-3 md:mb-4">Rappels Quotidiens (8h, 14h, 21h)</h2>
           <p class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Messages envoyés aux utilisateurs avec des caisses quotidiennes en attente</p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Matin (8h)</label>
               <MessageListEditor v-model="settings.reminreminder_day_morning" />
@@ -203,10 +203,10 @@
         </div>
 
         <!-- Reminders - Weekly -->
-        <div class="p-4 sm:p-6">
-          <h2 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Rappels Hebdomadaires (8h, 14h, 21h)</h2>
+        <div class="p-3 sm:p-4 md:p-6">
+          <h2 class="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-2 sm:mb-3 md:mb-4">Rappels Hebdomadaires (8h, 14h, 21h)</h2>
           <p class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Messages envoyés aux utilisateurs avec des caisses hebdomadaires en attente</p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Matin (8h)</label>
               <MessageListEditor v-model="settings.reminreminder_week_morning" />
@@ -235,10 +235,10 @@
         </div>
 
         <!-- Reminders - Monthly -->
-        <div class="p-4 sm:p-6">
-          <h2 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Rappels Mensuels (8h, 14h, 21h)</h2>
+        <div class="p-3 sm:p-4 md:p-6">
+          <h2 class="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-2 sm:mb-3 md:mb-4">Rappels Mensuels (8h, 14h, 21h)</h2>
           <p class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Messages envoyés aux utilisateurs avec des caisses mensuelles en attente</p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Matin (8h)</label>
               <MessageListEditor v-model="settings.reminreminder_month_morning" />
@@ -267,10 +267,10 @@
         </div>
 
         <!-- Motivation Messages -->
-        <div class="p-4 sm:p-6">
-          <h2 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Messages de Motivation (8h, 14h, 21h)</h2>
+        <div class="p-3 sm:p-4 md:p-6">
+          <h2 class="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-2 sm:mb-3 md:mb-4">Messages de Motivation (8h, 14h, 21h)</h2>
           <p class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Messages envoyés aux utilisateurs actifs qui n'ont aucune caisse en attente pour les motiver à en créer une</p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Matin (8h)</label>
               <MessageListEditor v-model="settings.motivation_no_caisse_morning" />
@@ -299,9 +299,9 @@
         </div>
 
         <!-- Version Settings -->
-        <div v-if="isStaff" class="p-4 sm:p-6">
-          <h2 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Paramètres de version</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <div v-if="isStaff" class="p-3 sm:p-4 md:p-6">
+          <h2 class="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-2 sm:mb-3 md:mb-4">Paramètres de version</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Version minimale requise</label>
               <input 
@@ -332,9 +332,9 @@
         </div>
 
         <!-- Download Links -->
-        <div v-if="isStaff" class="p-4 sm:p-6">
-          <h2 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Liens de téléchargement</h2>
-          <div class="grid grid-cols-1 gap-4 sm:gap-6">
+        <div v-if="isStaff" class="p-3 sm:p-4 md:p-6">
+          <h2 class="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-2 sm:mb-3 md:mb-4">Liens de téléchargement</h2>
+          <div class="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Lien téléchargement Android</label>
               <input 
@@ -366,17 +366,17 @@
         </div>
 
         <!-- Submit Button -->
-        <div class="p-4 sm:p-6 bg-gray-50">
+        <div class="p-3 sm:p-4 md:p-6 bg-gray-50">
           <button 
             type="submit" 
-            class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" 
+            class="w-full sm:w-auto bg-primary text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base" 
             :disabled="loading"
           >
-            <span v-if="!loading" class="flex items-center">
+            <span v-if="!loading" class="flex items-center justify-center">
               <i class="fas fa-save mr-2"></i>
               Sauvegarder les modifications
             </span>
-            <span v-else class="flex items-center">
+            <span v-else class="flex items-center justify-center">
               <i class="fas fa-spinner animate-spin mr-2"></i>
               Enregistrement...
             </span>

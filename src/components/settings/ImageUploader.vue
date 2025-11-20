@@ -21,8 +21,8 @@
       <p class="text-sm text-gray-600 mb-2">Aucune image</p>
     </div>
     
-    <div class="flex items-center gap-2">
-      <label class="flex-1 cursor-pointer">
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+      <label class="flex-1 cursor-pointer min-w-0">
         <input
           ref="fileInput"
           type="file"
@@ -30,9 +30,9 @@
           @change="handleFileSelect"
           class="hidden"
         />
-        <span class="inline-flex items-center justify-center w-full px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
-          <i class="fas fa-upload mr-2"></i>
-          {{ modelValue ? 'Changer l\'image' : 'Sélectionner une image' }}
+        <span class="inline-flex items-center justify-center w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+          <i class="fas fa-upload mr-2 text-xs sm:text-sm"></i>
+          <span class="truncate">{{ modelValue ? 'Changer l\'image' : 'Sélectionner une image' }}</span>
         </span>
       </label>
       
@@ -40,10 +40,11 @@
         v-if="modelValue"
         type="button"
         @click="removeImage"
-        class="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+        class="px-3 sm:px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-xs sm:text-sm whitespace-nowrap"
       >
-        <i class="fas fa-trash mr-2"></i>
-        Supprimer
+        <i class="fas fa-trash mr-1 sm:mr-2"></i>
+        <span class="hidden sm:inline">Supprimer</span>
+        <span class="sm:hidden">Suppr.</span>
       </button>
     </div>
     
