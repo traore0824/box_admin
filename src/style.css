@@ -82,10 +82,6 @@ body {
     @apply px-2 sm:px-4 md:px-6 py-2 sm:py-3 sm:py-4 text-xs sm:text-sm;
   }
   
-  .table td.whitespace-nowrap {
-    @apply whitespace-nowrap;
-  }
-  
   .table tr {
     @apply hover:bg-gray-50;
   }
