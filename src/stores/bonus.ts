@@ -180,17 +180,36 @@ export const useBonusStore = defineStore('bonus', () => {
 
       const data = await response.json()
       
-      // Gérer différents formats de réponse
+      // Gérer différents formats de réponse et mapper les données
+      let rawResults: any[] = []
       if (Array.isArray(data)) {
-        attributions.value = data
+        rawResults = data
         totalAttributions.value = data.length
       } else if (data.results && Array.isArray(data.results)) {
-        attributions.value = data.results
+        rawResults = data.results
         totalAttributions.value = data.count || data.results.length
       } else {
-        attributions.value = []
+        rawResults = []
         totalAttributions.value = 0
       }
+      
+      // Mapper les données de l'API vers le format attendu par le template
+      attributions.value = rawResults.map((item: any) => ({
+        id: item.id,
+        parrain: {
+          id: item.referrer,
+          email: item.referrer_email || '',
+          fullname: item.referrer_fullname || 'N/A'
+        },
+        filleul: {
+          id: item.referred_user,
+          email: item.referred_user_email || '',
+          fullname: item.referred_user_fullname || 'N/A'
+        },
+        amount: item.bonus_amount || item.amount || '0.00',
+        transaction_reference: item.transaction_reference || 'N/A',
+        created_at: item.created_at
+      }))
       
       currentAttributionPage.value = page
       if (search) attributionSearchQuery.value = search
