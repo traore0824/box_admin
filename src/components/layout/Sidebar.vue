@@ -117,8 +117,8 @@ const filteredMenuItems = computed(() => {
   if (isStaff) {
     return menuItems
   }
-  // CustomerService : masquer le dashboard et le wallet
-  const hiddenPaths = ['/', '/wallets']
+  // CustomerService : masquer le dashboard, le wallet et les commissions
+  const hiddenPaths = ['/', '/wallets', '/commissions']
   return menuItems.filter(item => !hiddenPaths.includes(item.path))
 })
 
