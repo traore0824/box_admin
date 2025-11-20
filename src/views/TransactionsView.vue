@@ -1,18 +1,18 @@
 <template>
   <div class="space-y-6">
     <!-- Page Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-      <h1 class="text-2xl font-bold text-gray-900">Historique des Transactions</h1>
-      <div class="mt-4 sm:mt-0">
-        <button class="btn btn-outline">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Historique des Transactions</h1>
+      <div class="w-full sm:w-auto">
+        <button class="btn btn-outline w-full sm:w-auto">
           <i class="fas fa-download mr-2"></i> Exporter
         </button>
       </div>
     </div>
 
     <!-- Filters -->
-    <div class="bg-white rounded-lg shadow-sm p-3 sm:p-4">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         <!-- Search Filter -->
         <div>
           <label for="search" class="block text-sm font-medium text-gray-700">Rechercher</label>
@@ -55,35 +55,40 @@
 
     <!-- Transactions Table -->
     <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-      <div class="table-container">
+      <div class="table-container -mx-4 sm:mx-0">
         <table class="table">
           <thead class="bg-gray-50">
             <tr>
-              <th>Référence</th>
-              <th>Date</th>
-              <th>Montant</th>
-              <th>Téléphone</th>
-              <th>Type</th>
-              <th>Statut</th>
-              <th>Utilisateur</th>
-              <th>Caisse</th>
-              <th>Actions</th>
+              <th class="px-2 sm:px-4 md:px-6">Référence</th>
+              <th class="px-2 sm:px-4 md:px-6 hidden md:table-cell">Date</th>
+              <th class="px-2 sm:px-4 md:px-6">Montant</th>
+              <th class="px-2 sm:px-4 md:px-6 hidden lg:table-cell">Téléphone</th>
+              <th class="px-2 sm:px-4 md:px-6">Type</th>
+              <th class="px-2 sm:px-4 md:px-6">Statut</th>
+              <th class="px-2 sm:px-4 md:px-6 hidden xl:table-cell">Utilisateur</th>
+              <th class="px-2 sm:px-4 md:px-6 hidden xl:table-cell">Caisse</th>
+              <th class="px-2 sm:px-4 md:px-6">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
             <tr v-for="transaction in transactionsStore.getFilteredTransactions()" :key="transaction.id">
-              <td class="font-medium text-gray-900">{{ transaction.public_reference }}</td>
-              <td>{{ new Date(transaction.created_at).toLocaleDateString() }}</td>
-              <td :class="{
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
+                <div class="flex flex-col">
+                  <span class="font-medium text-gray-900 text-xs sm:text-sm">{{ transaction.public_reference }}</span>
+                  <span class="text-xs text-gray-500 md:hidden">{{ new Date(transaction.created_at).toLocaleDateString() }}</span>
+                </div>
+              </td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden md:table-cell">{{ new Date(transaction.created_at).toLocaleDateString() }}</td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm" :class="{
                 'text-success': transaction.type_trans === 'deposit',
                 'text-danger': transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation',
                 'text-warning': transaction.type_trans === 'cancellation'
               }">
                 {{ transaction.type_trans === 'deposit' ? '+' : '-' }}{{ transaction.amount.toLocaleString() }} XOF
               </td>
-              <td>{{ transaction.phone }}</td>
-              <td>
-                <span class="badge" :class="{
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden lg:table-cell">{{ transaction.phone }}</td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
+                <span class="badge text-xs" :class="{
                   'bg-success-light text-success-dark': transaction.type_trans === 'deposit',
                   'bg-warning-light text-warning-dark': transaction.type_trans === 'withdrawal',
                   'bg-red-100 text-red-800': transaction.type_trans === 'cancellation'
@@ -91,8 +96,8 @@
                   {{ transaction.type_trans === 'deposit' ? 'Deposit' : transaction.type_trans === 'withdrawal' ? 'Retrait' : transaction.type_trans === 'cancellation' ? 'Annulation' : transaction.type_trans }}
                 </span>
               </td>
-              <td>
-                <span class="badge" :class="{
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
+                <span class="badge text-xs" :class="{
                   'badge-success': transaction.status === 'accept',
                   'badge-danger': transaction.status === 'error',
                   'bg-gray-100 text-gray-800': transaction.status === 'pending',
@@ -102,30 +107,30 @@
                   {{ transaction.status === 'accept' ? 'Success' : transaction.status === 'error' ? 'Erreur' : transaction.status === 'pending' ? 'Pending' : transaction.status === 'expired' ? 'Expired' : transaction.status === 'timeout' ? 'Timeout' : transaction.status }}
                 </span>
               </td>
-              <td>{{ transaction.caisse.created_by.email }}</td>
-              <td>{{ transaction.caisse.name }}</td>
-              <td>
-                <div class="flex space-x-2">
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ transaction.caisse.created_by.email }}</td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ transaction.caisse.name }}</td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
+                <div class="flex flex-col sm:flex-row gap-1 sm:gap-2">
                   <button
                     v-if="canApproveTransaction(transaction)"
                     @click="openApproveModal(transaction)"
                     :disabled="transactionsStore.isLoading || approvingTransactionId === transaction.id"
-                    class="btn btn-sm btn-success"
+                    class="btn btn-sm btn-success text-xs"
                     :class="{ 'opacity-50 cursor-not-allowed': transactionsStore.isLoading || approvingTransactionId === transaction.id }"
                   >
                     <i v-if="approvingTransactionId === transaction.id" class="fas fa-spinner fa-spin mr-1"></i>
                     <i v-else class="fas fa-check mr-1"></i>
-                    Approuver
+                    <span class="hidden sm:inline">Approuver</span>
                   </button>
                   <button
                     @click="openFeexpayStatusModal(transaction)"
                     :disabled="transactionsStore.isLoading || checkingFeexpayId === transaction.id"
-                    class="btn btn-sm btn-outline"
+                    class="btn btn-sm btn-outline text-xs"
                     :class="{ 'opacity-50 cursor-not-allowed': transactionsStore.isLoading || checkingFeexpayId === transaction.id }"
                   >
                     <i v-if="checkingFeexpayId === transaction.id" class="fas fa-spinner fa-spin mr-1"></i>
                     <i v-else class="fas fa-search mr-1"></i>
-                    Vérifier Feexpay
+                    <span class="hidden sm:inline">Vérifier</span>
                   </button>
                 </div>
               </td>

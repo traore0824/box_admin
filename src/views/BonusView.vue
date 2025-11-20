@@ -54,53 +54,56 @@
 
       <!-- Liste des Attributions -->
       <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-800">Historique des Attributions de Bonus</h2>
+        <div class="p-3 sm:p-4 border-b border-gray-200">
+          <h2 class="text-base sm:text-lg font-semibold text-gray-800">Historique des Attributions de Bonus</h2>
         </div>
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto -mx-4 sm:mx-0">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Date
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                   Parrain
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                   Filleul
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Montant
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
                   Transaction
                 </th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="attribution in bonusStore.attributions" :key="attribution.id">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ formatDate(attribution.created_at) }}
+                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-500">
+                  <div class="flex flex-col">
+                    <span>{{ formatDate(attribution.created_at) }}</span>
+                    <span class="text-xs text-gray-400 md:hidden">{{ attribution.parrain?.fullname || 'N/A' }}</span>
+                  </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 hidden md:table-cell">
                   <div v-if="attribution.parrain">
-                    <p class="text-sm font-medium text-gray-900">{{ attribution.parrain.fullname || 'N/A' }}</p>
-                    <p class="text-sm text-gray-500">{{ attribution.parrain.email || 'N/A' }}</p>
+                    <p class="text-xs sm:text-sm font-medium text-gray-900">{{ attribution.parrain.fullname || 'N/A' }}</p>
+                    <p class="text-xs sm:text-sm text-gray-500">{{ attribution.parrain.email || 'N/A' }}</p>
                   </div>
                   <span v-else class="text-gray-400">-</span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 hidden lg:table-cell">
                   <div v-if="attribution.filleul">
-                    <p class="text-sm font-medium text-gray-900">{{ attribution.filleul.fullname || 'N/A' }}</p>
-                    <p class="text-sm text-gray-500">{{ attribution.filleul.email || 'N/A' }}</p>
+                    <p class="text-xs sm:text-sm font-medium text-gray-900">{{ attribution.filleul.fullname || 'N/A' }}</p>
+                    <p class="text-xs sm:text-sm text-gray-500">{{ attribution.filleul.email || 'N/A' }}</p>
                   </div>
                   <span v-else class="text-gray-400">-</span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
+                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold text-green-600">
                   {{ formatCurrency(parseFloat(attribution.amount)) }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-500 hidden xl:table-cell">
                   <span class="font-mono text-xs">{{ attribution.transaction_reference || 'N/A' }}</span>
                 </td>
               </tr>
@@ -109,8 +112,8 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="bonusStore.totalAttributions > 0" class="px-4 py-3 bg-white border-t border-gray-200 flex items-center justify-between">
-          <div class="text-sm text-gray-700">
+        <div v-if="bonusStore.totalAttributions > 0" class="px-3 sm:px-4 py-3 bg-white border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="text-xs sm:text-sm text-gray-700 text-center sm:text-left">
             Page {{ bonusStore.currentAttributionPage }} sur {{ Math.ceil(bonusStore.totalAttributions / 20) }}
           </div>
           <div class="flex space-x-2">
@@ -162,45 +165,45 @@
 
       <!-- Liste des Demandes -->
       <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-800">Demandes de Retrait de Bonus</h2>
+        <div class="p-3 sm:p-4 border-b border-gray-200">
+          <h2 class="text-base sm:text-lg font-semibold text-gray-800">Demandes de Retrait de Bonus</h2>
         </div>
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto -mx-4 sm:mx-0">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Utilisateur
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Montant
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Statut
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                   Date de demande
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                   Notes
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="withdrawal in bonusStore.withdrawals" :key="withdrawal.id">
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
                   <div>
-                    <p class="text-sm font-medium text-gray-900">Utilisateur #{{ withdrawal.user }}</p>
-                    <p class="text-sm text-gray-500">{{ withdrawal.user_email }}</p>
+                    <p class="text-xs sm:text-sm font-medium text-gray-900">Utilisateur #{{ withdrawal.user }}</p>
+                    <p class="text-xs sm:text-sm text-gray-500">{{ withdrawal.user_email }}</p>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
+                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold text-green-600">
                   {{ formatCurrency(parseFloat(withdrawal.amount)) }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
                   <span
                     :class="[
                       'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
@@ -215,7 +218,7 @@
                        withdrawal.status === 'rejected' ? 'Rejeté' : 'Annulé' }}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-500 hidden md:table-cell">
                   <div>
                     <p>{{ formatDate(withdrawal.created_at) }}</p>
                     <p v-if="withdrawal.processed_at" class="text-xs text-gray-400">
@@ -223,13 +226,13 @@
                     </p>
                   </div>
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-500">
+                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-500 hidden lg:table-cell">
                   <p v-if="withdrawal.notes" class="max-w-xs truncate" :title="withdrawal.notes">
                     {{ withdrawal.notes }}
                   </p>
                   <span v-else class="text-gray-400">-</span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium">
                   <div v-if="withdrawal.status === 'pending'" class="flex space-x-2">
                     <button
                       @click="openAcceptModal(withdrawal)"
@@ -261,8 +264,8 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="bonusStore.totalWithdrawals > 0" class="px-4 py-3 bg-white border-t border-gray-200 flex items-center justify-between">
-          <div class="text-sm text-gray-700">
+        <div v-if="bonusStore.totalWithdrawals > 0" class="px-3 sm:px-4 py-3 bg-white border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="text-xs sm:text-sm text-gray-700 text-center sm:text-left">
             Page {{ bonusStore.currentPage }} sur {{ Math.ceil(bonusStore.totalWithdrawals / 10) }}
           </div>
           <div class="flex space-x-2">
