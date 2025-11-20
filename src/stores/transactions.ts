@@ -151,6 +151,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     }
   }
 
+  
   // 🔍 Vérifier le statut d'une transaction sur Feexpay
   async function checkFeexpayStatus(transactionId: number) {
     try {

@@ -111,14 +111,15 @@ const isMobileMenuOpen = ref(false)
 const selectedOption = ref('/')
 const route = useRoute()
 
-// Filtrer le menu selon le rôle : CustomerService ne voit pas le dashboard
+// Filtrer le menu selon le rôle : CustomerService ne voit pas certaines sections
 const filteredMenuItems = computed(() => {
   const isStaff = authStore.user?.is_staff === true
   if (isStaff) {
     return menuItems
   }
-  // CustomerService : masquer le dashboard
-  return menuItems.filter(item => item.path !== '/')
+  // CustomerService : masquer le dashboard et le wallet
+  const hiddenPaths = ['/', '/wallets']
+  return menuItems.filter(item => !hiddenPaths.includes(item.path))
 })
 
 // Définir le dashboard comme option par défaut (ou users pour CustomerService)
