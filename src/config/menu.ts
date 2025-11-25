@@ -55,6 +55,11 @@ export const menuItems = [
     icon: 'fas fa-bell-plus'
   },
   {
+    path: '/contact-box',
+    name: 'Messages de Contact',
+    icon: 'fas fa-envelope'
+  },
+  {
     path: '/settings',
     name: 'Paramètres',
     icon: 'fas fa-cog'

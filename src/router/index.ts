@@ -15,6 +15,7 @@ import KYCPendingView from '../views/KYCPendingView.vue'
 import NotificationsView from '../views/NotificationsView.vue'
 import SendNotificationView from '../views/SendNotificationView.vue'
 import SettingsView from '../views/SettingsView.vue'
+import ContactBoxView from '../views/ContactBoxView.vue'
 
 const routes = [
   {
@@ -93,6 +94,12 @@ const routes = [
     path: '/settings',
     name: 'settings',
     component: SettingsView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/contact-box',
+    name: 'contact-box',
+    component: ContactBoxView,
     meta: { requiresAuth: true }
   }
 ]

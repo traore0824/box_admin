@@ -305,7 +305,7 @@ export const useSettingsStore = defineStore('settings', () => {
           settings.value = normalizeSettings(result.data)
         }
       } else {
-        await fetchSettings()
+      await fetchSettings()
       }
       return true
     } catch (err) {

@@ -108,6 +108,70 @@ export const useTransactionsStore = defineStore('transactions', () => {
     return transactions.value
   }
 
+  // 📡 Mettre à jour le statut d'une transaction (vérifie Feexpay)
+  async function updateTransactionStatus(transactionId: number) {
+    try {
+      isLoading.value = true
+      error.value = null
+
+      const response = await fetchWithAuth('/box/transaction/update-status/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ transaction_id: transactionId })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.message || 'Erreur lors de la mise à jour du statut')
+      }
+
+      const result = await response.json()
+      
+      // Rafraîchir la liste des transactions
+      await fetchTransactions(currentPage.value)
+      
+      return result
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
+      console.error('Error updating transaction status:', err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // 📡 Valider une transaction de retrait/annulation (sans changer le statut)
+  async function validateWithdrawal(transactionId: number) {
+    try {
+      isLoading.value = true
+      error.value = null
+
+      const response = await fetchWithAuth('/box/transaction-validate-withdrawal/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ transaction_id: transactionId })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.message || 'Erreur lors de la validation')
+      }
+
+      const result = await response.json()
+      return result
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
+      console.error('Error validating withdrawal:', err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   // ✅ Approuver une transaction de retrait ou d'annulation
   async function approveWithdrawal(transactionId: number) {
     try {
@@ -116,12 +180,12 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
       const response = await fetchWithAuth('/box/transaction-approve-withdrawal', {
         method: 'POST',
-        body: {
-          transaction_id: transactionId
-        }
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ transaction_id: transactionId })
       })
 
-      
       if (!response.ok) {
         const data = await response.json().catch(() => ({}))
         const errorMessage = data.message || data.detail || 'Erreur lors de l\'approbation de la transaction'
@@ -151,7 +215,6 @@ export const useTransactionsStore = defineStore('transactions', () => {
     }
   }
 
-  
   // 🔍 Vérifier le statut d'une transaction sur Feexpay
   async function checkFeexpayStatus(transactionId: number) {
     try {
@@ -160,9 +223,10 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
       const response = await fetchWithAuth('/box/transaction-check-feexpay-status/', {
         method: 'POST',
-        body: {
-          transaction_id: transactionId
-        }
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ transaction_id: transactionId })
       })
 
       if (!response.ok) {
@@ -198,6 +262,8 @@ export const useTransactionsStore = defineStore('transactions', () => {
     updateTypeTransFilter,
     applyFilters,
     getFilteredTransactions,
+    updateTransactionStatus,
+    validateWithdrawal,
     approveWithdrawal,
     checkFeexpayStatus
   }
