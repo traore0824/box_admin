@@ -42,7 +42,7 @@ export const useContactBoxStore = defineStore('contactBox', () => {
         params.q = searchQuery.value.trim()
       }
 
-      const response = await fetchWithAuth('/box/box-site-contact/', {
+      const response = await fetchWithAuth('/box/box-site-contact', {
         method: 'GET',
         queryParams: params
       })
