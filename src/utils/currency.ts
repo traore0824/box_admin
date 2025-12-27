@@ -2,13 +2,13 @@
 
 /**
  * Helper pour formater les montants en XOF
- * Utilise XOF (FCFA) par défaut, mais peut être étendu pour utiliser les settings
+ * Utilise XOF par défaut, mais peut être étendu pour utiliser les settings
  */
 export function formatCurrency(amount: number | string, xof: string = 'XOF'): string {
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
   
   if (isNaN(numAmount)) {
-    return '0 FCFA'
+    return '0 XOF'
   }
 
   // Format avec Intl.NumberFormat pour une meilleure localisation
@@ -41,7 +41,7 @@ export function formatAmount(amount: number | string, showCurrency: boolean = tr
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
   
   if (isNaN(numAmount)) {
-    return showCurrency ? '0 FCFA' : '0'
+    return showCurrency ? '0 XOF' : '0'
   }
 
   const formatted = new Intl.NumberFormat('fr-FR', {
@@ -49,6 +49,6 @@ export function formatAmount(amount: number | string, showCurrency: boolean = tr
     maximumFractionDigits: 0
   }).format(numAmount)
 
-  return showCurrency ? `${formatted} FCFA` : formatted
+  return showCurrency ? `${formatted} XOF` : formatted
 }
 

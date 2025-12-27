@@ -359,7 +359,7 @@ const handleWithdraw = async () => {
     }
     
     // Validation : montant ne doit pas dépasser un seuil raisonnable (sécurité)
-    if (totalAmount > 100000000) { // 100 millions FCFA
+    if (totalAmount > 100000000) { // 100 millions XOF
       const notification = useNotification()
       notification.addNotification('Montant trop élevé. Veuillez contacter le support.', 'error')
       return

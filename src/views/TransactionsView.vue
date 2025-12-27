@@ -446,19 +446,19 @@
               </div>
               <div v-if="validationDetails.details.transaction_amount" class="flex justify-between">
                 <span class="text-sm font-medium text-gray-700">Montant:</span>
-                <span class="text-sm text-gray-900">{{ validationDetails.details.transaction_amount }} FCFA</span>
+                <span class="text-sm text-gray-900">{{ validationDetails.details.transaction_amount }} XOF</span>
               </div>
               <div v-if="validationDetails.details.total_deposits" class="flex justify-between">
                 <span class="text-sm font-medium text-gray-700">Total Dépôts:</span>
-                <span class="text-sm text-gray-900">{{ validationDetails.details.total_deposits }} FCFA</span>
+                <span class="text-sm text-gray-900">{{ validationDetails.details.total_deposits }} XOF</span>
               </div>
               <div v-if="validationDetails.details.amount_already_paid" class="flex justify-between">
                 <span class="text-sm font-medium text-gray-700">Montant Déjà Payé:</span>
-                <span class="text-sm text-gray-900">{{ validationDetails.details.amount_already_paid }} FCFA</span>
+                <span class="text-sm text-gray-900">{{ validationDetails.details.amount_already_paid }} XOF</span>
               </div>
               <div v-if="validationDetails.details.difference" class="flex justify-between">
                 <span class="text-sm font-medium text-gray-700">Différence:</span>
-                <span class="text-sm text-red-600 font-semibold">{{ validationDetails.details.difference }} FCFA</span>
+                <span class="text-sm text-red-600 font-semibold">{{ validationDetails.details.difference }} XOF</span>
               </div>
               <div v-if="validationDetails.details.caisse_id" class="flex justify-between">
                 <span class="text-sm font-medium text-gray-700">ID Caisse:</span>

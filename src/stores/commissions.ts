@@ -215,7 +215,7 @@ export const useCommissionsStore = defineStore('commissions', () => {
       if (result.is_consistent) {
         notification.addNotification('Réconciliation réussie : tout est cohérent', 'success')
       } else {
-        notification.addNotification(`Incohérence détectée : ${result.discrepancy} FCFA`, 'warning')
+        notification.addNotification(`Incohérence détectée : ${result.discrepancy} XOF`, 'warning')
       }
 
       // Rafraîchir la commission
