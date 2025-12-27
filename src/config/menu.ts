@@ -30,6 +30,11 @@ export const menuItems = [
     icon: 'fas fa-gift'
   },
   {
+    path: '/user-commission-withdrawals',
+    name: 'Retraits Commission Utilisateur',
+    icon: 'fas fa-hand-holding-usd'
+  },
+  {
     path: '/wallets',
     name: 'Wallets',
     icon: 'fas fa-wallet'

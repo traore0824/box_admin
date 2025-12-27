@@ -16,6 +16,7 @@ import NotificationsView from '../views/NotificationsView.vue'
 import SendNotificationView from '../views/SendNotificationView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import ContactBoxView from '../views/ContactBoxView.vue'
+import UserCommissionWithdrawalView from '../views/UserCommissionWithdrawalView.vue'
 
 const routes = [
   {
@@ -100,6 +101,12 @@ const routes = [
     path: '/contact-box',
     name: 'contact-box',
     component: ContactBoxView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/user-commission-withdrawals',
+    name: 'user-commission-withdrawals',
+    component: UserCommissionWithdrawalView,
     meta: { requiresAuth: true }
   }
 ]
