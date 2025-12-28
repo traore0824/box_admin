@@ -9,6 +9,9 @@ interface Commission {
   last_reconciliation_at: string | null
   calculated_total: string
   is_consistent: boolean
+  available_amount: string
+  withdrawn_amount: string
+  total_amount: string
 }
 
 interface CommissionTransaction {

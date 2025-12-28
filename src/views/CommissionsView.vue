@@ -25,20 +25,19 @@
         <div class="bg-blue-50 p-4 rounded-lg">
           <p class="text-sm text-gray-600">Montant Total</p>
           <p class="text-2xl font-bold text-blue-600">
-            {{ formatCurrency(parseFloat(commissionsStore.commission?.amount || '0')) }}
+            {{ formatCurrency(parseFloat(commissionsStore.commission?.total_amount || '0')) }}
           </p>
         </div>
         <div class="bg-green-50 p-4 rounded-lg">
           <p class="text-sm text-gray-600">Disponible</p>
           <p class="text-2xl font-bold text-green-600">
-            {{ formatCurrency(parseFloat(commissionsStore.commission?.amount || '0')) }}
+            {{ formatCurrency(parseFloat(commissionsStore.commission?.available_amount || '0')) }}
           </p>
         </div>
-        <div class="bg-gray-50 p-4 rounded-lg">
-          <p class="text-sm text-gray-600">Cohérence</p>
-          <p class="text-lg font-semibold" :class="commissionsStore.commission?.is_consistent ? 'text-green-600' : 'text-red-600'">
-            <i :class="commissionsStore.commission?.is_consistent ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"></i>
-            {{ commissionsStore.commission?.is_consistent ? 'Cohérent' : 'Incohérent' }}
+        <div class="bg-orange-50 p-4 rounded-lg">
+          <p class="text-sm text-gray-600">Montant Retiré</p>
+          <p class="text-2xl font-bold text-orange-600">
+            {{ formatCurrency(parseFloat(commissionsStore.commission?.withdrawn_amount || '0')) }}
           </p>
         </div>
       </div>
