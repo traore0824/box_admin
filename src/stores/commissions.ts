@@ -9,9 +9,9 @@ interface Commission {
   last_reconciliation_at: string | null
   calculated_total: string
   is_consistent: boolean
-  available_amount: string
-  withdrawn_amount: string
-  total_amount: string
+  available_amount: number | string
+  withdrawn_amount: number | string
+  total_amount: number | string
 }
 
 interface CommissionTransaction {
@@ -74,7 +74,22 @@ export const useCommissionsStore = defineStore('commissions', () => {
         throw new Error('Erreur lors de la récupération de la commission')
       }
 
-      commission.value = await response.json()
+      const data = await response.json()
+      // Si la réponse est un tableau, prendre le premier élément
+      commission.value = Array.isArray(data) ? data[0] : data
+      
+      // Convertir les valeurs numériques en string si nécessaire
+      if (commission.value) {
+        if (typeof commission.value.available_amount === 'number') {
+          commission.value.available_amount = commission.value.available_amount.toString()
+        }
+        if (typeof commission.value.withdrawn_amount === 'number') {
+          commission.value.withdrawn_amount = commission.value.withdrawn_amount.toString()
+        }
+        if (typeof commission.value.total_amount === 'number') {
+          commission.value.total_amount = commission.value.total_amount.toString()
+        }
+      }
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
       console.error('Error fetching commission:', err)

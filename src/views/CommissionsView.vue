@@ -25,19 +25,19 @@
         <div class="bg-blue-50 p-4 rounded-lg">
           <p class="text-sm text-gray-600">Montant Total</p>
           <p class="text-2xl font-bold text-blue-600">
-            {{ formatCurrency(parseFloat(commissionsStore.commission?.total_amount || '0')) }}
+            {{ formatCurrency(parseFloat(String(commissionsStore.commission?.total_amount || '0'))) }}
           </p>
         </div>
         <div class="bg-green-50 p-4 rounded-lg">
           <p class="text-sm text-gray-600">Disponible</p>
           <p class="text-2xl font-bold text-green-600">
-            {{ formatCurrency(parseFloat(commissionsStore.commission?.available_amount || '0')) }}
+            {{ formatCurrency(parseFloat(String(commissionsStore.commission?.available_amount || '0'))) }}
           </p>
         </div>
         <div class="bg-orange-50 p-4 rounded-lg">
           <p class="text-sm text-gray-600">Montant Retiré</p>
           <p class="text-2xl font-bold text-orange-600">
-            {{ formatCurrency(parseFloat(commissionsStore.commission?.withdrawn_amount || '0')) }}
+            {{ formatCurrency(parseFloat(String(commissionsStore.commission?.withdrawn_amount || '0'))) }}
           </p>
         </div>
       </div>
