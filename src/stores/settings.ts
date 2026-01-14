@@ -211,22 +211,22 @@ export const useSettingsStore = defineStore('settings', () => {
         })
         
         // Pour admin, convertir les décimales en strings
-        const decimalFields = [
-          'minimum_amount',
-          'minimum_amount_obj',
-          'referral_bonus_amount',
-          'cancellation_commission',
-          'done_commission',
-          'cancel_block_commission',
+      const decimalFields = [
+        'minimum_amount',
+        'minimum_amount_obj',
+        'referral_bonus_amount',
+        'cancellation_commission',
+        'done_commission',
+        'cancel_block_commission',
           'operation_fee',
           'minimum_commission_withdrawal'
-        ]
+      ]
 
-        decimalFields.forEach(field => {
-          if (payload[field] !== undefined && payload[field] !== null) {
-            payload[field] = String(payload[field])
-          }
-        })
+      decimalFields.forEach(field => {
+        if (payload[field] !== undefined && payload[field] !== null) {
+          payload[field] = String(payload[field])
+        }
+      })
       } else {
         // SERVICE CLIENT (par défaut) - endpoint déjà défini au début
         console.log('✅ [updateSettings] BRANCHE SERVICE CLIENT ACTIVÉE')
@@ -305,10 +305,10 @@ export const useSettingsStore = defineStore('settings', () => {
         if (isCustomerService) {
           settings.value = normalizeSettings({ ...settings.value, ...result.data })
         } else {
-          settings.value = normalizeSettings(result.data)
+        settings.value = normalizeSettings(result.data)
         }
       } else {
-      await fetchSettings()
+        await fetchSettings()
       }
       return true
     } catch (err) {

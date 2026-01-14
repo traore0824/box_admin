@@ -17,6 +17,7 @@ import SendNotificationView from '../views/SendNotificationView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import ContactBoxView from '../views/ContactBoxView.vue'
 import UserCommissionWithdrawalView from '../views/UserCommissionWithdrawalView.vue'
+import WithdrawalTransactionsView from '../views/WithdrawalTransactionsView.vue'
 
 const routes = [
   {
@@ -47,6 +48,12 @@ const routes = [
     path: '/transactions',
     name: 'transactions',
     component: TransactionsView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/withdrawal-transactions',
+    name: 'withdrawal-transactions',
+    component: WithdrawalTransactionsView,
     meta: { requiresAuth: true }
   },
   {

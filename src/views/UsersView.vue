@@ -37,6 +37,15 @@
                 <option value="client">Clients</option>
               </select>
             </div>
+            <div class="flex flex-col flex-1 sm:flex-initial">
+              <label class="block text-xs font-medium text-gray-700 mb-1">Caisse</label>
+              <select v-model="usersStore.noCaisseFilter" @change="usersStore.applyFilters"
+                class="w-full sm:w-auto px-3 sm:px-4 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base sm:min-w-[160px]">
+                <option value="all">Toutes les caisses</option>
+                <option value="no_caisse">Sans caisse</option>
+                <option value="has_caisse">Avec caisse</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -46,100 +55,130 @@
     <div class="bg-white rounded-lg shadow overflow-hidden">
       <div class="overflow-x-auto -mx-4 sm:mx-0">
         <div class="inline-block min-w-full align-middle sm:px-0">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
                 <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nom
-                </th>
+                Nom
+              </th>
                 <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                  Email
-                </th>
+                Email
+              </th>
                 <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                  Téléphone
-                </th>
+                Téléphone
+              </th>
                 <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                  Crée le
-                </th>
+                Crée le
+              </th>
                 <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Solde
-                </th>
+                Solde
+              </th>
                 <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                  Caisse total
-                </th>
+                Caisse total
+              </th>
                 <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
-                Nombre de parrainage
-                </th>
+              Nombre de parrainage
+              </th>
                 <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                  Statut Agent
-                </th>
+                Statut Agent
+              </th>
+                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
+                Sexe
+              </th>
+                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
+                Date naissance
+              </th>
+                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
+                Code parrainage
+              </th>
+                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
+                Code parrain
+              </th>
+                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
+                Carte ID
+              </th>
                 <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Statut
-                </th>
+                Statut
+              </th>
                 <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="user in usersStore.filteredUsers" :key="user.id">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr v-for="user in usersStore.filteredUsers" :key="user.id">
                 <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
                   <div class="flex flex-col">
                     <span class="font-medium text-gray-900 text-xs sm:text-sm">{{ user.first_name }} {{ user.last_name }}</span>
                     <span class="text-xs text-gray-500 sm:hidden">{{ user.email }}</span>
                   </div>
-                </td>
+              </td>
                 <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden sm:table-cell">
-                  {{ user.email }}
-                </td>
+                {{ user.email }}
+              </td>
                 <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden md:table-cell">
-                  {{ user.phone }}
-                </td>
+                {{ user.phone }}
+              </td>
                 <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden lg:table-cell">
-                  {{ new Date(user.created_at).toLocaleDateString() }}
-                </td>
+                {{ new Date(user.created_at).toLocaleDateString() }}
+              </td>
                 <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm">
-                  {{ formatAmount(user.total_funds) }}
-                </td>
+                {{ formatAmount(user.total_funds) }}
+              </td>
                 <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden lg:table-cell">
-                  {{ user.total_box }} 
-                </td>
+                {{ user.total_box }} 
+              </td>
                 <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">
-                  {{ user.number_sponsor }} 
-                </td>
+                {{ user.number_sponsor }} 
+              </td>
                 <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 hidden md:table-cell">
-                  <span :class="[
-                    'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
-                    user.agent_client ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                  ]">
-                    {{ user.agent_client ? 'Agent' : 'Client' }}
-                  </span>
-                </td>
+                <span :class="[
+                  'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
+                  user.agent_client ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                ]">
+                  {{ user.agent_client ? 'Agent' : 'Client' }}
+                </span>
+              </td>
+                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">
+                {{ user.sexe || '-' }}
+              </td>
+                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">
+                {{ user.birthday ? new Date(user.birthday).toLocaleDateString() : '-' }}
+              </td>
+                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">
+                {{ user.referral_code || '-' }}
+              </td>
+                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">
+                {{ user.user_referral_code || '-' }}
+              </td>
+                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">
+                {{ user.card_id || '-' }}
+              </td>
                 <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
-                  <div class="flex flex-col space-y-1">
-                    <span :class="[
-                      'px-2 inline-flex text-xs leading-5 font-semibold rounded-full w-fit',
-                      user.is_block ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                    ]">
-                      <i :class="[
-                        'fas mr-1',
-                        user.is_block ? 'fa-lock' : 'fa-unlock'
-                      ]"></i>
-                      {{ user.is_block ? 'Bloqué' : 'Actif' }}
+                <div class="flex flex-col space-y-1">
+                  <span :class="[
+                    'px-2 inline-flex text-xs leading-5 font-semibold rounded-full w-fit',
+                    user.is_block ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                  ]">
+                    <i :class="[
+                      'fas mr-1',
+                      user.is_block ? 'fa-lock' : 'fa-unlock'
+                    ]"></i>
+                    {{ user.is_block ? 'Bloqué' : 'Actif' }}
+                  </span>
+                  <div v-if="user.is_block && user.reason_block" class="relative group">
+                    <span class="text-xs text-gray-600 cursor-help underline decoration-dotted">
+                      Raison du blocage
                     </span>
-                    <div v-if="user.is_block && user.reason_block" class="relative group">
-                      <span class="text-xs text-gray-600 cursor-help underline decoration-dotted">
-                        Raison du blocage
-                      </span>
                       <div class="absolute left-0 bottom-full mb-2 w-48 sm:w-64 p-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                        <div class="relative">
-                          <p class="whitespace-normal">{{ user.reason_block }}</p>
-                          <div class="absolute -bottom-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
-                        </div>
+                      <div class="relative">
+                        <p class="whitespace-normal">{{ user.reason_block }}</p>
+                        <div class="absolute -bottom-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
                       </div>
                     </div>
                   </div>
-                </td>
+                </div>
+              </td>
                 <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium">
                 <!-- Dropdown Component -->
                 <div class="relative inline-block text-left">
@@ -210,6 +249,14 @@
                           role="menuitem">
                           <i class="fas fa-key mr-3 w-4 text-center"></i>
                           Réinitialiser PIN
+                        </button>
+
+                        <!-- Action Envoyer OTP PIN -->
+                        <button @click="handleSendPinVerificationOtp(user)" :disabled="actionLoading[user.id]"
+                          class="group flex items-center w-full px-4 py-2 text-sm text-left hover:bg-gray-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed text-cyan-700 hover:text-cyan-800"
+                          role="menuitem">
+                          <i class="fas fa-mobile-alt mr-3 w-4 text-center"></i>
+                          Envoyer OTP PIN
                         </button>
 
                         <!-- Separator -->
@@ -796,6 +843,28 @@ async function handleResetPin(user: User) {
       console.error('Erreur lors de la réinitialisation du PIN:', error)
       const notification = useNotification()
       notification.addNotification(`Erreur: ${error.message || 'Impossible de réinitialiser le PIN.'}`, 'error')
+    } finally {
+      actionLoading[user.id] = false
+    }
+  }
+  isModalOpen.value = true
+}
+
+// Send PIN Verification OTP
+async function handleSendPinVerificationOtp(user: User) {
+  const userName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'cet utilisateur'
+  modalTitle.value = 'Envoyer OTP de vérification PIN'
+  modalMessage.value = `Êtes-vous sûr de vouloir envoyer un OTP de vérification PIN à ${userName} ?`
+  pendingAction.value = async () => {
+    actionLoading[user.id] = true
+    try {
+      await usersStore.sendPinVerificationOtp(user.id)
+      const notification = useNotification()
+      notification.addNotification('OTP de vérification PIN envoyé avec succès', 'success')
+    } catch (error: any) {
+      console.error('Erreur lors de l\'envoi de l\'OTP de vérification PIN:', error)
+      const notification = useNotification()
+      notification.addNotification(`Erreur: ${error.message || 'Impossible d\'envoyer l\'OTP de vérification PIN.'}`, 'error')
     } finally {
       actionLoading[user.id] = false
     }

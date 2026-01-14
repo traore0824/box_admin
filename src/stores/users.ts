@@ -47,6 +47,7 @@ export const useUsersStore = defineStore('users', () => {
   const searchQuery = ref('')
   const blockFilter = ref<'all' | 'blocked' | 'unblocked'>('all')
   const agentFilter = ref<'all' | 'agent' | 'client'>('all')
+  const noCaisseFilter = ref<'all' | 'no_caisse' | 'has_caisse'>('all')
   const totalUsers = ref(0)
   const currentPage = ref(1)
   const itemsPerPage = 10
@@ -63,7 +64,7 @@ export const useUsersStore = defineStore('users', () => {
 
   // Watcher pour appliquer automatiquement les filtres quand ils changent
   let isInitialLoad = true
-  watch([blockFilter, agentFilter], () => {
+  watch([blockFilter, agentFilter, noCaisseFilter], () => {
     // Ignorer le premier déclenchement (montage initial)
     if (isInitialLoad) {
       isInitialLoad = false
@@ -99,6 +100,13 @@ export const useUsersStore = defineStore('users', () => {
         queryParams.is_agent_client = 'true'
       } else if (agentFilter.value === 'client') {
         queryParams.is_agent_client = 'false'
+      }
+
+      // Ajouter le filtre utilisateurs sans caisse
+      if (noCaisseFilter.value === 'no_caisse') {
+        queryParams.user_have_caisse = 'false'
+      } else if (noCaisseFilter.value === 'has_caisse') {
+        queryParams.user_have_caisse = 'true'
       }
 
       const response = await fetchWithAuth('/auth/listUser/', {
@@ -246,6 +254,34 @@ export const useUsersStore = defineStore('users', () => {
     }
   }
 
+  // Envoyer un OTP de vérification PIN
+  async function sendPinVerificationOtp(userId: number) {
+    try {
+      error.value = null
+
+      const response = await fetchWithAuth('/auth/send-pin-verification-otp/', {
+        method: 'POST',
+        body: JSON.stringify({ user_id: userId }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        if (response.status === 401) {
+          throw new Error('Non autorisé. Veuillez vous reconnecter.')
+        }
+        throw new Error(data.detail || data.message || 'Erreur lors de l\'envoi de l\'OTP.')
+      }
+
+      const result = await response.json()
+      return result
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
+      console.error('Error sending PIN verification OTP:', err)
+      throw err
+    }
+  }
+
   // Mettre à jour le statut KYC d'un utilisateur
   async function updateKycStatus(userId: number, status: 'pending' | 'accept' | 'reject' | 'null', rejectionReason?: string) {
     try {
@@ -293,6 +329,7 @@ export const useUsersStore = defineStore('users', () => {
     searchQuery,
     blockFilter,
     agentFilter,
+    noCaisseFilter,
     totalUsers,
     currentPage,
     itemsPerPage,
@@ -303,6 +340,7 @@ export const useUsersStore = defineStore('users', () => {
     toggleUserBlockStatus,
     toggleUserAgentStatus,
     resetUserPin,
+    sendPinVerificationOtp,
     updateKycStatus
   }
 })

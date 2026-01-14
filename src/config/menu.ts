@@ -20,6 +20,11 @@ export const menuItems = [
     icon: 'fas fa-exchange-alt'
   },
   {
+    path: '/withdrawal-transactions',
+    name: 'Retraits & Annulations',
+    icon: 'fas fa-minus-circle'
+  },
+  {
     path: '/commissions',
     name: 'Commissions',
     icon: 'fas fa-money-bill-wave'

@@ -102,10 +102,10 @@ export const useKYCStore = defineStore('kyc', () => {
       
       switch (status) {
         case 'accept':
-          notification.addNotification('Demande KYC approuvée avec succès', 'success')
+        notification.addNotification('Demande KYC approuvée avec succès', 'success')
           break
         case 'reject':
-          notification.addNotification('Demande KYC rejetée', 'info')
+        notification.addNotification('Demande KYC rejetée', 'info')
           break
         case 'pending':
           notification.addNotification('Statut KYC mis à jour: En attente', 'info')
