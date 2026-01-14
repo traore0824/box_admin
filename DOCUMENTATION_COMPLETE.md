@@ -961,7 +961,7 @@ class VerifyWithdrawalOTPSerializer(serializers.Serializer):
 ### Authentification
 - `POST /auth/toggle-block/` - Débloquer/Bloquer un utilisateur (modifié)
 - `POST /auth/create-user-pin/` - Créer un PIN (modifié)
-- `POST /auth/send-pin-verification-otp/` - Envoyer OTP de vérification PIN
+- `POST /auth/send-pin-verification-otp/` - **ACTION ADMIN** : Envoyer OTP de vérification PIN à un utilisateur
 - `POST /auth/validate-user-pin/` - Valider un PIN (modifié)
 - `POST /auth/login/` - Login (modifié pour inclure requires_pin_verification)
 
@@ -985,6 +985,45 @@ class VerifyWithdrawalOTPSerializer(serializers.Serializer):
 
 ### Transactions
 - `GET /box/all-transaction` - Liste des transactions (modifié avec filtres par type_trans, status, etc.)
+
+---
+
+## ⚡ Actions Administrateur
+
+### Gestion des Utilisateurs
+- **Envoyer OTP PIN** : `POST /auth/send-pin-verification-otp/`
+  - Envoie un OTP de vérification à un utilisateur pour réinitialiser son PIN
+  - Accessible via le menu "Actions" de chaque utilisateur
+  - Génère un nouvel OTP et l'envoie par email
+  - Requis après déblocage d'un utilisateur par un admin
+
+- **Bloquer/Débloquer** : `POST /auth/toggle-block/`
+  - Change le statut de blocage d'un utilisateur
+  - Pour le blocage PIN : met `requires_verification = True`
+  - Accessible via le menu "Actions" de chaque utilisateur
+
+- **Nommer Agent/Retirer Agent** : `POST /auth/toggle-agent/`
+  - Change le statut agent/client d'un utilisateur
+  - Accessible via le menu "Actions" de chaque utilisateur
+
+- **Réinitialiser PIN** : `POST /auth/reset-pin/`
+  - Réinitialise le PIN d'un utilisateur
+  - Met `pin_define = false` et `pin_incorrect_count = 0`
+  - Accessible via le menu "Actions" de chaque utilisateur
+
+### Gestion des Transactions
+- **Approuver Transaction** : `POST /box/transaction-approve-withdrawal`
+  - Approuve un retrait ou une annulation
+  - Vérifie la cohérence des montants avant approbation
+  - Retire automatiquement l'argent du wallet
+
+- **Valider Transaction** : `POST /box/transaction-validate-withdrawal/`
+  - Valide une transaction sans changer son statut
+  - Vérifie uniquement la cohérence des montants
+
+- **Mettre à jour Statut** : `POST /box/transaction/update-status/`
+  - Met à jour le statut d'une transaction en vérifiant Feexpay
+  - Traite automatiquement les bonus et commissions
 
 ---
 
