@@ -48,6 +48,7 @@
             <option value="deposit">Deposit</option>
             <option value="withdrawal">Retrait</option>
             <option value="cancellation">Annulation</option>
+            <option value="withdrawal_request">Demande de retrait</option>
           </select>
         </div>
       </div>
@@ -81,7 +82,7 @@
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden md:table-cell">{{ new Date(transaction.created_at).toLocaleDateString() }}</td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm" :class="{
                 'text-success': transaction.type_trans === 'deposit',
-                'text-danger': transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation',
+                'text-danger': transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation' || transaction.type_trans === 'withdrawal_request',
                 'text-warning': transaction.type_trans === 'cancellation'
               }">
                 {{ transaction.type_trans === 'deposit' ? '+' : '-' }}{{ transaction.amount.toLocaleString() }} XOF
@@ -90,10 +91,10 @@
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
                 <span class="badge text-xs" :class="{
                   'bg-success-light text-success-dark': transaction.type_trans === 'deposit',
-                  'bg-warning-light text-warning-dark': transaction.type_trans === 'withdrawal',
+                  'bg-warning-light text-warning-dark': transaction.type_trans === 'withdrawal' || transaction.type_trans === 'withdrawal_request',
                   'bg-red-100 text-red-800': transaction.type_trans === 'cancellation'
                 }">
-                  {{ transaction.type_trans === 'deposit' ? 'Deposit' : transaction.type_trans === 'withdrawal' ? 'Retrait' : transaction.type_trans === 'cancellation' ? 'Annulation' : transaction.type_trans }}
+                  {{ transaction.type_trans === 'deposit' ? 'Deposit' : transaction.type_trans === 'withdrawal' ? 'Retrait' : transaction.type_trans === 'cancellation' ? 'Annulation' : transaction.type_trans === 'withdrawal_request' ? 'Demande de retrait' : transaction.type_trans }}
                 </span>
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
@@ -145,9 +146,9 @@
                     <span class="hidden sm:inline">Vérifier Feexpay</span>
                   </button>
 
-                  <!-- Bouton Vérifier la transaction (pour withdrawal/cancellation en pending) -->
+                  <!-- Bouton Vérifier la transaction (pour withdrawal/cancellation/withdrawal_request en pending) -->
                   <button
-                    v-if="(transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation') && transaction.status === 'pending'"
+                    v-if="(transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation' || transaction.type_trans === 'withdrawal_request') && transaction.status === 'pending'"
                     @click="handleValidate(transaction.id)"
                     :disabled="transactionsStore.isLoading"
                     class="btn btn-sm text-xs"
@@ -535,7 +536,7 @@ const hasNextPage = computed(() => {
 // Vérifier si une transaction peut être approuvée
 function canApproveTransaction(transaction: Transaction): boolean {
   return (
-    (transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation') &&
+    (transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation' || transaction.type_trans === 'withdrawal_request') &&
     transaction.status === 'pending'
   )
 }

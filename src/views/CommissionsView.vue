@@ -107,10 +107,10 @@
                 />
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                {{ transaction.transaction?.public_reference || 'Non défini' }}
+                {{ transaction.transaction?.public_reference || 'N/A' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ transaction.transaction ? formatCurrency(parseFloat(transaction.transaction.amount)) : 'Non défini' }}
+                {{ transaction.transaction?.amount ? formatCurrency(parseFloat(transaction.transaction.amount)) : 'N/A' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
                 {{ formatCurrency(parseFloat(transaction.commission)) }}

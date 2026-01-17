@@ -82,6 +82,42 @@ export const useNotificationStore = defineStore('notification', () => {
     }
   }
 
+  // Envoyer un email par admin (différent de sendNotification qui envoie des push notifications)
+  async function sendEmail(data: {
+    subject: string
+    content: string
+    user_id?: number
+    user_ids?: number[]
+    template_name?: string
+  }) {
+    try {
+      isLoading.value = true
+      error.value = null
+
+      const response = await fetchWithAuth('/box/admin/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.detail || data.message || 'Erreur lors de l\'envoi de l\'email')
+      }
+
+      const result = await response.json()
+      return result
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Erreur lors de l\'envoi de l\'email'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   async function fetchNotifications(page = 1) {
     try {
       isLoading.value = true

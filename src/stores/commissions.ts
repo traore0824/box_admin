@@ -20,7 +20,7 @@ interface CommissionTransaction {
     id: number
     public_reference: string
     amount: string
-  }
+  } | null
   commission: string
   commission_rate: string
   is_withdrawn: boolean

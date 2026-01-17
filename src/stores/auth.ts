@@ -176,6 +176,36 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  // Envoyer un OTP de déblocage de compte PIN (API publique)
+  async function sendOtp(email: string) {
+    try {
+      isLoading.value = true
+      error.value = null
+
+      const { API_BASE_URL } = await import('../config/api')
+      const response = await fetch(`${API_BASE_URL}/auth/send-opt`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.detail || data.message || 'Erreur lors de l\'envoi de l\'OTP')
+      }
+
+      const result = await response.json()
+      return result
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Erreur lors de l\'envoi de l\'OTP'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     user,
     accessToken,
@@ -188,6 +218,7 @@ export const useAuthStore = defineStore('auth', () => {
     clearAuth,
     login,
     logout,
-    autoLogin
+    autoLogin,
+    sendOtp
   }
 })
