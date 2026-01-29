@@ -18,6 +18,7 @@ import SettingsView from '../views/SettingsView.vue'
 import ContactBoxView from '../views/ContactBoxView.vue'
 import UserCommissionWithdrawalView from '../views/UserCommissionWithdrawalView.vue'
 import WithdrawalTransactionsView from '../views/WithdrawalTransactionsView.vue'
+import UserProfileView from '../views/UserProfileView.vue'
 
 const routes = [
   {
@@ -114,6 +115,12 @@ const routes = [
     path: '/user-commission-withdrawals',
     name: 'user-commission-withdrawals',
     component: UserCommissionWithdrawalView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/users/:id',
+    name: 'user-profile',
+    component: UserProfileView,
     meta: { requiresAuth: true }
   }
 ]

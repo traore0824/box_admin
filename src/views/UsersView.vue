@@ -8,9 +8,9 @@
     <!-- Search and Filters -->
     <div class="space-y-3">
       <!-- Barre de recherche - demi ligne -->
-      <div class="relative">
+      <div class="relative max-w-[50%]">
         <input v-model="usersStore.searchQuery" @input="() => usersStore.updateSearchQuery(usersStore.searchQuery)" type="text" placeholder="Rechercher un utilisateur..."
-          class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+          class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm" />
         <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
       </div>
       
@@ -18,7 +18,7 @@
       <div class="flex flex-wrap gap-3">
         <div class="flex-1 sm:flex-initial min-w-[140px]">
           <select v-model="usersStore.blockFilter" @change="usersStore.applyFilters"
-            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
             <option value="all">Tous les statuts</option>
             <option value="blocked">Bloqués</option>
             <option value="unblocked">Non bloqués</option>
@@ -26,7 +26,7 @@
         </div>
         <div class="flex-1 sm:flex-initial min-w-[140px]">
           <select v-model="usersStore.agentFilter" @change="usersStore.applyFilters"
-            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
             <option value="all">Tous les types</option>
             <option value="agent">Agents</option>
             <option value="client">Clients</option>
@@ -34,7 +34,7 @@
         </div>
         <div class="flex-1 sm:flex-initial min-w-[140px]">
           <select v-model="usersStore.noCaisseFilter" @change="usersStore.applyFilters"
-            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
             <option value="all">Toutes les caisses</option>
             <option value="no_caisse">Sans caisse</option>
             <option value="has_caisse">Avec caisse</option>
@@ -78,7 +78,7 @@
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
                 <div class="flex items-center gap-3">
                   <!-- Avatar avec initiales -->
-                  <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-sm">
+                  <div class="flex-shrink-0 w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-sm">
                     {{ getUserInitials(user) }}
                   </div>
                   <!-- Nom, prénom et email -->
@@ -229,6 +229,17 @@
                           role="menuitem">
                           <i class="fas fa-wallet mr-3 w-4 text-center"></i>
                           Voir Wallet
+                        </button>
+
+                        <!-- Separator -->
+                        <div class="border-t border-gray-100 my-1"></div>
+
+                        <!-- Action Voir Profil -->
+                        <button @click="viewUserProfile(user)" :disabled="actionLoading[user.id]"
+                          class="group flex items-center w-full px-4 py-2 text-sm text-left hover:bg-gray-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed text-primary hover:text-primary-dark"
+                          role="menuitem">
+                          <i class="fas fa-user-circle mr-3 w-4 text-center"></i>
+                          Voir profil
                         </button>
                       </div>
                     </div>
@@ -919,6 +930,12 @@ const goToFullWalletView = () => {
   if (!selectedUserForWallet.value) return
   closeWalletModal()
   router.push({ name: 'wallets', query: { user_id: selectedUserForWallet.value.id.toString() } })
+}
+
+// View User Profile
+const viewUserProfile = (user: User) => {
+  closeAllDropdowns()
+  router.push({ name: 'user-profile', params: { id: user.id.toString() } })
 }
 
 // Format helpers - formatCurrency et formatAmount sont importés depuis utils/currency
