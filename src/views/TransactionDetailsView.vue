@@ -257,69 +257,121 @@
 
   <!-- Modal pour afficher le résultat Feexpay -->
   <Teleport to="body">
-    <div v-if="showFeexpayModal" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeFeexpayModal">
-      <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="closeFeexpayModal"></div>
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-          <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-medium text-gray-900">
-                Résultat de la vérification Feexpay
-              </h3>
-              <button @click="closeFeexpayModal" class="text-gray-400 hover:text-gray-500">
-                <i class="fas fa-times"></i>
-              </button>
+    <div v-if="showFeexpayModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" @click="closeFeexpayModal">
+      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" @click.stop>
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">Statut Feexpay</h3>
+            <button @click="closeFeexpayModal" class="text-gray-400 hover:text-gray-600">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <!-- Loading State -->
+          <div v-if="actionLoading && !feexpayResult" class="text-center py-8">
+            <i class="fas fa-spinner fa-spin text-2xl text-primary mb-2"></i>
+            <p class="text-gray-600">Vérification du statut en cours...</p>
+          </div>
+
+          <!-- Success State -->
+          <div v-else-if="feexpayResult && feexpayResult.success" class="space-y-4">
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div class="flex items-center mb-2">
+                <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                <span class="font-semibold text-green-800">Vérification réussie</span>
+              </div>
             </div>
 
-            <div v-if="feexpayResult" class="space-y-4">
-              <!-- Afficher la réponse brute pour déboguer -->
-              <div class="bg-gray-50 rounded-lg p-4">
-                <h4 class="text-sm font-semibold text-gray-900 mb-2">Réponse complète de l'API</h4>
-                <pre class="text-xs text-gray-700 overflow-auto max-h-96">{{ JSON.stringify(feexpayResult, null, 2) }}</pre>
-              </div>
-
-              <div v-if="feexpayResult.message" class="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                <p class="text-sm text-blue-800 font-medium">{{ feexpayResult.message }}</p>
-              </div>
-
-              <div v-if="feexpayResult.status" class="grid grid-cols-1 gap-3">
+            <div class="space-y-3">
+              <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Statut Feexpay</label>
-                  <span :class="[
-                    'px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full',
-                    getFeexpayStatusClass(feexpayResult.status)
-                  ]">
-                    {{ feexpayResult.status }}
+                  <span class="text-sm text-gray-600">Transaction ID:</span>
+                  <span class="ml-2 font-medium">{{ feexpayResult.transaction_id }}</span>
+                </div>
+                <div>
+                  <span class="text-sm text-gray-600">Référence:</span>
+                  <span class="ml-2 font-medium">{{ feexpayResult.reference }}</span>
+                </div>
+                <div>
+                  <span class="text-sm text-gray-600">Statut Feexpay:</span>
+                  <span class="ml-2 font-medium" :class="{
+                    'text-green-600': feexpayResult.feexpay_status === 'SUCCESSFUL',
+                    'text-red-600': feexpayResult.feexpay_status !== 'SUCCESSFUL'
+                  }">
+                    {{ feexpayResult.feexpay_status }}
                   </span>
+                </div>
+                <div>
+                  <span class="text-sm text-gray-600">Statut Local:</span>
+                  <span class="ml-2 font-medium">{{ feexpayResult.local_status }}</span>
                 </div>
               </div>
 
-              <div v-if="feexpayResult.data" class="bg-gray-50 rounded-lg p-4">
-                <h4 class="text-sm font-semibold text-gray-900 mb-2">Détails de la réponse</h4>
-                <pre class="text-xs text-gray-700 overflow-auto max-h-64">{{ JSON.stringify(feexpayResult.data, null, 2) }}</pre>
+              <div v-if="feexpayResult.feexpay_data" class="mt-4">
+                <h4 class="font-semibold text-gray-800 mb-2">Détails Feexpay:</h4>
+                <div class="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+                  <div v-if="feexpayResult.feexpay_data.amount">
+                    <span class="text-gray-600">Montant:</span>
+                    <span class="ml-2 font-medium">{{ feexpayResult.feexpay_data.amount }} XOF</span>
+                  </div>
+                  <div v-if="feexpayResult.feexpay_data.phoneNumber">
+                    <span class="text-gray-600">Téléphone:</span>
+                    <span class="ml-2 font-medium">{{ feexpayResult.feexpay_data.phoneNumber }}</span>
+                  </div>
+                  <div v-if="feexpayResult.feexpay_data.status">
+                    <span class="text-gray-600">Statut:</span>
+                    <span class="ml-2 font-medium" :class="{
+                      'text-green-600': feexpayResult.feexpay_data.status === 'SUCCESSFUL',
+                      'text-red-600': feexpayResult.feexpay_data.status !== 'SUCCESSFUL'
+                    }">
+                      {{ feexpayResult.feexpay_data.status }}
+                    </span>
+                  </div>
+                  <div v-if="feexpayResult.feexpay_data.responsecode">
+                    <span class="text-gray-600">Code de réponse:</span>
+                    <span class="ml-2 font-medium">{{ feexpayResult.feexpay_data.responsecode }}</span>
+                  </div>
+                  <div v-if="feexpayResult.feexpay_data.responsemsg">
+                    <span class="text-gray-600">Message:</span>
+                    <span class="ml-2 font-medium">{{ feexpayResult.feexpay_data.responsemsg }}</span>
+                  </div>
+                  <div v-if="feexpayResult.feexpay_data.date">
+                    <span class="text-gray-600">Date:</span>
+                    <span class="ml-2 font-medium">{{ new Date(feexpayResult.feexpay_data.date).toLocaleString() }}</span>
+                  </div>
+                  <div v-if="feexpayResult.feexpay_data.description">
+                    <span class="text-gray-600">Description:</span>
+                    <span class="ml-2 font-medium">{{ feexpayResult.feexpay_data.description }}</span>
+                  </div>
+                  <div v-if="feexpayResult.feexpay_data.type">
+                    <span class="text-gray-600">Type:</span>
+                    <span class="ml-2 font-medium">{{ feexpayResult.feexpay_data.type }}</span>
+                  </div>
+                </div>
               </div>
+            </div>
+          </div>
 
-              <div v-if="feexpayResult.transaction_updated" class="p-3 bg-green-50 border border-green-200 rounded-md">
-                <p class="text-sm text-green-800">
-                  <i class="fas fa-check-circle mr-2"></i>
-                  La transaction a été mise à jour
-                </p>
+          <!-- Error State -->
+          <div v-else-if="feexpayResult && !feexpayResult.success" class="space-y-4">
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div class="flex items-center mb-2">
+                <i class="fas fa-exclamation-circle text-red-600 mr-2"></i>
+                <span class="font-semibold text-red-800">Erreur lors de la vérification</span>
               </div>
+              <p class="text-sm text-gray-700 mt-2">{{ feexpayResult.message || 'Une erreur est survenue' }}</p>
             </div>
+          </div>
 
-            <div v-else class="text-center py-4">
-              <p class="text-gray-600">Aucun résultat disponible</p>
-            </div>
+          <!-- No Result -->
+          <div v-else class="text-center py-4">
+            <p class="text-gray-600">Aucun résultat disponible</p>
+          </div>
 
-            <div class="flex justify-end gap-3 pt-4 mt-4 border-t border-gray-200">
-              <button
-                @click="closeFeexpayModal"
-                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-              >
-                Fermer
-              </button>
-            </div>
+          <div class="flex justify-end mt-6">
+            <button @click="closeFeexpayModal" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+              Fermer
+            </button>
           </div>
         </div>
       </div>

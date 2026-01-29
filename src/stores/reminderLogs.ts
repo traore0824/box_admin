@@ -12,7 +12,6 @@ export interface ReminderLog {
   channel: 'push' | 'email' | 'call'
   scheduled_at: string
   sent_at: string | null
-  is_manual: boolean
   success: boolean
   created_at: string
 }
@@ -33,8 +32,17 @@ export const useReminderLogsStore = defineStore('reminderLogs', () => {
   const totalLogs = ref(0)
   const searchQuery = ref('')
   const dateFilter = ref<string | null>(null)
+  const successFilter = ref<boolean | null>(null)
 
   const notification = useNotification()
+
+  function getTodayDate(): string {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
 
   function buildQueryParams(page = 1): Record<string, string> {
     const params: Record<string, string> = {
@@ -42,12 +50,21 @@ export const useReminderLogsStore = defineStore('reminderLogs', () => {
       page_size: itemsPerPage.toString()
     }
 
-    if (searchQuery.value.trim() !== '') {
-      params.search = searchQuery.value.trim()
-    }
-
+    // Par défaut : date du jour et success=false (échecs uniquement)
     if (dateFilter.value) {
       params.date = dateFilter.value
+    } else {
+      params.date = getTodayDate()
+    }
+
+    if (successFilter.value !== null) {
+      params.success = successFilter.value.toString()
+    } else {
+      params.success = 'false' // Par défaut : uniquement les échecs
+    }
+
+    if (searchQuery.value.trim() !== '') {
+      params.search = searchQuery.value.trim()
     }
 
     return params
@@ -83,7 +100,6 @@ export const useReminderLogsStore = defineStore('reminderLogs', () => {
     id: number,
     data: {
       sent_at?: string
-      is_manual?: boolean
       success?: boolean
     },
     usePatch = true
@@ -130,6 +146,11 @@ export const useReminderLogsStore = defineStore('reminderLogs', () => {
     currentPage.value = 1
   }
 
+  function updateSuccessFilter(success: boolean | null) {
+    successFilter.value = success
+    currentPage.value = 1
+  }
+
   function applyFilters() {
     currentPage.value = 1
     fetchLogs(1)
@@ -144,10 +165,12 @@ export const useReminderLogsStore = defineStore('reminderLogs', () => {
     totalLogs,
     searchQuery,
     dateFilter,
+    successFilter,
     fetchLogs,
     updateLog,
     updateSearchQuery,
     updateDateFilter,
+    updateSuccessFilter,
     applyFilters
   }
 })

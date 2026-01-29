@@ -71,7 +71,7 @@ export const menuItems = [
   },
   {
     path: '/reminder-logs',
-    name: 'Logs des Rappels',
+    name: 'Rappels non envoyés',
     icon: 'fas fa-list-alt'
   },
   {

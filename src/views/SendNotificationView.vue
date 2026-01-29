@@ -30,32 +30,6 @@
           placeholder="Entrez le contenu de la notification" required></textarea>
       </div>
 
-      <!-- Image Upload -->
-      <div class="mb-6">
-        <label for="image" class="block text-sm font-medium text-gray-700 mb-2">
-          Image (optionnel)
-        </label>
-        <div class="flex items-center space-x-4">
-          <input 
-            id="image" 
-            type="file" 
-            @change="handleImageUpload"
-            accept="image/*"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm"
-          />
-          <img 
-            v-if="notification.image_url"
-            :src="notification.image_url"
-            alt="Preview"
-            class="w-24 h-24 object-contain rounded border border-gray-300"
-          />
-        </div>
-        <p v-if="uploadStore.isLoading" class="mt-2 text-sm text-gray-500">
-          <i class="fas fa-spinner fa-spin mr-2"></i>
-          Upload en cours...
-        </p>
-      </div>
-
       <!-- Type de message -->
       <div class="mb-6">
         <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -92,6 +66,32 @@
             </label>
           </div>
         </div>
+      </div>
+
+      <!-- Image Upload (affiché pour notification push) -->
+      <div v-if="messageType === 'notification'" class="mb-6">
+        <label for="image" class="block text-sm font-medium text-gray-700 mb-2">
+          Image (optionnel)
+        </label>
+        <div class="flex items-center space-x-4">
+          <input 
+            id="image" 
+            type="file" 
+            @change="handleImageUpload"
+            accept="image/*"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm"
+          />
+          <img 
+            v-if="notification.image_url"
+            :src="notification.image_url"
+            alt="Preview"
+            class="w-24 h-24 object-contain rounded border border-gray-300"
+          />
+        </div>
+        <p v-if="uploadStore.isLoading" class="mt-2 text-sm text-gray-500">
+          <i class="fas fa-spinner fa-spin mr-2"></i>
+          Upload en cours...
+        </p>
       </div>
 
       <!-- Champs Email (affichés si le type est email) -->

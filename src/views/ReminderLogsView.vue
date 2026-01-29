@@ -2,7 +2,7 @@
   <div class="space-y-6 p-3 sm:p-4 md:p-6">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-      <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Logs des Messages de Rappel</h1>
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Rappels non envoyés</h1>
     </div>
 
     <!-- Filtres -->
@@ -24,6 +24,17 @@
             type="date"
             class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
+        </div>
+        <div>
+          <select
+            v-model="successFilter"
+            @change="applyFilters"
+            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option :value="null">Tous les statuts</option>
+            <option :value="false">Échecs uniquement</option>
+            <option :value="true">Succès uniquement</option>
+          </select>
         </div>
         <button
           @click="clearFilters"
@@ -59,7 +70,6 @@
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Canal</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Programmé le</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Envoyé le</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
               <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
@@ -84,11 +94,6 @@
               </td>
               <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ log.sent_at ? formatDateTime(log.sent_at) : 'Non envoyé' }}
-              </td>
-              <td class="px-4 py-4 whitespace-nowrap">
-                <span class="px-2 py-1 text-xs font-semibold rounded-full" :class="log.is_manual ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'">
-                  {{ log.is_manual ? 'Manuel' : 'Automatique' }}
-                </span>
               </td>
               <td class="px-4 py-4 whitespace-nowrap">
                 <span class="px-2 py-1 text-xs font-semibold rounded-full" :class="log.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
@@ -198,17 +203,6 @@
                 <div>
                   <label class="flex items-center">
                     <input
-                      v-model="formData.is_manual"
-                      type="checkbox"
-                      class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
-                    />
-                    <span class="ml-2 text-sm text-gray-700">Rappel manuel</span>
-                  </label>
-                </div>
-
-                <div>
-                  <label class="flex items-center">
-                    <input
                       v-model="formData.success"
                       type="checkbox"
                       class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
@@ -253,10 +247,10 @@ const editingLog = ref<ReminderLog | null>(null)
 
 const searchQuery = ref('')
 const dateFilter = ref<string | null>(null)
+const successFilter = ref<boolean | null>(null)
 
 const formData = ref({
   sent_at: '',
-  is_manual: false,
   success: true
 })
 
@@ -280,6 +274,7 @@ onMounted(() => {
   loadLogs()
   dateFilter.value = reminderLogsStore.dateFilter
   searchQuery.value = reminderLogsStore.searchQuery
+  successFilter.value = reminderLogsStore.successFilter
 })
 
 const loadLogs = async () => {
@@ -294,7 +289,6 @@ const openEditModal = (log: ReminderLog) => {
   editingLog.value = log
   formData.value = {
     sent_at: log.sent_at ? formatDateTimeLocal(log.sent_at) : '',
-    is_manual: log.is_manual,
     success: log.success
   }
   showModal.value = true
@@ -305,7 +299,6 @@ const closeModal = () => {
   editingLog.value = null
   formData.value = {
     sent_at: '',
-    is_manual: false,
     success: true
   }
 }
@@ -315,7 +308,6 @@ const handleSubmit = async () => {
 
   try {
     const updateData: any = {
-      is_manual: formData.value.is_manual,
       success: formData.value.success
     }
 
@@ -345,14 +337,17 @@ const goToPage = async (page: number) => {
 
 const applyFilters = () => {
   reminderLogsStore.updateDateFilter(dateFilter.value)
+  reminderLogsStore.updateSuccessFilter(successFilter.value)
   reminderLogsStore.applyFilters()
 }
 
 const clearFilters = () => {
   searchQuery.value = ''
   dateFilter.value = null
+  successFilter.value = null
   reminderLogsStore.updateSearchQuery('')
   reminderLogsStore.updateDateFilter(null)
+  reminderLogsStore.updateSuccessFilter(null)
   reminderLogsStore.applyFilters()
 }
 

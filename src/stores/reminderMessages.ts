@@ -7,9 +7,7 @@ export interface ReminderMessage {
   id: number
   title: string
   content: string
-  message_type: 'morning' | 'afternoon' | 'evening' | 'general'
-  is_active: boolean
-  priority: number
+  active: boolean
   created_at: string
   updated_at: string
 }
@@ -105,9 +103,7 @@ export const useReminderMessagesStore = defineStore('reminderMessages', () => {
   async function createMessage(data: {
     title: string
     content: string
-    message_type?: 'morning' | 'afternoon' | 'evening' | 'general'
-    is_active?: boolean
-    priority?: number
+    active?: boolean
   }) {
     try {
       isLoading.value = true
@@ -121,9 +117,7 @@ export const useReminderMessagesStore = defineStore('reminderMessages', () => {
         body: JSON.stringify({
           title: data.title,
           content: data.content,
-          message_type: data.message_type || 'general',
-          is_active: data.is_active !== undefined ? data.is_active : true,
-          priority: data.priority || 1
+          active: data.active !== undefined ? data.active : true
         })
       })
 
@@ -152,9 +146,7 @@ export const useReminderMessagesStore = defineStore('reminderMessages', () => {
     data: {
       title?: string
       content?: string
-      message_type?: 'morning' | 'afternoon' | 'evening' | 'general'
-      is_active?: boolean
-      priority?: number
+      active?: boolean
     },
     usePatch = true
   ) {

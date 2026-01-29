@@ -57,7 +57,6 @@
             <tr>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titre</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priorité</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date de création</th>
               <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -70,16 +69,8 @@
                 <div class="text-sm text-gray-500 truncate max-w-xs">{{ message.content }}</div>
               </td>
               <td class="px-4 py-4 whitespace-nowrap">
-                <span class="px-2 py-1 text-xs font-semibold rounded-full" :class="getMessageTypeClass(message.message_type)">
-                  {{ getMessageTypeLabel(message.message_type) }}
-                </span>
-              </td>
-              <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                {{ message.priority }}
-              </td>
-              <td class="px-4 py-4 whitespace-nowrap">
-                <span class="px-2 py-1 text-xs font-semibold rounded-full" :class="message.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
-                  {{ message.is_active ? 'Actif' : 'Inactif' }}
+                <span class="px-2 py-1 text-xs font-semibold rounded-full" :class="message.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
+                  {{ message.active ? 'Actif' : 'Inactif' }}
                 </span>
               </td>
               <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -213,42 +204,10 @@
                   </p>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label for="message_type" class="block text-sm font-medium text-gray-700 mb-1">
-                      Type de message
-                    </label>
-                    <select
-                      id="message_type"
-                      v-model="formData.message_type"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                    >
-                      <option value="general">Général</option>
-                      <option value="morning">Matin</option>
-                      <option value="afternoon">Après-midi</option>
-                      <option value="evening">Soir</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label for="priority" class="block text-sm font-medium text-gray-700 mb-1">
-                      Priorité <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                      id="priority"
-                      v-model.number="formData.priority"
-                      type="number"
-                      min="1"
-                      required
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                    />
-                  </div>
-                </div>
-
                 <div>
                   <label class="flex items-center">
                     <input
-                      v-model="formData.is_active"
+                      v-model="formData.active"
                       type="checkbox"
                       class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
                     />
@@ -307,9 +266,7 @@ const activeFilter = ref<boolean | null>(null)
 const formData = reactive({
   title: '',
   content: '',
-  message_type: 'general' as 'morning' | 'afternoon' | 'evening' | 'general',
-  is_active: true,
-  priority: 1
+  active: true
 })
 
 const totalPages = computed(() => {
@@ -352,9 +309,7 @@ const openEditModal = (message: ReminderMessage) => {
   editingMessage.value = message
   formData.title = message.title
   formData.content = message.content
-  formData.message_type = message.message_type
-  formData.is_active = message.is_active
-  formData.priority = message.priority
+  formData.active = message.active
   showModal.value = true
 }
 
@@ -367,9 +322,7 @@ const closeModal = () => {
 const resetForm = () => {
   formData.title = ''
   formData.content = ''
-  formData.message_type = 'general'
-  formData.is_active = true
-  formData.priority = 1
+  formData.active = true
 }
 
 const handleSubmit = async () => {
@@ -433,25 +386,6 @@ const formatDate = (dateString: string) => {
   })
 }
 
-const getMessageTypeLabel = (type: string) => {
-  const labels: Record<string, string> = {
-    morning: 'Matin',
-    afternoon: 'Après-midi',
-    evening: 'Soir',
-    general: 'Général'
-  }
-  return labels[type] || type
-}
-
-const getMessageTypeClass = (type: string) => {
-  const classes: Record<string, string> = {
-    morning: 'bg-yellow-100 text-yellow-800',
-    afternoon: 'bg-orange-100 text-orange-800',
-    evening: 'bg-purple-100 text-purple-800',
-    general: 'bg-blue-100 text-blue-800'
-  }
-  return classes[type] || 'bg-gray-100 text-gray-800'
-}
 </script>
 
 <style scoped>
