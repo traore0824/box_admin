@@ -61,6 +61,7 @@
               <th scope="col" class="px-2 sm:px-4 md:px-6 hidden md:table-cell">Progression</th>
               <th scope="col" class="px-2 sm:px-4 md:px-6 hidden lg:table-cell">Date de début</th>
               <th scope="col" class="px-2 sm:px-4 md:px-6 hidden xl:table-cell">Utilisateur</th>
+              <th scope="col" class="px-2 sm:px-4 md:px-6">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
@@ -73,7 +74,7 @@
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm">
                 <span class="font-medium">
-                  {{ parseFloat(caisse.amount).toLocaleString() }} XOF
+                  {{ caisse.amount ? parseFloat(caisse.amount).toLocaleString() : '0' }} XOF
                 </span>
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
@@ -102,6 +103,16 @@
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 hidden xl:table-cell">
                 <div class="text-xs sm:text-sm text-gray-900">{{ caisse.created_by.email }}</div>
                 <div class="text-xs text-gray-500">{{ caisse.created_by.phone }}</div>
+              </td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
+                <router-link
+                  :to="{ name: 'caisse-details', params: { id: caisse.id.toString() } }"
+                  class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                  title="Voir les détails de la caisse"
+                >
+                  <i class="fas fa-eye mr-1"></i>
+                  <span class="hidden sm:inline">Détails</span>
+                </router-link>
               </td>
             </tr>
           </tbody>
@@ -149,7 +160,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useCaisseStore } from '../stores/caisse'
+
+const router = useRouter()
 
 const caisseStore = useCaisseStore()
 
@@ -225,6 +239,10 @@ onMounted(() => {
 
 .btn-primary {
   @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500;
+}
+
+.btn-outline {
+  @apply border-gray-300 text-gray-700 bg-white hover:bg-gray-50;
 }
 
 .btn-sm {

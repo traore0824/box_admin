@@ -9,7 +9,7 @@ export interface Caisse {
   name: string
   start_date: string
   end_date: string | null
-  amount: string
+  amount: string | null
   status: string
   created_by: {
     id: number
@@ -23,16 +23,30 @@ export interface Caisse {
   created_at: string
   updated_at: string
   next_payment: string | null
-  amount_obj: string
-  amount_already_paid: string
+  amount_obj: number | string
+  amount_already_paid: number | string
   percentage_progession: string
-  remaining_amount: number
+  remaining_amount?: number
   frequence: string
   is_active: boolean
   date_before_delete: string
   custom_frequence: number[]
   cancel_date: string | null
   transaction_delay: number
+  type_box?: 'locked' | 'free'
+  personal?: boolean
+  members?: Array<{
+    id: number
+    first_name: string
+    last_name: string
+    email: string
+    phone: string
+    referral_code: string
+    agent_client: boolean
+  }>
+  date_active?: string | null
+  user_total_trans?: number
+  has_pending_withdrawal?: boolean
 }
 
 export interface CaisseResponse {

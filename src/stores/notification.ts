@@ -27,15 +27,36 @@ export const useNotificationStore = defineStore('notification', () => {
   const itemsPerPage = 10
 
   async function sendNotification(data: {
+    type: 'single' | 'all'
+    channel: 'email' | 'push' | 'both'
     title: string
     content: string
     user_id?: number
+    image_url?: string
   }) {
     try {
       isLoading.value = true
       error.value = null
 
-      console.log('Sending notification with data:', data)
+      // Validation
+      if (data.type === 'single' && !data.user_id) {
+        throw new Error('user_id est obligatoire lorsque type="single"')
+      }
+
+      const payload: any = {
+        type: data.type,
+        channel: data.channel,
+        title: data.title,
+        content: data.content
+      }
+
+      if (data.type === 'single' && data.user_id) {
+        payload.user_id = data.user_id
+      }
+
+      if (data.image_url) {
+        payload.image_url = data.image_url
+      }
 
       const response = await fetchWithAuth('/box/send-notification', {
         method: 'POST',
@@ -43,50 +64,17 @@ export const useNotificationStore = defineStore('notification', () => {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(payload)
       })
 
-      console.log('Response status:', response.status)
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()))
-
-      // Vérifier si la réponse est vide
-      const text = await response.text()
-      console.log('Raw response:', text)
-
-      // Si le status est 200 ou 201, considérer comme succès même si la réponse est vide
-      if (response.ok) {
-        if (!text) {
-          console.log('Empty response but status is OK, considering as success')
-          return { success: true }
-        }
-
-        try {
-          const notification = JSON.parse(text)
-          notifications.value.unshift(notification)
-          return notification
-        } catch (e) {
-          console.log('Could not parse response as JSON, but status is OK, considering as success')
-          return { success: true }
-        }
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || errorData.message || 'Erreur lors de l\'envoi de la notification')
       }
 
-      // Gestion des erreurs
-      let errorMessage = 'Erreur lors de l\'envoi de la notification'
-      if (text) {
-        try {
-          const errorData = JSON.parse(text)
-          errorMessage = errorData.message || errorMessage
-        } catch (e) {
-          console.error('Error parsing error response:', e)
-          errorMessage = `Erreur serveur (${response.status}): ${text}`
-        }
-      } else {
-        errorMessage = `Erreur serveur (${response.status}): Réponse vide`
-      }
-
-      throw new Error(errorMessage)
+      const result = await response.json()
+      return result
     } catch (err) {
-      console.error('Full error:', err)
       error.value = err instanceof Error ? err.message : 'Erreur lors de l\'envoi de la notification'
       throw err
     } finally {

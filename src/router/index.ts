@@ -22,6 +22,7 @@ import UserProfileView from '../views/UserProfileView.vue'
 import TransactionDetailsView from '../views/TransactionDetailsView.vue'
 import ReminderMessagesView from '../views/ReminderMessagesView.vue'
 import ReminderLogsView from '../views/ReminderLogsView.vue'
+import CaisseDetailsView from '../views/CaisseDetailsView.vue'
 
 const routes = [
   {
@@ -46,6 +47,12 @@ const routes = [
     path: '/caisses',
     name: 'caisses',
     component: CaissesView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/caisses/:id',
+    name: 'caisse-details',
+    component: CaisseDetailsView,
     meta: { requiresAuth: true }
   },
   {
