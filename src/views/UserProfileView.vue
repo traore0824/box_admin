@@ -515,7 +515,7 @@
             <div class="flex flex-wrap gap-4">
               <select 
                 v-model="walletTransactionTypeFilter"
-                @change="loadWalletTransactions"
+                @change="loadWalletTransactionsForModal"
                 class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="all">Tous les types</option>
@@ -528,7 +528,7 @@
               </select>
               <select 
                 v-model="walletStatusFilter"
-                @change="loadWalletTransactions"
+                @change="loadWalletTransactionsForModal"
                 class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="all">Tous les statuts</option>
@@ -1084,7 +1084,7 @@ const closeWalletModal = () => {
   walletsStore.resetFilters()
 }
 
-const loadWalletTransactions = () => {
+const loadWalletTransactionsForModal = () => {
   if (!user.value) return
   
   walletsStore.fetchUserTransactions(

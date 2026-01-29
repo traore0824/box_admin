@@ -56,6 +56,83 @@
         </p>
       </div>
 
+      <!-- Option Email -->
+      <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <div class="flex items-center mb-4">
+          <input 
+            id="send-email" 
+            v-model="sendEmail" 
+            type="checkbox"
+            :disabled="notification.recipientType === 'all'"
+            class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          />
+          <label for="send-email" class="ml-2 text-sm font-medium text-gray-700" :class="{ 'opacity-50': notification.recipientType === 'all' }">
+            <i class="fas fa-envelope mr-2"></i>
+            Envoyer également un email
+            <span v-if="notification.recipientType === 'all'" class="text-xs text-gray-500 ml-2">(disponible uniquement pour un utilisateur spécifique)</span>
+          </label>
+        </div>
+
+        <!-- Champs Email (affichés si l'option est activée) -->
+        <div v-if="sendEmail" class="space-y-4 mt-4">
+          <div>
+            <label for="highlight-text" class="block text-sm font-medium text-gray-700 mb-2">
+              Texte mis en évidence (optionnel)
+            </label>
+            <input 
+              id="highlight-text" 
+              v-model="emailData.highlight_text" 
+              type="text"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm"
+              placeholder="Ex: Réduction de 50%"
+            />
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="button-text" class="block text-sm font-medium text-gray-700 mb-2">
+                Texte du bouton (optionnel)
+              </label>
+              <input 
+                id="button-text" 
+                v-model="emailData.button_text" 
+                type="text"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm"
+                placeholder="Ex: Voir l'offre"
+              />
+            </div>
+            <div>
+              <label for="button-url" class="block text-sm font-medium text-gray-700 mb-2">
+                URL du bouton (optionnel)
+              </label>
+              <input 
+                id="button-url" 
+                v-model="emailData.button_url" 
+                type="url"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm"
+                placeholder="https://app.example.com/promo"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label for="email-image-url" class="block text-sm font-medium text-gray-700 mb-2">
+              URL de l'image pour l'email (optionnel)
+            </label>
+            <input 
+              id="email-image-url" 
+              v-model="emailData.image_url" 
+              type="url"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm"
+              placeholder="https://example.com/image.jpg"
+            />
+            <p class="mt-1 text-xs text-gray-500">
+              Si non renseigné, l'image de la notification sera utilisée
+            </p>
+          </div>
+        </div>
+      </div>
+
       <!-- Recipients Selection -->
       <div class="mb-6">
         <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -202,6 +279,15 @@ const notification = ref({
   image_url: '' as string | undefined
 })
 
+// Email state
+const sendEmail = ref(false)
+const emailData = ref({
+  highlight_text: '',
+  button_text: '',
+  button_url: '',
+  image_url: ''
+})
+
 // Search and pagination state
 const searchQuery = ref('')
 const showUserList = ref(false)
@@ -302,6 +388,13 @@ const clearForm = () => {
     selectedUsers: [],
     image_url: undefined
   }
+  sendEmail.value = false
+  emailData.value = {
+    highlight_text: '',
+    button_text: '',
+    button_url: '',
+    image_url: ''
+  }
   searchQuery.value = ''
   showUserList.value = false
   currentPage.value = 1
@@ -314,7 +407,7 @@ const sendNotification = async () => {
       return
     }
 
-    // Préparer les données pour l'API
+    // Préparer les données pour l'API de notification
     const data: any = {
       title: notification.value.title,
       content: notification.value.content
@@ -330,8 +423,51 @@ const sendNotification = async () => {
       data.image_url = notification.value.image_url
     }
 
-    // Utiliser le store de notification pour envoyer la notification
+    // Envoyer la notification
     await notificationStore.sendNotification(data)
+    
+    // Envoyer l'email si l'option est activée
+    if (sendEmail.value && notification.value.recipientType === 'specific' && notification.value.selectedUsers.length > 0) {
+      // Envoyer un email à chaque utilisateur sélectionné
+      const emailPromises = notification.value.selectedUsers.map(async (userId) => {
+        const emailDataToSend: any = {
+          user_id: userId,
+          title: notification.value.title,
+          subject: notification.value.title, // Utiliser title comme subject
+          content: notification.value.content
+        }
+
+        // Ajouter les champs optionnels
+        if (emailData.value.highlight_text) {
+          emailDataToSend.highlight_text = emailData.value.highlight_text
+        }
+        if (emailData.value.button_text) {
+          emailDataToSend.button_text = emailData.value.button_text
+        }
+        if (emailData.value.button_url) {
+          emailDataToSend.button_url = emailData.value.button_url
+        }
+        // Utiliser l'image de l'email si fournie, sinon celle de la notification
+        if (emailData.value.image_url) {
+          emailDataToSend.image_url = emailData.value.image_url
+        } else if (notification.value.image_url) {
+          emailDataToSend.image_url = notification.value.image_url
+        }
+
+        return notificationStore.sendEmail(emailDataToSend)
+      })
+
+      try {
+        await Promise.all(emailPromises)
+        notificationService.addNotification('Email(s) envoyé(s) avec succès !', 'success')
+      } catch (emailError) {
+        console.error('Error sending email:', emailError)
+        notificationService.addNotification(
+          emailError instanceof Error ? emailError.message : 'Erreur lors de l\'envoi de l\'email',
+          'error'
+        )
+      }
+    }
     
     notificationService.addNotification('Notification envoyée avec succès !', 'success')
     clearForm()

@@ -122,6 +122,44 @@ export const useNotificationStore = defineStore('notification', () => {
     }
   }
 
+  async function sendEmail(data: {
+    user_id: number
+    title: string
+    subject?: string
+    content?: string
+    highlight_text?: string
+    button_text?: string
+    button_url?: string
+    image_url?: string
+    template_name?: string
+  }) {
+    try {
+      isLoading.value = true
+      error.value = null
+
+      const response = await fetchWithAuth('/box/marketing/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || errorData.message || 'Erreur lors de l\'envoi de l\'email')
+      }
+
+      const result = await response.json()
+      return result
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Erreur lors de l\'envoi de l\'email'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     notifications,
     isLoading,
@@ -129,6 +167,7 @@ export const useNotificationStore = defineStore('notification', () => {
     currentPage,
     itemsPerPage,
     sendNotification,
+    sendEmail,
     fetchNotifications
   }
 })

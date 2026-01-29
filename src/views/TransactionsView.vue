@@ -497,10 +497,12 @@
 
 <script setup lang="ts">
 import { onMounted, computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useTransactionsStore } from '../stores/transactions'
 import { Transaction } from '../types/transaction'
 import { useNotification } from '../services/notification'
 
+const router = useRouter()
 const transactionsStore = useTransactionsStore()
 const notification = useNotification()
 
