@@ -3,50 +3,42 @@
     <!-- Header -->
     <div class="flex flex-col gap-4 sm:gap-0 sm:flex-row sm:items-center sm:justify-between">
       <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Gestion des Utilisateurs</h1>
+    </div>
 
-      <!-- Search and Filters -->
-      <div class="w-full sm:w-auto sm:mt-0">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-          <!-- Barre de recherche -->
-          <div class="relative flex-1 sm:flex-initial sm:max-w-md">
-            <label class="block text-xs font-medium text-gray-700 mb-1">Rechercher</label>
-            <div class="relative">
-              <input v-model="usersStore.searchQuery" @input="() => usersStore.updateSearchQuery(usersStore.searchQuery)" type="text" placeholder="Rechercher un utilisateur..."
-                class="w-full px-3 sm:px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base" />
-              <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            </div>
-          </div>
-          
-          <!-- Filtres -->
-          <div class="flex flex-col sm:flex-row gap-3">
-            <div class="flex flex-col flex-1 sm:flex-initial">
-              <label class="block text-xs font-medium text-gray-700 mb-1">Statut de blocage</label>
-              <select v-model="usersStore.blockFilter" @change="usersStore.applyFilters"
-                class="w-full sm:w-auto px-3 sm:px-4 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base sm:min-w-[160px]">
-                <option value="all">Tous les statuts</option>
-                <option value="blocked">Bloqués</option>
-                <option value="unblocked">Non bloqués</option>
-              </select>
-            </div>
-            <div class="flex flex-col flex-1 sm:flex-initial">
-              <label class="block text-xs font-medium text-gray-700 mb-1">Type d'utilisateur</label>
-              <select v-model="usersStore.agentFilter" @change="usersStore.applyFilters"
-                class="w-full sm:w-auto px-3 sm:px-4 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base sm:min-w-[160px]">
-                <option value="all">Tous les types</option>
-                <option value="agent">Agents</option>
-                <option value="client">Clients</option>
-              </select>
-            </div>
-            <div class="flex flex-col flex-1 sm:flex-initial">
-              <label class="block text-xs font-medium text-gray-700 mb-1">Caisse</label>
-              <select v-model="usersStore.noCaisseFilter" @change="usersStore.applyFilters"
-                class="w-full sm:w-auto px-3 sm:px-4 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base sm:min-w-[160px]">
-                <option value="all">Toutes les caisses</option>
-                <option value="no_caisse">Sans caisse</option>
-                <option value="has_caisse">Avec caisse</option>
-              </select>
-            </div>
-          </div>
+    <!-- Search and Filters -->
+    <div class="space-y-3">
+      <!-- Barre de recherche - demi ligne -->
+      <div class="relative">
+        <input v-model="usersStore.searchQuery" @input="() => usersStore.updateSearchQuery(usersStore.searchQuery)" type="text" placeholder="Rechercher un utilisateur..."
+          class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+        <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+      </div>
+      
+      <!-- Filtres - juste en dessous de la recherche -->
+      <div class="flex flex-wrap gap-3">
+        <div class="flex-1 sm:flex-initial min-w-[140px]">
+          <select v-model="usersStore.blockFilter" @change="usersStore.applyFilters"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+            <option value="all">Tous les statuts</option>
+            <option value="blocked">Bloqués</option>
+            <option value="unblocked">Non bloqués</option>
+          </select>
+        </div>
+        <div class="flex-1 sm:flex-initial min-w-[140px]">
+          <select v-model="usersStore.agentFilter" @change="usersStore.applyFilters"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+            <option value="all">Tous les types</option>
+            <option value="agent">Agents</option>
+            <option value="client">Clients</option>
+          </select>
+        </div>
+        <div class="flex-1 sm:flex-initial min-w-[140px]">
+          <select v-model="usersStore.noCaisseFilter" @change="usersStore.applyFilters"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+            <option value="all">Toutes les caisses</option>
+            <option value="no_caisse">Sans caisse</option>
+            <option value="has_caisse">Avec caisse</option>
+          </select>
         </div>
       </div>
     </div>
@@ -58,103 +50,61 @@
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
-                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Nom
+              <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Utilisateur
               </th>
-                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                Email
-              </th>
-                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+              <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Téléphone
               </th>
-                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                Crée le
+              <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Date de création
               </th>
-                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Solde
               </th>
-                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+              <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Caisse total
               </th>
-                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
-              Nombre de parrainage
-              </th>
-                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                Statut Agent
-              </th>
-                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
-                Sexe
-              </th>
-                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
-                Date naissance
-              </th>
-                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
-                Code parrainage
-              </th>
-                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
-                Code parrain
-              </th>
-                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
-                Carte ID
-              </th>
-                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Statut
               </th>
-                <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <tr v-for="user in usersStore.filteredUsers" :key="user.id">
-                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
-                  <div class="flex flex-col">
-                    <span class="font-medium text-gray-900 text-xs sm:text-sm">{{ user.first_name }} {{ user.last_name }}</span>
-                    <span class="text-xs text-gray-500 sm:hidden">{{ user.email }}</span>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
+                <div class="flex items-center gap-3">
+                  <!-- Avatar avec initiales -->
+                  <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-sm">
+                    {{ getUserInitials(user) }}
                   </div>
+                  <!-- Nom, prénom et email -->
+                  <div class="flex flex-col min-w-0">
+                    <span class="font-medium text-gray-900 text-sm truncate">
+                      {{ user.first_name }} {{ user.last_name }}
+                    </span>
+                    <span class="text-xs text-gray-500 truncate">
+                      {{ user.email }}
+                    </span>
+                  </div>
+                </div>
               </td>
-                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden sm:table-cell">
-                {{ user.email }}
-              </td>
-                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden md:table-cell">
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm">
                 {{ user.phone }}
               </td>
-                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden lg:table-cell">
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm">
                 {{ new Date(user.created_at).toLocaleDateString() }}
               </td>
-                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm">
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm">
                 {{ formatAmount(user.total_funds) }}
               </td>
-                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden lg:table-cell">
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm">
                 {{ user.total_box }} 
               </td>
-                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">
-                {{ user.number_sponsor }} 
-              </td>
-                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 hidden md:table-cell">
-                <span :class="[
-                  'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
-                  user.agent_client ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                ]">
-                  {{ user.agent_client ? 'Agent' : 'Client' }}
-                </span>
-              </td>
-                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">
-                {{ user.sexe || '-' }}
-              </td>
-                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">
-                {{ user.birthday ? new Date(user.birthday).toLocaleDateString() : '-' }}
-              </td>
-                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">
-                {{ user.referral_code || '-' }}
-              </td>
-                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">
-                {{ user.user_referral_code || '-' }}
-              </td>
-                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">
-                {{ user.card_id || '-' }}
-              </td>
-                <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
                 <div class="flex flex-col space-y-1">
                   <span :class="[
                     'px-2 inline-flex text-xs leading-5 font-semibold rounded-full w-fit',
@@ -170,7 +120,7 @@
                     <span class="text-xs text-gray-600 cursor-help underline decoration-dotted">
                       Raison du blocage
                     </span>
-                      <div class="absolute left-0 bottom-full mb-2 w-48 sm:w-64 p-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <div class="absolute left-0 bottom-full mb-2 w-48 sm:w-64 p-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                       <div class="relative">
                         <p class="whitespace-normal">{{ user.reason_block }}</p>
                         <div class="absolute -bottom-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
@@ -1022,6 +972,15 @@ const closeKycImageModal = () => {
   selectedKycImage.value = null
   // Réactiver le scroll du body
   document.body.style.overflow = ''
+}
+
+// Fonction pour générer les initiales d'un utilisateur
+const getUserInitials = (user: User): string => {
+  const firstName = user.first_name || ''
+  const lastName = user.last_name || ''
+  const firstInitial = firstName.charAt(0).toUpperCase()
+  const lastInitial = lastName.charAt(0).toUpperCase()
+  return `${firstInitial}${lastInitial}` || 'U'
 }
 
 // La gestion de la touche Échap est déjà intégrée dans handleEscape ci-dessus
