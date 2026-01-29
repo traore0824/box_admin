@@ -21,6 +21,7 @@ import WithdrawalTransactionsView from '../views/WithdrawalTransactionsView.vue'
 import UserProfileView from '../views/UserProfileView.vue'
 import TransactionDetailsView from '../views/TransactionDetailsView.vue'
 import ReminderMessagesView from '../views/ReminderMessagesView.vue'
+import ReminderLogsView from '../views/ReminderLogsView.vue'
 
 const routes = [
   {
@@ -135,6 +136,12 @@ const routes = [
     path: '/reminder-messages',
     name: 'reminder-messages',
     component: ReminderMessagesView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/reminder-logs',
+    name: 'reminder-logs',
+    component: ReminderLogsView,
     meta: { requiresAuth: true }
   }
 ]

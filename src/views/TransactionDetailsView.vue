@@ -273,6 +273,12 @@
             </div>
 
             <div v-if="feexpayResult" class="space-y-4">
+              <!-- Afficher la réponse brute pour déboguer -->
+              <div class="bg-gray-50 rounded-lg p-4">
+                <h4 class="text-sm font-semibold text-gray-900 mb-2">Réponse complète de l'API</h4>
+                <pre class="text-xs text-gray-700 overflow-auto max-h-96">{{ JSON.stringify(feexpayResult, null, 2) }}</pre>
+              </div>
+
               <div v-if="feexpayResult.message" class="p-3 bg-blue-50 border border-blue-200 rounded-md">
                 <p class="text-sm text-blue-800 font-medium">{{ feexpayResult.message }}</p>
               </div>

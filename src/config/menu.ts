@@ -70,6 +70,11 @@ export const menuItems = [
     icon: 'fas fa-clock'
   },
   {
+    path: '/reminder-logs',
+    name: 'Logs des Rappels',
+    icon: 'fas fa-list-alt'
+  },
+  {
     path: '/contact-box',
     name: 'Messages de Contact',
     icon: 'fas fa-envelope'

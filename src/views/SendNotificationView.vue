@@ -81,23 +81,17 @@
               v-model="messageType" 
               type="radio" 
               value="email"
-              :disabled="notification.recipientType === 'all'"
-              class="h-4 w-4 text-primary border-gray-300" 
-              :class="{ 'opacity-50 cursor-not-allowed': notification.recipientType === 'all' }"
+              class="h-4 w-4 text-primary border-gray-300"
             />
             <label 
               for="type-email" 
               class="ml-2 text-sm text-gray-700"
-              :class="{ 'opacity-50 cursor-not-allowed': notification.recipientType === 'all' }"
             >
               <i class="fas fa-envelope mr-2"></i>
               Email
             </label>
           </div>
         </div>
-        <p v-if="notification.recipientType === 'all' && messageType === 'email'" class="mt-2 text-xs text-red-600">
-          L'envoi d'email à tous les utilisateurs n'est pas supporté. Veuillez sélectionner un utilisateur spécifique.
-        </p>
       </div>
 
       <!-- Champs Email (affichés si le type est email) -->
@@ -453,16 +447,10 @@ const sendNotification = async () => {
       return
     }
 
-    // Vérifier que si c'est un email, un utilisateur spécifique est sélectionné
-    if (messageType.value === 'email') {
-      if (notification.value.recipientType === 'all') {
-        notificationService.addNotification('L\'envoi d\'email à tous les utilisateurs n\'est pas supporté. Veuillez sélectionner un utilisateur spécifique.', 'error')
-        return
-      }
-      if (notification.value.recipientType === 'specific' && notification.value.selectedUsers.length === 0) {
-        notificationService.addNotification('Veuillez sélectionner au moins un utilisateur pour envoyer un email.', 'error')
-        return
-      }
+    // Vérifier que si c'est un email avec utilisateur spécifique, au moins un utilisateur est sélectionné
+    if (messageType.value === 'email' && notification.value.recipientType === 'specific' && notification.value.selectedUsers.length === 0) {
+      notificationService.addNotification('Veuillez sélectionner au moins un utilisateur pour envoyer un email.', 'error')
+      return
     }
 
     // Si c'est une notification push
@@ -489,12 +477,11 @@ const sendNotification = async () => {
     } 
     // Si c'est un email
     else if (messageType.value === 'email') {
-      // Envoyer un email à chaque utilisateur sélectionné
-      const emailPromises = notification.value.selectedUsers.map(async (userId) => {
+      if (notification.value.recipientType === 'all') {
+        // Envoyer un email à tous les utilisateurs (sans user_id)
         const emailDataToSend: any = {
-          user_id: userId,
           title: notification.value.title,
-          subject: notification.value.title, // Utiliser title comme subject
+          subject: notification.value.title,
           content: notification.value.content
         }
 
@@ -518,11 +505,44 @@ const sendNotification = async () => {
           emailDataToSend.template_name = emailData.value.template_name
         }
 
-        return notificationStore.sendEmail(emailDataToSend)
-      })
+        await notificationStore.sendEmail(emailDataToSend)
+        notificationService.addNotification('Email envoyé à tous les utilisateurs avec succès !', 'success')
+      } else {
+        // Envoyer un email à chaque utilisateur sélectionné
+        const emailPromises = notification.value.selectedUsers.map(async (userId) => {
+          const emailDataToSend: any = {
+            user_id: userId,
+            title: notification.value.title,
+            subject: notification.value.title, // Utiliser title comme subject
+            content: notification.value.content
+          }
 
-      await Promise.all(emailPromises)
-      notificationService.addNotification('Email(s) envoyé(s) avec succès !', 'success')
+          // Ajouter les champs optionnels
+          if (emailData.value.highlight_text) {
+            emailDataToSend.highlight_text = emailData.value.highlight_text
+          }
+          if (emailData.value.button_text) {
+            emailDataToSend.button_text = emailData.value.button_text
+          }
+          if (emailData.value.button_url) {
+            emailDataToSend.button_url = emailData.value.button_url
+          }
+          // Utiliser l'image de l'email si fournie, sinon celle de la notification
+          if (emailData.value.image_url) {
+            emailDataToSend.image_url = emailData.value.image_url
+          } else if (notification.value.image_url) {
+            emailDataToSend.image_url = notification.value.image_url
+          }
+          if (emailData.value.template_name) {
+            emailDataToSend.template_name = emailData.value.template_name
+          }
+
+          return notificationStore.sendEmail(emailDataToSend)
+        })
+
+        await Promise.all(emailPromises)
+        notificationService.addNotification('Email(s) envoyé(s) avec succès !', 'success')
+      }
     }
     
     clearForm()

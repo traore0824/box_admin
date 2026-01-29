@@ -47,7 +47,7 @@ export const useUsersStore = defineStore('users', () => {
   const searchQuery = ref('')
   const blockFilter = ref<'all' | 'blocked' | 'unblocked'>('all')
   const agentFilter = ref<'all' | 'agent' | 'client'>('all')
-  const noCaisseFilter = ref<'all' | 'no_caisse' | 'has_caisse'>('all')
+  const noCaisseFilter = ref<'all' | 'no_caisse'>('all')
   const totalUsers = ref(0)
   const currentPage = ref(1)
   const itemsPerPage = 10
@@ -104,9 +104,7 @@ export const useUsersStore = defineStore('users', () => {
 
       // Ajouter le filtre utilisateurs sans caisse
       if (noCaisseFilter.value === 'no_caisse') {
-        queryParams.user_have_caisse = 'false'
-      } else if (noCaisseFilter.value === 'has_caisse') {
-        queryParams.user_have_caisse = 'true'
+        queryParams.without_caisse = 'true'
       }
 
       const response = await fetchWithAuth('/auth/listUser/', {

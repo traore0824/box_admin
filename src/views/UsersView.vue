@@ -35,9 +35,8 @@
         <div class="flex-1 sm:flex-initial min-w-[140px]">
           <select v-model="usersStore.noCaisseFilter" @change="usersStore.applyFilters"
             class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
-            <option value="all">Toutes les caisses</option>
+            <option value="all">Tous</option>
             <option value="no_caisse">Sans caisse</option>
-            <option value="has_caisse">Avec caisse</option>
           </select>
         </div>
       </div>
