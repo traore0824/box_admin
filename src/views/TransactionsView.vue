@@ -111,6 +111,16 @@
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ transaction.caisse.name }}</td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
                 <div class="flex flex-col sm:flex-row gap-1 sm:gap-2">
+                  <!-- Bouton Voir détails -->
+                  <button
+                    @click="viewTransactionDetails(transaction.id)"
+                    class="btn btn-sm btn-outline text-xs"
+                    title="Voir les détails"
+                  >
+                    <i class="fas fa-eye mr-1"></i>
+                    <span class="hidden sm:inline">Détails</span>
+                  </button>
+
                   <!-- Bouton Mettre à jour le statut (si status !== error && status !== accept) -->
                   <button
                     v-if="transaction.status !== 'error' && transaction.status !== 'accept'"
@@ -617,5 +627,10 @@ function closeFeexpayModal() {
 const closeValidationModal = () => {
   showValidationModal.value = false
   validationDetails.value = null
+}
+
+// Voir les détails de la transaction
+const viewTransactionDetails = (transactionId: number) => {
+  router.push({ name: 'transaction-details', params: { id: transactionId.toString() } })
 }
 </script>

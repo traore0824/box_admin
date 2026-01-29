@@ -58,6 +58,59 @@
         </div>
       </div>
 
+      <!-- Actions -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <i class="fas fa-cog mr-2 text-primary"></i>
+          Actions
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <!-- Bloquer/Débloquer -->
+          <button @click="handleToggleBlock" :disabled="actionLoading"
+            class="flex items-center justify-center px-4 py-3 border rounded-lg transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+            :class="user.is_block ? 'border-green-300 bg-green-50 text-green-700 hover:bg-green-100' : 'border-red-300 bg-red-50 text-red-700 hover:bg-red-100'">
+            <i :class="['fas mr-2', user.is_block ? 'fa-unlock' : 'fa-lock']"></i>
+            {{ user.is_block ? 'Débloquer' : 'Bloquer' }}
+          </button>
+
+          <!-- Nommer Agent / Retirer Agent -->
+          <button @click="handleToggleAgent" :disabled="actionLoading"
+            class="flex items-center justify-center px-4 py-3 border rounded-lg transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+            :class="user.agent_client ? 'border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100' : 'border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100'">
+            <i :class="['fas mr-2', user.agent_client ? 'fa-user-minus' : 'fa-user-tie']"></i>
+            {{ user.agent_client ? 'Retirer Agent' : 'Nommer Agent' }}
+          </button>
+
+          <!-- Réinitialiser PIN -->
+          <button @click="handleResetPin" :disabled="actionLoading"
+            class="flex items-center justify-center px-4 py-3 border border-purple-300 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fas fa-key mr-2"></i>
+            Réinitialiser PIN
+          </button>
+
+          <!-- Envoyer OTP PIN -->
+          <button @click="handleSendPinVerificationOtp" :disabled="actionLoading"
+            class="flex items-center justify-center px-4 py-3 border border-cyan-300 bg-cyan-50 text-cyan-700 rounded-lg hover:bg-cyan-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fas fa-mobile-alt mr-2"></i>
+            Envoyer OTP PIN
+          </button>
+
+          <!-- Mettre à jour KYC -->
+          <button @click="openKycModal" :disabled="actionLoading"
+            class="flex items-center justify-center px-4 py-3 border border-indigo-300 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fas fa-id-card mr-2"></i>
+            Mettre à jour KYC
+          </button>
+
+          <!-- Voir Wallet -->
+          <button @click="viewUserWallet" :disabled="actionLoading"
+            class="flex items-center justify-center px-4 py-3 border border-teal-300 bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fas fa-wallet mr-2"></i>
+            Voir Wallet
+          </button>
+        </div>
+      </div>
+
       <!-- Informations personnelles -->
       <div class="bg-white rounded-lg shadow p-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -67,31 +120,31 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
-            <p class="text-gray-900">{{ user.phone || '-' }}</p>
+            <p class="text-gray-900">{{ formatNullValue(user.phone) }}</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Date de création</label>
-            <p class="text-gray-900">{{ new Date(user.created_at).toLocaleDateString('fr-FR') }}</p>
+            <p class="text-gray-900">{{ user.created_at ? new Date(user.created_at).toLocaleDateString('fr-FR') : 'Non défini' }}</p>
           </div>
-          <div v-if="user.birthday">
+          <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Date de naissance</label>
-            <p class="text-gray-900">{{ new Date(user.birthday).toLocaleDateString('fr-FR') }}</p>
+            <p class="text-gray-900">{{ user.birthday ? new Date(user.birthday).toLocaleDateString('fr-FR') : 'Non défini' }}</p>
           </div>
-          <div v-if="user.sexe">
+          <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Sexe</label>
-            <p class="text-gray-900">{{ user.sexe }}</p>
+            <p class="text-gray-900">{{ formatNullValue(user.sexe) }}</p>
           </div>
-          <div v-if="user.referral_code">
+          <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Code parrainage</label>
-            <p class="text-gray-900 font-mono">{{ user.referral_code }}</p>
+            <p class="text-gray-900 font-mono">{{ formatNullValue(user.referral_code) }}</p>
           </div>
-          <div v-if="user.user_referral_code">
+          <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Code parrain</label>
-            <p class="text-gray-900 font-mono">{{ user.user_referral_code }}</p>
+            <p class="text-gray-900 font-mono">{{ formatNullValue(user.user_referral_code) }}</p>
           </div>
-          <div v-if="user.card_id">
+          <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Carte ID</label>
-            <p class="text-gray-900 font-mono">{{ user.card_id }}</p>
+            <p class="text-gray-900 font-mono">{{ formatNullValue(user.card_id) }}</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Statut KYC</label>
@@ -115,25 +168,25 @@
           <div class="bg-blue-50 p-4 rounded-lg">
             <p class="text-sm text-gray-600 mb-1">Solde actuel (Wallet)</p>
             <p class="text-2xl font-bold text-blue-600">
-              {{ walletBalance ? formatCurrency(parseFloat(walletBalance.current_balance)) : '-' }}
+              {{ walletBalance && walletBalance.current_balance ? formatCurrency(parseFloat(walletBalance.current_balance)) : 'Non défini' }}
             </p>
           </div>
           <div class="bg-green-50 p-4 rounded-lg">
             <p class="text-sm text-gray-600 mb-1">Total dépôts</p>
             <p class="text-2xl font-bold text-green-600">
-              {{ walletBalance ? formatCurrency(parseFloat(walletBalance.total_deposits)) : '-' }}
+              {{ walletBalance && walletBalance.total_deposits ? formatCurrency(parseFloat(walletBalance.total_deposits)) : 'Non défini' }}
             </p>
           </div>
           <div class="bg-red-50 p-4 rounded-lg">
             <p class="text-sm text-gray-600 mb-1">Total retraits</p>
             <p class="text-2xl font-bold text-red-600">
-              {{ walletBalance ? formatCurrency(parseFloat(walletBalance.total_withdrawals)) : '-' }}
+              {{ walletBalance && walletBalance.total_withdrawals ? formatCurrency(parseFloat(walletBalance.total_withdrawals)) : 'Non défini' }}
             </p>
           </div>
           <div class="bg-gray-50 p-4 rounded-lg">
             <p class="text-sm text-gray-600 mb-1">Montant disponible</p>
             <p class="text-2xl font-bold text-gray-600">
-              {{ walletBalance ? formatCurrency(parseFloat(walletBalance.available_amount)) : '-' }}
+              {{ walletBalance && walletBalance.available_amount ? formatCurrency(parseFloat(walletBalance.available_amount)) : 'Non défini' }}
             </p>
           </div>
           <div class="bg-primary-50 p-4 rounded-lg">
@@ -196,7 +249,7 @@
                   </span>
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 font-mono text-xs">
-                  {{ transaction.public_reference || '-' }}
+                  {{ formatNullValue(transaction.public_reference) }}
                 </td>
               </tr>
             </tbody>
@@ -280,33 +333,275 @@
         <div v-else-if="caisses.length === 0" class="text-center py-8 text-gray-500">
           Aucune caisse trouvée
         </div>
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div v-for="caisse in caisses" :key="caisse.id" class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-            <h4 class="font-semibold text-gray-900 mb-2">{{ caisse.name }}</h4>
-            <div class="space-y-1 text-sm">
-              <p class="text-gray-600">
-                <span class="font-medium">Montant épargné:</span> {{ formatAmount(caisse.savedAmount) }}
-              </p>
-              <p class="text-gray-600">
-                <span class="font-medium">Objectif:</span> {{ formatAmount(caisse.targetAmount) }}
-              </p>
-              <p class="text-gray-600">
-                <span class="font-medium">Fréquence:</span> {{ getFrequencyLabel(caisse.frequency) }}
-              </p>
-              <p class="text-gray-600">
-                <span class="font-medium">Statut:</span>
-                <span :class="[
-                  'ml-1 px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full',
-                  getCaisseStatusClass(caisse.status)
-                ]">
-                  {{ getCaisseStatusLabel(caisse.status) }}
-                </span>
-              </p>
-            </div>
-          </div>
+        <div v-else class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date de début</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date de fin</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date de création</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre de retard</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total transaction</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Argent objectif</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Argent atteint</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prochaine date de payment</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Membres</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-for="caisse in caisses" :key="caisse.id">
+                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {{ formatNullValue(caisse.name) }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                  {{ caisse.start_date ? new Date(caisse.start_date).toLocaleDateString('fr-FR') : 'Non défini' }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                  {{ caisse.end_date ? new Date(caisse.end_date).toLocaleDateString('fr-FR') : 'Non défini' }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                  {{ caisse.created_at ? new Date(caisse.created_at).toLocaleDateString('fr-FR') : 'Non défini' }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                  {{ formatNullValue(caisse.transaction_delay) }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm">
+                  <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                    {{ formatNullValue(caisse.type_box) }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                  {{ formatNullValue(caisse.total_trans) }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">
+                  {{ caisse.amount_obj ? formatAmount(caisse.amount_obj) : 'Non défini' }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">
+                  {{ caisse.amount_already_paid ? formatAmount(caisse.amount_already_paid) : 'Non défini' }}
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                  {{ caisse.next_payment ? new Date(caisse.next_payment).toLocaleDateString('fr-FR') : 'Non défini' }}
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-500">
+                  <div v-if="!caisse.personal && caisse.members && caisse.members.length > 0" class="space-y-1">
+                    <div v-for="member in caisse.members" :key="member.id || member" class="text-xs">
+                      {{ member.first_name || member.last_name || member.email || member }}
+                    </div>
+                  </div>
+                  <span v-else class="text-gray-400">-</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
+
+    <!-- Confirmation Modal -->
+    <ConfirmationModal :is-open="isModalOpen" :title="modalTitle" :message="modalMessage" @confirm="onModalConfirm"
+      @cancel="onModalCancel" />
+
+    <!-- Modal KYC -->
+    <Teleport to="body">
+      <div v-if="showKycModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-3xl mx-4 my-8">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Mettre à jour le statut KYC</h3>
+          <div class="mb-4">
+            <p class="text-sm text-gray-600 mb-2">
+              Utilisateur: <span class="font-semibold">{{ user?.first_name }} {{ user?.last_name }}</span>
+            </p>
+            <p class="text-sm text-gray-600">
+              Statut actuel: 
+              <span class="font-semibold" :class="getKycStatusClass(user?.status)">
+                {{ getKycStatusLabel(user?.status) }}
+              </span>
+            </p>
+            <p v-if="user?.card_id" class="text-sm text-gray-600 mt-1">
+              Numéro de carte: <span class="font-semibold">{{ user.card_id }}</span>
+            </p>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Nouveau statut *</label>
+            <select 
+              v-model="kycStatus"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="null">Aucun document</option>
+              <option value="pending">En attente</option>
+              <option value="accept">Approuvé</option>
+              <option value="reject">Rejeté</option>
+            </select>
+          </div>
+          <div v-if="kycStatus === 'reject'" class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Raison du rejet <span class="text-red-500">*</span>
+            </label>
+            <textarea 
+              v-model="kycRejectionReason"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              rows="4"
+              placeholder="Expliquez la raison du rejet..."
+              required
+            ></textarea>
+          </div>
+          <div class="flex justify-end space-x-3">
+            <button 
+              @click="closeKycModal"
+              class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+            >
+              Annuler
+            </button>
+            <button 
+              @click="confirmKycUpdate"
+              :disabled="!kycStatus || (kycStatus === 'reject' && !kycRejectionReason.trim()) || actionLoading"
+              class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50"
+            >
+              Mettre à jour
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Modal Wallet -->
+    <Teleport to="body">
+      <div v-if="showWalletModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-6xl mx-4 my-8">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">
+              Wallet de {{ user?.first_name }} {{ user?.last_name }}
+            </h3>
+            <button 
+              @click="closeWalletModal"
+              class="text-gray-400 hover:text-gray-600"
+            >
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+
+          <!-- Résumé du Wallet -->
+          <div v-if="walletsStore.summary" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-blue-50 p-4 rounded-lg">
+              <p class="text-sm text-gray-600">Solde Actuel</p>
+              <p class="text-2xl font-bold text-blue-600">
+                {{ formatCurrency(parseFloat(walletsStore.summary.current_balance)) }}
+              </p>
+            </div>
+            <div class="bg-green-50 p-4 rounded-lg">
+              <p class="text-sm text-gray-600">Total Dépôts</p>
+              <p class="text-2xl font-bold text-green-600">
+                {{ formatCurrency(parseFloat(walletsStore.summary.total_deposits)) }}
+              </p>
+            </div>
+            <div class="bg-red-50 p-4 rounded-lg">
+              <p class="text-sm text-gray-600">Total Retraits</p>
+              <p class="text-2xl font-bold text-red-600">
+                {{ formatCurrency(parseFloat(walletsStore.summary.total_withdrawals)) }}
+              </p>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <p class="text-sm text-gray-600">Montant Disponible</p>
+              <p class="text-2xl font-bold text-gray-600">
+                {{ formatCurrency(parseFloat(walletsStore.summary.available_amount)) }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Filtres -->
+          <div class="bg-gray-50 p-4 rounded-lg mb-4">
+            <div class="flex flex-wrap gap-4">
+              <select 
+                v-model="walletTransactionTypeFilter"
+                @change="loadWalletTransactions"
+                class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="all">Tous les types</option>
+                <option value="deposit">Dépôt</option>
+                <option value="withdrawal">Retrait</option>
+                <option value="bonus">Bonus</option>
+                <option value="commission">Commission</option>
+                <option value="refund">Remboursement</option>
+                <option value="transfer">Transfert</option>
+              </select>
+              <select 
+                v-model="walletStatusFilter"
+                @change="loadWalletTransactions"
+                class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="all">Tous les statuts</option>
+                <option value="completed">Complété</option>
+                <option value="pending">En attente</option>
+                <option value="failed">Échoué</option>
+                <option value="cancelled">Annulé</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Historique des Transactions -->
+          <div class="overflow-x-auto max-h-96">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50 sticky top-0">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Montant</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Solde Avant</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Solde Après</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Référence</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr v-for="transaction in walletsStore.transactions" :key="transaction.id">
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    {{ formatDateTime(transaction.created_at) }}
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <span 
+                      :class="[
+                        'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
+                        getWalletTransactionTypeClass(transaction.transaction_type)
+                      ]"
+                    >
+                      {{ transaction.transaction_type_display }}
+                    </span>
+                  </td>
+                  <td 
+                    class="px-4 py-3 whitespace-nowrap text-sm font-semibold"
+                    :class="getWalletAmountClass(transaction.transaction_type)"
+                  >
+                    {{ transaction.transaction_type === 'deposit' || transaction.transaction_type === 'bonus' ? '+' : '-' }}
+                    {{ formatCurrency(parseFloat(transaction.amount)) }}
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    {{ formatCurrency(parseFloat(transaction.balance_before)) }}
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                    {{ formatCurrency(parseFloat(transaction.balance_after)) }}
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <span 
+                      :class="[
+                        'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
+                        getWalletStatusClass(transaction.status)
+                      ]"
+                    >
+                      {{ transaction.status_display }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 font-mono text-xs">
+                    {{ formatNullValue(transaction.transaction_reference || transaction.reference) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -316,10 +611,15 @@ import { useRoute, useRouter } from 'vue-router'
 import { fetchWithAuth } from '../stores/fetchwithtoken'
 import { formatCurrency, formatAmount } from '../utils/currency'
 import { useNotification } from '../services/notification'
+import { useUsersStore } from '../stores/users'
+import { useWalletsStore } from '../stores/wallets'
+import ConfirmationModal from '../components/ConfirmationModal.vue'
 
 const route = useRoute()
 const router = useRouter()
 const notification = useNotification()
+const usersStore = useUsersStore()
+const walletsStore = useWalletsStore()
 
 // State
 const user = ref<any>(null)
@@ -332,8 +632,25 @@ const transactionsLoading = ref(false)
 const walletTransactionsLoading = ref(false)
 const caissesLoading = ref(false)
 const error = ref<string | null>(null)
+const actionLoading = ref(false)
 
 const userId = ref<number | null>(null)
+
+// Modal State
+const isModalOpen = ref(false)
+const modalTitle = ref('')
+const modalMessage = ref('')
+const pendingAction = ref<(() => Promise<void>) | null>(null)
+
+// KYC Modal State
+const showKycModal = ref(false)
+const kycStatus = ref<string>('')
+const kycRejectionReason = ref('')
+
+// Wallet Modal State
+const showWalletModal = ref(false)
+const walletTransactionTypeFilter = ref('all')
+const walletStatusFilter = ref('all')
 
 // Fonction pour générer les initiales
 const getUserInitials = (user: any): string => {
@@ -449,6 +766,14 @@ const formatDateTime = (date: string): string => {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+// Fonction pour formater les valeurs null
+const formatNullValue = (value: any): string => {
+  if (value === null || value === undefined || value === '') {
+    return 'Non défini'
+  }
+  return value
 }
 
 // Fonction pour revenir en arrière
@@ -600,12 +925,187 @@ const loadCaisses = async () => {
     }
 
     const data = await response.json()
-    caisses.value = data.results || data || []
+    // Gérer le format de réponse avec { count, next, previous, results: [...] }
+    if (data.results && Array.isArray(data.results)) {
+      caisses.value = data.results
+    } else if (Array.isArray(data)) {
+      caisses.value = data
+    } else {
+      caisses.value = []
+    }
   } catch (err) {
     console.error('Error loading caisses:', err)
   } finally {
     caissesLoading.value = false
   }
+}
+
+// Actions handlers
+const handleToggleBlock = async () => {
+  if (!user.value) return
+  const actionText = user.value.is_block ? 'débloquer' : 'bloquer'
+  const userName = `${user.value.first_name || ''} ${user.value.last_name || ''}`.trim() || 'cet utilisateur'
+
+  modalTitle.value = `Confirmation de ${actionText}`
+  modalMessage.value = `Êtes-vous sûr de vouloir ${actionText} ${userName} ?`
+  pendingAction.value = async () => {
+    actionLoading.value = true
+    try {
+      await usersStore.toggleUserBlockStatus(user.value.id)
+      notification.addNotification(`Utilisateur ${actionText} avec succès.`, 'success')
+      // Recharger les informations utilisateur
+      await loadUserInfo()
+    } catch (error: any) {
+      console.error(`Erreur lors de la tentative de ${actionText} l'utilisateur:`, error)
+      notification.addNotification(`Erreur: ${error.message || `Impossible de ${actionText} l'utilisateur.`}`, 'error')
+    } finally {
+      actionLoading.value = false
+    }
+  }
+  isModalOpen.value = true
+}
+
+const handleToggleAgent = async () => {
+  if (!user.value) return
+  const actionText = user.value.agent_client ? 'retirer des agents' : 'nommer comme agent'
+  const userName = `${user.value.first_name || ''} ${user.value.last_name || ''}`.trim() || 'cet utilisateur'
+
+  modalTitle.value = `Confirmation de ${actionText}`
+  modalMessage.value = `Êtes-vous sûr de vouloir ${actionText} ${userName} ?`
+  pendingAction.value = async () => {
+    actionLoading.value = true
+    try {
+      await usersStore.toggleUserAgentStatus(user.value.id)
+      notification.addNotification(`Utilisateur ${actionText} avec succès.`, 'success')
+      // Recharger les informations utilisateur
+      await loadUserInfo()
+    } catch (error: any) {
+      console.error(`Erreur lors de la tentative de ${actionText} l'utilisateur:`, error)
+      notification.addNotification(`Erreur: ${error.message || `Impossible de ${actionText} l'utilisateur.`}`, 'error')
+    } finally {
+      actionLoading.value = false
+    }
+  }
+  isModalOpen.value = true
+}
+
+const handleResetPin = async () => {
+  if (!user.value) return
+  const userName = `${user.value.first_name || ''} ${user.value.last_name || ''}`.trim() || 'cet utilisateur'
+  modalTitle.value = 'Réinitialiser le PIN'
+  modalMessage.value = `Êtes-vous sûr de vouloir réinitialiser le PIN de ${userName} ?`
+  pendingAction.value = async () => {
+    actionLoading.value = true
+    try {
+      await usersStore.resetUserPin(user.value.id)
+      notification.addNotification('PIN réinitialisé avec succès', 'success')
+      // Recharger les informations utilisateur
+      await loadUserInfo()
+    } catch (error: any) {
+      console.error('Erreur lors de la réinitialisation du PIN:', error)
+      notification.addNotification(`Erreur: ${error.message || 'Impossible de réinitialiser le PIN.'}`, 'error')
+    } finally {
+      actionLoading.value = false
+    }
+  }
+  isModalOpen.value = true
+}
+
+const handleSendPinVerificationOtp = async () => {
+  if (!user.value) return
+  const userName = `${user.value.first_name || ''} ${user.value.last_name || ''}`.trim() || 'cet utilisateur'
+  modalTitle.value = 'Envoyer OTP de vérification PIN'
+  modalMessage.value = `Êtes-vous sûr de vouloir envoyer un OTP de vérification PIN à ${userName} ?`
+  pendingAction.value = async () => {
+    actionLoading.value = true
+    try {
+      await usersStore.sendPinVerificationOtp(user.value.id)
+      notification.addNotification('OTP de vérification PIN envoyé avec succès', 'success')
+    } catch (error: any) {
+      console.error('Erreur lors de l\'envoi de l\'OTP de vérification PIN:', error)
+      notification.addNotification(`Erreur: ${error.message || 'Impossible d\'envoyer l\'OTP de vérification PIN.'}`, 'error')
+    } finally {
+      actionLoading.value = false
+    }
+  }
+  isModalOpen.value = true
+}
+
+const openKycModal = () => {
+  if (!user.value) return
+  kycStatus.value = user.value.status || 'null'
+  kycRejectionReason.value = ''
+  showKycModal.value = true
+}
+
+const closeKycModal = () => {
+  showKycModal.value = false
+  kycStatus.value = ''
+  kycRejectionReason.value = ''
+}
+
+const confirmKycUpdate = async () => {
+  if (!user.value || !kycStatus.value) return
+  
+  try {
+    actionLoading.value = true
+    await usersStore.updateKycStatus(
+      user.value.id,
+      kycStatus.value as 'pending' | 'accept' | 'reject' | 'null',
+      kycStatus.value === 'reject' ? kycRejectionReason.value : undefined
+    )
+    notification.addNotification('Statut KYC mis à jour avec succès', 'success')
+    closeKycModal()
+    // Recharger les informations utilisateur
+    await loadUserInfo()
+  } catch (error: any) {
+    console.error('Erreur lors de la mise à jour du statut KYC:', error)
+    notification.addNotification(`Erreur: ${error.message || 'Impossible de mettre à jour le statut KYC.'}`, 'error')
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+const viewUserWallet = async () => {
+  if (!user.value) return
+  showWalletModal.value = true
+  
+  try {
+    await walletsStore.fetchUserTransactions(user.value.id, 1)
+  } catch (error) {
+    notification.addNotification('Erreur lors du chargement du wallet', 'error')
+  }
+}
+
+const closeWalletModal = () => {
+  showWalletModal.value = false
+  walletTransactionTypeFilter.value = 'all'
+  walletStatusFilter.value = 'all'
+  walletsStore.resetFilters()
+}
+
+const loadWalletTransactions = () => {
+  if (!user.value) return
+  
+  walletsStore.fetchUserTransactions(
+    user.value.id,
+    1,
+    walletTransactionTypeFilter.value === 'all' ? undefined : walletTransactionTypeFilter.value,
+    walletStatusFilter.value === 'all' ? undefined : walletStatusFilter.value
+  )
+}
+
+const onModalConfirm = async () => {
+  if (pendingAction.value) {
+    await pendingAction.value()
+  }
+  isModalOpen.value = false
+  pendingAction.value = null
+}
+
+const onModalCancel = () => {
+  isModalOpen.value = false
+  pendingAction.value = null
 }
 
 onMounted(() => {

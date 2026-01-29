@@ -19,6 +19,7 @@ import ContactBoxView from '../views/ContactBoxView.vue'
 import UserCommissionWithdrawalView from '../views/UserCommissionWithdrawalView.vue'
 import WithdrawalTransactionsView from '../views/WithdrawalTransactionsView.vue'
 import UserProfileView from '../views/UserProfileView.vue'
+import TransactionDetailsView from '../views/TransactionDetailsView.vue'
 
 const routes = [
   {
@@ -121,6 +122,12 @@ const routes = [
     path: '/users/:id',
     name: 'user-profile',
     component: UserProfileView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/transactions/:id',
+    name: 'transaction-details',
+    component: TransactionDetailsView,
     meta: { requiresAuth: true }
   }
 ]
