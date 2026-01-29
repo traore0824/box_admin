@@ -862,7 +862,7 @@ const loadTransactions = async () => {
 
   try {
     transactionsLoading.value = true
-    const response = await fetchWithAuth('/box/transaction/list', {
+    const response = await fetchWithAuth('/box/all-transaction', {
       queryParams: { user_id: userId.value.toString(), page_size: '20' }
     })
 

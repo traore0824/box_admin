@@ -254,6 +254,71 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal pour afficher le résultat Feexpay -->
+  <Teleport to="body">
+    <div v-if="showFeexpayModal" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeFeexpayModal">
+      <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="closeFeexpayModal"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-medium text-gray-900">
+                Résultat de la vérification Feexpay
+              </h3>
+              <button @click="closeFeexpayModal" class="text-gray-400 hover:text-gray-500">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+
+            <div v-if="feexpayResult" class="space-y-4">
+              <div v-if="feexpayResult.message" class="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p class="text-sm text-blue-800 font-medium">{{ feexpayResult.message }}</p>
+              </div>
+
+              <div v-if="feexpayResult.status" class="grid grid-cols-1 gap-3">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Statut Feexpay</label>
+                  <span :class="[
+                    'px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full',
+                    getFeexpayStatusClass(feexpayResult.status)
+                  ]">
+                    {{ feexpayResult.status }}
+                  </span>
+                </div>
+              </div>
+
+              <div v-if="feexpayResult.data" class="bg-gray-50 rounded-lg p-4">
+                <h4 class="text-sm font-semibold text-gray-900 mb-2">Détails de la réponse</h4>
+                <pre class="text-xs text-gray-700 overflow-auto max-h-64">{{ JSON.stringify(feexpayResult.data, null, 2) }}</pre>
+              </div>
+
+              <div v-if="feexpayResult.transaction_updated" class="p-3 bg-green-50 border border-green-200 rounded-md">
+                <p class="text-sm text-green-800">
+                  <i class="fas fa-check-circle mr-2"></i>
+                  La transaction a été mise à jour
+                </p>
+              </div>
+            </div>
+
+            <div v-else class="text-center py-4">
+              <p class="text-gray-600">Aucun résultat disponible</p>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 mt-4 border-t border-gray-200">
+              <button
+                @click="closeFeexpayModal"
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -274,6 +339,8 @@ const transaction = ref<any>(null)
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 const actionLoading = ref(false)
+const showFeexpayModal = ref(false)
+const feexpayResult = ref<any>(null)
 
 const transactionId = ref<number | null>(null)
 
@@ -496,6 +563,8 @@ const handleCheckFeexpay = async () => {
   try {
     actionLoading.value = true
     const result = await transactionsStore.checkFeexpayStatus(transaction.value.id)
+    feexpayResult.value = result
+    showFeexpayModal.value = true
     notification.addNotification('Statut Feexpay vérifié avec succès', 'success')
     // Recharger les détails
     await loadTransactionDetails()
@@ -505,6 +574,25 @@ const handleCheckFeexpay = async () => {
   } finally {
     actionLoading.value = false
   }
+}
+
+const closeFeexpayModal = () => {
+  showFeexpayModal.value = false
+  feexpayResult.value = null
+}
+
+const getFeexpayStatusClass = (status: string): string => {
+  const statusLower = status?.toLowerCase() || ''
+  if (statusLower.includes('success') || statusLower.includes('successful')) {
+    return 'bg-green-100 text-green-800'
+  }
+  if (statusLower.includes('fail') || statusLower.includes('error')) {
+    return 'bg-red-100 text-red-800'
+  }
+  if (statusLower.includes('pending') || statusLower.includes('processing')) {
+    return 'bg-yellow-100 text-yellow-800'
+  }
+  return 'bg-gray-100 text-gray-800'
 }
 
 const handleValidateWithdrawal = async () => {

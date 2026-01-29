@@ -65,6 +65,11 @@ export const menuItems = [
     icon: 'fas fa-bell-plus'
   },
   {
+    path: '/reminder-messages',
+    name: 'Messages de Rappel',
+    icon: 'fas fa-clock'
+  },
+  {
     path: '/contact-box',
     name: 'Messages de Contact',
     icon: 'fas fa-envelope'

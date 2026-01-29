@@ -56,25 +56,52 @@
         </p>
       </div>
 
-      <!-- Option Email -->
-      <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <div class="flex items-center mb-4">
-          <input 
-            id="send-email" 
-            v-model="sendEmail" 
-            type="checkbox"
-            :disabled="notification.recipientType === 'all'"
-            class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-          <label for="send-email" class="ml-2 text-sm font-medium text-gray-700" :class="{ 'opacity-50': notification.recipientType === 'all' }">
-            <i class="fas fa-envelope mr-2"></i>
-            Envoyer également un email
-            <span v-if="notification.recipientType === 'all'" class="text-xs text-gray-500 ml-2">(disponible uniquement pour un utilisateur spécifique)</span>
-          </label>
+      <!-- Type de message -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Type de message <span class="text-red-500">*</span>
+        </label>
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center">
+            <input 
+              id="type-notification" 
+              v-model="messageType" 
+              type="radio" 
+              value="notification"
+              class="h-4 w-4 text-primary border-gray-300" 
+            />
+            <label for="type-notification" class="ml-2 text-sm text-gray-700">
+              <i class="fas fa-bell mr-2"></i>
+              Notification Push
+            </label>
+          </div>
+          <div class="flex items-center">
+            <input 
+              id="type-email" 
+              v-model="messageType" 
+              type="radio" 
+              value="email"
+              :disabled="notification.recipientType === 'all'"
+              class="h-4 w-4 text-primary border-gray-300" 
+              :class="{ 'opacity-50 cursor-not-allowed': notification.recipientType === 'all' }"
+            />
+            <label 
+              for="type-email" 
+              class="ml-2 text-sm text-gray-700"
+              :class="{ 'opacity-50 cursor-not-allowed': notification.recipientType === 'all' }"
+            >
+              <i class="fas fa-envelope mr-2"></i>
+              Email
+            </label>
+          </div>
         </div>
+        <p v-if="notification.recipientType === 'all' && messageType === 'email'" class="mt-2 text-xs text-red-600">
+          L'envoi d'email à tous les utilisateurs n'est pas supporté. Veuillez sélectionner un utilisateur spécifique.
+        </p>
+      </div>
 
-        <!-- Champs Email (affichés si l'option est activée) -->
-        <div v-if="sendEmail" class="space-y-4 mt-4">
+      <!-- Champs Email (affichés si le type est email) -->
+      <div v-if="messageType === 'email'" class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-4">
           <div>
             <label for="highlight-text" class="block text-sm font-medium text-gray-700 mb-2">
               Texte mis en évidence (optionnel)
@@ -130,7 +157,22 @@
               Si non renseigné, l'image de la notification sera utilisée
             </p>
           </div>
-        </div>
+
+          <div>
+            <label for="template-name" class="block text-sm font-medium text-gray-700 mb-2">
+              Nom du template (optionnel)
+            </label>
+            <input 
+              id="template-name" 
+              v-model="emailData.template_name" 
+              type="text"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm"
+              placeholder="Ex: marketing_notification.html"
+            />
+            <p class="mt-1 text-xs text-gray-500">
+              Par défaut: marketing_notification.html
+            </p>
+          </div>
       </div>
 
       <!-- Recipients Selection -->
@@ -279,13 +321,16 @@ const notification = ref({
   image_url: '' as string | undefined
 })
 
+// Message type (notification or email)
+const messageType = ref<'notification' | 'email'>('notification')
+
 // Email state
-const sendEmail = ref(false)
 const emailData = ref({
   highlight_text: '',
   button_text: '',
   button_url: '',
-  image_url: ''
+  image_url: '',
+  template_name: ''
 })
 
 // Search and pagination state
@@ -388,12 +433,13 @@ const clearForm = () => {
     selectedUsers: [],
     image_url: undefined
   }
-  sendEmail.value = false
+  messageType.value = 'notification'
   emailData.value = {
     highlight_text: '',
     button_text: '',
     button_url: '',
-    image_url: ''
+    image_url: '',
+    template_name: ''
   }
   searchQuery.value = ''
   showUserList.value = false
@@ -407,27 +453,42 @@ const sendNotification = async () => {
       return
     }
 
-    // Préparer les données pour l'API de notification
-    const data: any = {
-      title: notification.value.title,
-      content: notification.value.content
+    // Vérifier que si c'est un email, un utilisateur spécifique est sélectionné
+    if (messageType.value === 'email') {
+      if (notification.value.recipientType === 'all') {
+        notificationService.addNotification('L\'envoi d\'email à tous les utilisateurs n\'est pas supporté. Veuillez sélectionner un utilisateur spécifique.', 'error')
+        return
+      }
+      if (notification.value.recipientType === 'specific' && notification.value.selectedUsers.length === 0) {
+        notificationService.addNotification('Veuillez sélectionner au moins un utilisateur pour envoyer un email.', 'error')
+        return
+      }
     }
 
-    // Ajouter l'ID utilisateur si c'est une notification spécifique
-    if (notification.value.recipientType === 'specific' && notification.value.selectedUsers.length > 0) {
-      data.user_id = notification.value.selectedUsers[0]
-    }
+    // Si c'est une notification push
+    if (messageType.value === 'notification') {
+      // Préparer les données pour l'API de notification
+      const data: any = {
+        title: notification.value.title,
+        content: notification.value.content
+      }
 
-    // Ajouter l'image si elle existe
-    if (notification.value.image_url) {
-      data.image_url = notification.value.image_url
-    }
+      // Ajouter l'ID utilisateur si c'est une notification spécifique
+      if (notification.value.recipientType === 'specific' && notification.value.selectedUsers.length > 0) {
+        data.user_id = notification.value.selectedUsers[0]
+      }
 
-    // Envoyer la notification
-    await notificationStore.sendNotification(data)
-    
-    // Envoyer l'email si l'option est activée
-    if (sendEmail.value && notification.value.recipientType === 'specific' && notification.value.selectedUsers.length > 0) {
+      // Ajouter l'image si elle existe
+      if (notification.value.image_url) {
+        data.image_url = notification.value.image_url
+      }
+
+      // Envoyer la notification
+      await notificationStore.sendNotification(data)
+      notificationService.addNotification('Notification envoyée avec succès !', 'success')
+    } 
+    // Si c'est un email
+    else if (messageType.value === 'email') {
       // Envoyer un email à chaque utilisateur sélectionné
       const emailPromises = notification.value.selectedUsers.map(async (userId) => {
         const emailDataToSend: any = {
@@ -453,28 +514,22 @@ const sendNotification = async () => {
         } else if (notification.value.image_url) {
           emailDataToSend.image_url = notification.value.image_url
         }
+        if (emailData.value.template_name) {
+          emailDataToSend.template_name = emailData.value.template_name
+        }
 
         return notificationStore.sendEmail(emailDataToSend)
       })
 
-      try {
-        await Promise.all(emailPromises)
-        notificationService.addNotification('Email(s) envoyé(s) avec succès !', 'success')
-      } catch (emailError) {
-        console.error('Error sending email:', emailError)
-        notificationService.addNotification(
-          emailError instanceof Error ? emailError.message : 'Erreur lors de l\'envoi de l\'email',
-          'error'
-        )
-      }
+      await Promise.all(emailPromises)
+      notificationService.addNotification('Email(s) envoyé(s) avec succès !', 'success')
     }
     
-    notificationService.addNotification('Notification envoyée avec succès !', 'success')
     clearForm()
   } catch (error) {
-    console.error('Error sending notification:', error)
+    console.error('Error sending message:', error)
     notificationService.addNotification(
-      error instanceof Error ? error.message : 'Erreur lors de l\'envoi de la notification',
+      error instanceof Error ? error.message : 'Erreur lors de l\'envoi',
       'error'
     )
   }
