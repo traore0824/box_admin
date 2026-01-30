@@ -1,12 +1,12 @@
 <template>
-  <div class="bg-white border-r border-gray-200 w-[260px] hidden md:block relative h-screen flex flex-col overflow-hidden">
+  <div class="bg-white border-r border-gray-200 w-[260px] hidden md:block relative h-screen flex flex-col">
     <!-- Logo -->
     <div class="h-16 border-b border-gray-200 flex items-center justify-center flex-shrink-0">
       <h1 class="text-2xl font-bold text-primary">BOX Admin</h1>
     </div>
     
     <!-- Navigation -->
-    <nav class="mt-6 px-4 flex-1 overflow-y-auto overflow-x-hidden" style="min-height: 0;">
+    <nav class="flex-1 overflow-y-auto overflow-x-hidden px-4 py-6">
       <ul class="space-y-1">
         <li v-for="item in filteredMenuItems" :key="item.path">
           <router-link 
@@ -49,7 +49,7 @@
   <!-- Mobile Menu -->
   <div 
     v-if="isMobileMenuOpen" 
-    class="fixed inset-y-0 left-0 w-full bg-white z-40 md:hidden flex flex-col h-screen overflow-hidden"
+    class="fixed inset-y-0 left-0 w-full bg-white z-40 md:hidden flex flex-col h-screen"
   >
     <!-- Logo -->
     <div class="h-16 border-b border-gray-200 flex items-center justify-center flex-shrink-0">
@@ -57,7 +57,7 @@
     </div>
     
     <!-- Navigation -->
-    <nav class="mt-6 px-4 flex-1 overflow-y-auto overflow-x-hidden" style="min-height: 0;">
+    <nav class="flex-1 overflow-y-auto overflow-x-hidden px-4 py-6">
       <ul class="space-y-1">
         <li v-for="item in filteredMenuItems" :key="item.path">
           <router-link 
