@@ -146,7 +146,7 @@ export const useNotificationStore = defineStore('notification', () => {
     }
   }
 
-  async function sendEmail(data: {
+  async function sendMarketingEmail(data: {
     user_id: number
     title: string
     subject?: string
@@ -171,13 +171,13 @@ export const useNotificationStore = defineStore('notification', () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || errorData.message || 'Erreur lors de l\'envoi de l\'email')
+        throw new Error(errorData.error || errorData.message || 'Erreur lors de l\'envoi de l\'email marketing')
       }
 
       const result = await response.json()
       return result
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Erreur lors de l\'envoi de l\'email'
+      error.value = err instanceof Error ? err.message : 'Erreur lors de l\'envoi de l\'email marketing'
       throw err
     } finally {
       isLoading.value = false
@@ -192,6 +192,7 @@ export const useNotificationStore = defineStore('notification', () => {
     itemsPerPage,
     sendNotification,
     sendEmail,
+    sendMarketingEmail,
     fetchNotifications
   }
 })
