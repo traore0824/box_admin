@@ -4,17 +4,17 @@
       <div>Chargement...</div>
     </div>
     <div v-else>
-      <div v-if="authStore.isAuthenticated" class="flex h-full">
+      <div v-if="authStore.isAuthenticated" class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <Sidebar />
         
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
           <!-- Top Navbar -->
           <Navbar />
           
           <!-- Page Content -->
-          <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
+          <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6" style="height: 0;">
             <router-view></router-view>
           </main>
           <ToastContainer />
