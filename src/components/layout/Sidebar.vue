@@ -1,12 +1,12 @@
 <template>
-  <div class="bg-white border-r border-gray-200 w-[260px] hidden md:block relative h-screen flex flex-col">
+  <div class="bg-white border-r border-gray-200 w-[260px] hidden md:block relative h-screen">
     <!-- Logo -->
-    <div class="h-16 border-b border-gray-200 flex items-center justify-center flex-shrink-0">
+    <div class="h-16 border-b border-gray-200 flex items-center justify-center z-10 bg-white">
       <h1 class="text-2xl font-bold text-primary">BOX Admin</h1>
     </div>
     
     <!-- Navigation -->
-    <nav class="flex-1 overflow-y-auto overflow-x-hidden px-4 py-6">
+    <nav class="absolute top-16 bottom-32 left-0 right-0 overflow-y-auto overflow-x-hidden px-4 py-6">
       <ul class="space-y-1">
         <li v-for="item in filteredMenuItems" :key="item.path">
           <router-link 
@@ -22,7 +22,7 @@
     </nav>
     
     <!-- User Section -->
-    <div class="border-t border-gray-200 py-4 px-6 bg-white flex-shrink-0">
+    <div class="absolute bottom-0 left-0 right-0 border-t border-gray-200 py-4 px-6 bg-white z-10">
       <div class="flex items-center space-x-3 mb-4">
         <AvatarIcon class="w-10 h-10 flex-shrink-0" />
         <div class="min-w-0 flex-1">
@@ -52,12 +52,12 @@
     class="fixed inset-y-0 left-0 w-full bg-white z-40 md:hidden flex flex-col h-screen"
   >
     <!-- Logo -->
-    <div class="h-16 border-b border-gray-200 flex items-center justify-center flex-shrink-0">
+    <div class="h-16 border-b border-gray-200 flex items-center justify-center flex-shrink-0 z-10">
       <h1 class="text-2xl font-bold text-primary">BOX Admin</h1>
     </div>
     
     <!-- Navigation -->
-    <nav class="flex-1 overflow-y-auto overflow-x-hidden px-4 py-6">
+    <nav class="overflow-y-auto overflow-x-hidden px-4 py-6" style="max-height: calc(100vh - 64px - 120px); min-height: 0;">
       <ul class="space-y-1">
         <li v-for="item in filteredMenuItems" :key="item.path">
           <router-link 
