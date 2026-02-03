@@ -192,13 +192,7 @@
                         <!-- Separator -->
                         <div class="border-t border-gray-100 my-1"></div>
 
-                        <!-- Action Reset PIN -->
-                        <button @click="handleResetPin(user)" :disabled="actionLoading[user.id]"
-                          class="group flex items-center w-full px-4 py-2 text-sm text-left hover:bg-gray-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed text-purple-700 hover:text-purple-800"
-                          role="menuitem">
-                          <i class="fas fa-key mr-3 w-4 text-center"></i>
-                          Réinitialiser PIN
-                        </button>
+
 
                         <!-- Action Envoyer OTP PIN -->
                         <button @click="handleSendPinVerificationOtp(user)" :disabled="actionLoading[user.id]"
@@ -788,27 +782,7 @@ const onModalCancel = () => {
   closeAllDropdowns() // Ensure dropdown is closed if modal is cancelled from overlay or escape
 }
 
-// Reset PIN
-async function handleResetPin(user: User) {
-  const userName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'cet utilisateur'
-  modalTitle.value = 'Réinitialiser le PIN'
-  modalMessage.value = `Êtes-vous sûr de vouloir réinitialiser le PIN de ${userName} ?`
-  pendingAction.value = async () => {
-    actionLoading[user.id] = true
-    try {
-      await usersStore.resetUserPin(user.id)
-      const notification = useNotification()
-      notification.addNotification('PIN réinitialisé avec succès', 'success')
-    } catch (error: any) {
-      console.error('Erreur lors de la réinitialisation du PIN:', error)
-      const notification = useNotification()
-      notification.addNotification(`Erreur: ${error.message || 'Impossible de réinitialiser le PIN.'}`, 'error')
-    } finally {
-      actionLoading[user.id] = false
-    }
-  }
-  isModalOpen.value = true
-}
+
 
 // Send PIN Verification OTP
 async function handleSendPinVerificationOtp(user: User) {

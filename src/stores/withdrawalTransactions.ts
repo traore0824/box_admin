@@ -40,7 +40,7 @@ export const useWithdrawalTransactionsStore = defineStore('withdrawalTransaction
       isLoading.value = true
       error.value = null
 
-      const response = await fetchWithAuth('/box/all-transaction', {
+      const response = await fetchWithAuth('/box/withdrawal-transaction-list', {
         queryParams: buildQueryParams(page)
       })
 
