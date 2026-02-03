@@ -337,8 +337,11 @@ const loadCaisse = async () => {
     isLoading.value = true
     error.value = null
 
-    // Récupérer toutes les caisses et trouver celle avec l'ID correspondant
-    const response = await fetchWithAuth('/box/caisse')
+    // Récupérer la caisse avec l'ID correspondant
+    // On passe l'ID en paramètre de recherche pour aider le backend à filtrer si possible
+    const response = await fetchWithAuth('/box/caisse', {
+      queryParams: { q: caisseId }
+    })
     
     if (!response.ok) {
       throw new Error('Erreur lors de la récupération de la caisse')

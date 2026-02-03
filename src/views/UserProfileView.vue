@@ -795,24 +795,16 @@ const loadUserInfo = async () => {
       throw new Error('ID utilisateur invalide')
     }
 
-    // Charger les informations de base de l'utilisateur depuis la liste
-    // On va utiliser l'API /auth/listUser/ avec un filtre par ID
-    const response = await fetchWithAuth('/auth/listUser/', {
-      queryParams: { page: '1', page_size: '100' }
+    // Charger les informations de l'utilisateur directement via l'API /auth/me/
+    const response = await fetchWithAuth('/auth/me/', {
+      queryParams: { user_id: userId.value.toString() }
     })
 
     if (!response.ok) {
-      throw new Error('Erreur lors de la récupération des informations utilisateur')
-    }
-
-    const data = await response.json()
-    const foundUser = data.results?.find((u: any) => u.id === userId.value)
-
-    if (!foundUser) {
       throw new Error(`Utilisateur avec l'ID ${userId.value} non trouvé`)
     }
 
-    user.value = foundUser
+    user.value = await response.json()
 
     // Charger toutes les données en parallèle
     await Promise.all([
