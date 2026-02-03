@@ -337,28 +337,17 @@ const loadCaisse = async () => {
     isLoading.value = true
     error.value = null
 
-    // Récupérer la caisse avec l'ID correspondant
-    // On passe l'ID en paramètre de recherche pour aider le backend à filtrer si possible
-    const response = await fetchWithAuth('/box/caisse', {
-      queryParams: { q: caisseId }
-    })
+    // Récupérer la caisse via son point de terminaison de détail direct
+    const response = await fetchWithAuth(`/box/caisse/${caisseId}`)
     
     if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error(`Caisse avec l'ID ${caisseId} non trouvée`)
+      }
       throw new Error('Erreur lors de la récupération de la caisse')
     }
 
-    const data = await response.json()
-    // Chercher la caisse avec l'ID correspondant dans les résultats
-    if (data.results && Array.isArray(data.results)) {
-      const foundCaisse = data.results.find((c: Caisse) => c.id === parseInt(caisseId))
-      if (foundCaisse) {
-        caisse.value = foundCaisse
-      } else {
-        throw new Error(`Caisse avec l'ID ${caisseId} non trouvée`)
-      }
-    } else {
-      throw new Error('Caisse non trouvée')
-    }
+    caisse.value = await response.json()
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
     notification.addNotification(error.value, 'error')
