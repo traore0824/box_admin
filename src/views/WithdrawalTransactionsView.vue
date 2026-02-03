@@ -109,7 +109,7 @@
                   </button>
 
                   <!-- Bouton Vérifier Feexpay (pour toutes les transactions) -->
-                  <button
+                  <!-- <button
                     @click="openFeexpayStatusModal(transaction)"
                     :disabled="withdrawalTransactionsStore.isLoading || checkingFeexpayId === transaction.id"
                     class="btn btn-sm btn-outline text-xs"
@@ -118,7 +118,7 @@
                     <i v-if="checkingFeexpayId === transaction.id" class="fas fa-spinner fa-spin mr-1"></i>
                     <i v-else class="fas fa-search mr-1"></i>
                     <span class="hidden sm:inline">Vérifier Feexpay</span>
-                  </button>
+                  </button> -->
 
                   <!-- Bouton Vérifier la transaction (pour withdrawal/cancellation en pending) -->
                   <button
@@ -350,7 +350,7 @@
     </Teleport>
 
     <!-- Modal de vérification Feexpay -->
-    <Teleport to="body">
+    <!-- <Teleport to="body">
       <div v-if="showFeexpayModal" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeFeexpayModal">
         <div class="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
           <div class="fixed inset-0 transition-opacity" @click="closeFeexpayModal">
@@ -411,7 +411,7 @@
           </div>
         </div>
       </div>
-    </Teleport>
+    </Teleport> -->
   </div>
 </template>
 
@@ -434,10 +434,10 @@ const selectedTransaction = ref<Transaction | null>(null)
 const approvingTransactionId = ref<number | null>(null)
 
 // État du modal de vérification Feexpay
-const showFeexpayModal = ref(false)
+/* const showFeexpayModal = ref(false)
 const checkingFeexpayId = ref<number | null>(null)
 const feexpayStatusData = ref<any>(null)
-const feexpayError = ref<string | null>(null)
+const feexpayError = ref<string | null>(null) */
 
 onMounted(() => {
   withdrawalTransactionsStore.fetchTransactions()
@@ -518,7 +518,7 @@ async function confirmApprove() {
 }
 
 // Ouvrir le modal de vérification Feexpay
-async function openFeexpayStatusModal(transaction: Transaction) {
+/* async function openFeexpayStatusModal(transaction: Transaction) {
   showFeexpayModal.value = true
   checkingFeexpayId.value = transaction.id
   feexpayStatusData.value = null
@@ -541,7 +541,7 @@ function closeFeexpayModal() {
   checkingFeexpayId.value = null
   feexpayStatusData.value = null
   feexpayError.value = null
-}
+} */
 
 // Fermer le modal de validation
 const closeValidationModal = () => {

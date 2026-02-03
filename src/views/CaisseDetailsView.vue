@@ -351,35 +351,7 @@ const loadCaisse = async () => {
       if (foundCaisse) {
         caisse.value = foundCaisse
       } else {
-        // Si pas trouvée, essayer de charger plus de pages
-        let found = false
-        let nextUrl: string | null = data.next
-        while (nextUrl && !found) {
-          try {
-            const nextResponse = await fetch(nextUrl, {
-              headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              }
-            })
-            if (nextResponse.ok) {
-              const nextData = await nextResponse.json()
-              const nextFound = nextData.results.find((c: Caisse) => c.id === parseInt(caisseId))
-              if (nextFound) {
-                caisse.value = nextFound
-                found = true
-              } else {
-                nextUrl = nextData.next
-              }
-            } else {
-              break
-            }
-          } catch (err) {
-            break
-          }
-        }
-        if (!found) {
-          throw new Error('Caisse non trouvée')
-        }
+        throw new Error(`Caisse avec l'ID ${caisseId} non trouvée`)
       }
     } else {
       throw new Error('Caisse non trouvée')

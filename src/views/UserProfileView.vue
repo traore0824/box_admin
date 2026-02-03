@@ -806,10 +806,10 @@ const loadUserInfo = async () => {
     }
 
     const data = await response.json()
-    const foundUser = data.results?.find((u: any) => u.id === userId.value) || data.results?.[0]
+    const foundUser = data.results?.find((u: any) => u.id === userId.value)
 
     if (!foundUser) {
-      throw new Error('Utilisateur non trouvé')
+      throw new Error(`Utilisateur avec l'ID ${userId.value} non trouvé`)
     }
 
     user.value = foundUser
