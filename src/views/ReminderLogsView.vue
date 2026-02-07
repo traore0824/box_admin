@@ -79,6 +79,7 @@
               <td class="px-4 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900">{{ log.user_email }}</div>
                 <div class="text-sm text-gray-500">ID: {{ log.user }}</div>
+
               </td>
               <td class="px-4 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">{{ log.caisse_name }}</div>
@@ -239,6 +240,7 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
 import { useReminderLogsStore, type ReminderLog } from '../stores/reminderLogs'
+
 import { debounce } from 'lodash'
 
 const reminderLogsStore = useReminderLogsStore()
@@ -280,10 +282,14 @@ onMounted(() => {
 const loadLogs = async () => {
   try {
     await reminderLogsStore.fetchLogs(reminderLogsStore.currentPage)
+    
+
   } catch (error) {
     // L'erreur est déjà gérée dans le store
   }
 }
+
+
 
 const openEditModal = (log: ReminderLog) => {
   editingLog.value = log

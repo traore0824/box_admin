@@ -16,6 +16,7 @@ interface StatisticsState {
     custom_caisse: number
     all_month_caisse: number
     all_days_caisse: number
+    avg_caisse_duration_days: number
     total_transactions: number
     deposit_transactions: number
     withdrawal_transactions: number
@@ -44,6 +45,7 @@ export const useStatisticsStore = defineStore('statistics', () => {
     custom_caisse: 0,
     all_month_caisse: 0,
     all_days_caisse: 0,
+    avg_caisse_duration_days: 0,
     total_transactions: 0,
     deposit_transactions: 0,
     withdrawal_transactions: 0,

@@ -97,6 +97,10 @@
           <span class="stat-label">Caisse du jour</span>
           <span class="stat-value">{{ stats.all_days_caisse }}</span>
         </div>
+        <div class="stat-item">
+          <span class="stat-label">Durée moyenne caisse (jours)</span>
+          <span class="stat-value">{{ stats.avg_caisse_duration_days || 0 }}</span>
+        </div>
       </div>
     </div>
 
