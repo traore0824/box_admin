@@ -98,10 +98,6 @@
           <span class="stat-value">{{ stats.all_days_caisse }}</span>
         </div>
         <div class="stat-item">
-          <span class="stat-label">Duree moyenne des caisse</span>
-          <span class="stat-value">{{ stats.avg_caisse_duration_days || 0 }}</span>
-        </div>
-        <div class="stat-item">
           <span class="stat-label">Duree moyenne caisse en cours (mois)</span>
           <span class="stat-value">{{ stats.avg_ongoing_caisse_duration_months || 0 }}</span>
         </div>
