@@ -8,22 +8,12 @@ interface NetworkStats {
 }
 
 interface FeexpayBalance {
-  balance: {
-    MTN: number
-    MOOV: number
-    CELTII: number
-  }
   total_balance: number
 }
 
 interface ReconciliationStats {
-  feexpay_balance: number
-  caisse_active_amount: number
-  commission_available: number
   baseline_deficit: number
   current_deficit: number
-  status: 'surplus' | 'deficit'
-  updated_at: string
 }
 
 interface DashboardStats {
@@ -150,22 +140,12 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const period = ref<'all' | 'todays' | 'this_week' | 'this_month'>('all')
 
   const feexpayStats = ref<FeexpayBalance>({
-    balance: {
-      MTN: 0,
-      MOOV: 0,
-      CELTII: 0
-    },
     total_balance: 0
   })
 
   const reconciliationStats = ref<ReconciliationStats>({
-    feexpay_balance: 0,
-    caisse_active_amount: 0,
-    commission_available: 0,
     baseline_deficit: 0,
-    current_deficit: 0,
-    status: 'deficit', // Default to deficit or handle as null
-    updated_at: ''
+    current_deficit: 0
   })
 
   async function fetchStats(params: string | Record<string, string> = 'all') {
@@ -253,9 +233,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
       }
 
       const data = await response.json()
-      if (data.error === false && data.data) {
-        feexpayStats.value = data.data
-      }
+      feexpayStats.value = data
     } catch (err) {
       console.error('Erreur API Feexpay:', err)
     }
