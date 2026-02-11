@@ -7,6 +7,25 @@ interface NetworkStats {
   total_amount: number
 }
 
+interface FeexpayBalance {
+  balance: {
+    MTN: number
+    MOOV: number
+    CELTII: number
+  }
+  total_balance: number
+}
+
+interface ReconciliationStats {
+  feexpay_balance: number
+  caisse_active_amount: number
+  commission_available: number
+  baseline_deficit: number
+  current_deficit: number
+  status: 'surplus' | 'deficit'
+  updated_at: string
+}
+
 interface DashboardStats {
   all_users: number
   agent_users: number
@@ -130,13 +149,32 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const error = ref<string | null>(null)
   const period = ref<'all' | 'todays' | 'this_week' | 'this_month'>('all')
 
+  const feexpayStats = ref<FeexpayBalance>({
+    balance: {
+      MTN: 0,
+      MOOV: 0,
+      CELTII: 0
+    },
+    total_balance: 0
+  })
+
+  const reconciliationStats = ref<ReconciliationStats>({
+    feexpay_balance: 0,
+    caisse_active_amount: 0,
+    commission_available: 0,
+    baseline_deficit: 0,
+    current_deficit: 0,
+    status: 'deficit', // Default to deficit or handle as null
+    updated_at: ''
+  })
+
   async function fetchStats(params: string | Record<string, string> = 'all') {
     try {
       loading.value = true
       error.value = null
-      
+
       let queryParams: Record<string, string | number | boolean>
-      
+
       // Si c'est une string, on utilise le format ancien avec 'q'
       if (typeof params === 'string') {
         queryParams = { q: params }
@@ -144,16 +182,16 @@ export const useDashboardStore = defineStore('dashboard', () => {
         // Si c'est un objet, on l'utilise directement
         queryParams = params
       }
-      
+
       const response = await fetchWithAuth('/box/statistic', {
         method: 'GET',
         queryParams
       })
-      
+
       if (!response.ok) {
         throw new Error('Erreur lors du chargement des statistiques')
       }
-      
+
       const data = await response.json()
       if (!data.evolution) {
         data.evolution = {
@@ -204,6 +242,42 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   }
 
+  async function fetchFeexpayStats() {
+    try {
+      const response = await fetchWithAuth('/box/feexpay/solde', {
+        method: 'GET'
+      })
+
+      if (!response.ok) {
+        throw new Error('Erreur lors du chargement du solde Feexpay')
+      }
+
+      const data = await response.json()
+      if (data.error === false && data.data) {
+        feexpayStats.value = data.data
+      }
+    } catch (err) {
+      console.error('Erreur API Feexpay:', err)
+    }
+  }
+
+  async function fetchReconciliationStats() {
+    try {
+      const response = await fetchWithAuth('/box/reconciliation/', {
+        method: 'GET'
+      })
+
+      if (!response.ok) {
+        throw new Error('Erreur lors du chargement de la réconciliation')
+      }
+
+      const data = await response.json()
+      reconciliationStats.value = data
+    } catch (err) {
+      console.error('Erreur API Réconciliation:', err)
+    }
+  }
+
   function setPeriod(newPeriod: 'all' | 'todays' | 'this_week' | 'this_month') {
     period.value = newPeriod
     fetchStats(newPeriod)
@@ -213,24 +287,24 @@ export const useDashboardStore = defineStore('dashboard', () => {
     if (!stats.value.all_users) return 0
     return Math.round((stats.value.active_users / stats.value.all_users) * 100)
   })
-// Ajoutez ces computed properties dans votre store (gardées pour usage futur)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const userStats = computed(() => ({
-  total: stats.value.all_users,
-  active: stats.value.active_users,
-  agents: stats.value.agent_users,
-  inactive: stats.value.inactive_users,
-  growth: stats.value.evolution?.all_users || 0
-}))
+  // Ajoutez ces computed properties dans votre store (gardées pour usage futur)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const userStats = computed(() => ({
+    total: stats.value.all_users,
+    active: stats.value.active_users,
+    agents: stats.value.agent_users,
+    inactive: stats.value.inactive_users,
+    growth: stats.value.evolution?.all_users || 0
+  }))
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const transactionStats = computed(() => ({
-  total: stats.value.total_transactions,
-  deposits: stats.value.deposit_transactions,
-  withdrawals: stats.value.withdrawal_transactions,
-  activeAmount: stats.value.caisse_active_amount,
-  depositPercentage: getPercentage(stats.value.deposit_transactions, stats.value.total_transactions)
-}))
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const transactionStats = computed(() => ({
+    total: stats.value.total_transactions,
+    deposits: stats.value.deposit_transactions,
+    withdrawals: stats.value.withdrawal_transactions,
+    activeAmount: stats.value.caisse_active_amount,
+    depositPercentage: getPercentage(stats.value.deposit_transactions, stats.value.total_transactions)
+  }))
   const caisseCompletionRate = computed(() => {
     if (!stats.value.total_caisses) return 0
     return Math.round((stats.value.caisse_done / stats.value.total_caisses) * 100)
@@ -299,6 +373,8 @@ const transactionStats = computed(() => ({
 
   return {
     stats: readonly(stats),
+    feexpayStats: readonly(feexpayStats),
+    reconciliationStats: readonly(reconciliationStats),
     loading: readonly(loading),
     error: readonly(error),
     period: readonly(period),
@@ -308,6 +384,8 @@ const transactionStats = computed(() => ({
     transactionSuccessRate,
 
     fetchStats,
+    fetchFeexpayStats,
+    fetchReconciliationStats,
     setPeriod,
     resetStats
   }

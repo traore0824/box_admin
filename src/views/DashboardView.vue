@@ -52,6 +52,81 @@
         />
       </section>
 
+      <!-- Solde Feexpay -->
+      <section class="feexpay-balance" v-if="feexpayStats">
+        <DashboardSection title="Solde Feexpay">
+          <MetricGrid>
+            <MetricItem
+              :value="formatCurrency(feexpayStats.balance.MTN)"
+              label="MTN"
+              color="warning"
+              icon="fas fa-mobile-alt"
+            />
+            <MetricItem
+              :value="formatCurrency(feexpayStats.balance.MOOV)"
+              label="MOOV"
+              color="info"
+              icon="fas fa-mobile-alt"
+            />
+            <MetricItem
+              :value="formatCurrency(feexpayStats.balance.CELTII)"
+              label="CELTII"
+              color="success"
+              icon="fas fa-mobile-alt"
+            />
+            <MetricItem
+              :value="formatCurrency(feexpayStats.total_balance)"
+              label="Total"
+              color="primary"
+              icon="fas fa-wallet"
+              border
+            />
+          </MetricGrid>
+        </DashboardSection>
+      </section>
+
+      <!-- Réconciliation Financière -->
+      <section class="reconciliation-stats" v-if="reconciliationStats">
+        <DashboardSection title="Réconciliation Financière">
+          <MetricGrid>
+            <MetricItem
+              :value="formatCurrency(reconciliationStats.feexpay_balance)"
+              label="Solde Feexpay"
+              color="info"
+              icon="fas fa-university"
+            />
+            <MetricItem
+              :value="formatCurrency(reconciliationStats.caisse_active_amount)"
+              label="Caisses Actives"
+              color="warning"
+              icon="fas fa-piggy-bank"
+            />
+            <MetricItem
+              :value="formatCurrency(reconciliationStats.commission_available)"
+              label="Commissions Disponibles"
+              color="primary"
+              icon="fas fa-hand-holding-usd"
+            />
+            <MetricItem
+              :value="formatCurrency(reconciliationStats.baseline_deficit)"
+              label="Déficit de Référence"
+              color="secondary"
+              icon="fas fa-info-circle"
+            />
+            <MetricItem
+              :value="formatCurrency(reconciliationStats.current_deficit)"
+              :label="reconciliationStats.status === 'surplus' ? 'Surplus Actuel' : 'Déficit Actuel'"
+              :color="reconciliationStats.status === 'surplus' ? 'success' : 'danger'"
+              :icon="reconciliationStats.status === 'surplus' ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"
+              border
+            />
+          </MetricGrid>
+          <div class="last-update" v-if="reconciliationStats.updated_at">
+            Dernière mise à jour : {{ new Date(reconciliationStats.updated_at).toLocaleString() }}
+          </div>
+        </DashboardSection>
+      </section>
+
       <!-- Statistiques Utilisateurs -->
       <section class="stats-grid">
         <DashboardSection title="Statistiques des Utilisateurs">
@@ -228,8 +303,8 @@ const REFRESH_INTERVAL = 5 * 60 * 1000 // 5 minutes
 
 // Store
 const dashboardStore = useDashboardStore()
-const { fetchStats } = dashboardStore
-const { stats } = storeToRefs(dashboardStore)
+const { fetchStats, fetchFeexpayStats, fetchReconciliationStats } = dashboardStore
+const { stats, feexpayStats, reconciliationStats } = storeToRefs(dashboardStore)
 
 // État local
 const loading = ref(false)
@@ -335,6 +410,8 @@ const loadData = async () => {
     }
 
     await fetchStats(params)
+    await fetchFeexpayStats()
+    await fetchReconciliationStats()
   } catch (error) {
     console.error('Erreur lors du chargement des données:', error)
   } finally {
