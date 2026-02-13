@@ -23,6 +23,7 @@ import TransactionDetailsView from '../views/TransactionDetailsView.vue'
 import ReminderMessagesView from '../views/ReminderMessagesView.vue'
 import ReminderLogsView from '../views/ReminderLogsView.vue'
 import CaisseDetailsView from '../views/CaisseDetailsView.vue'
+import PublicationsView from '../views/PublicationsView.vue'
 
 const routes = [
   {
@@ -148,7 +149,12 @@ const routes = [
   {
     path: '/reminder-logs',
     name: 'reminder-logs',
-    component: ReminderLogsView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/publications',
+    name: 'publications',
+    component: PublicationsView,
     meta: { requiresAuth: true }
   }
 ]
@@ -161,7 +167,7 @@ const router = createRouter({
 router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore()
   const storedAccessToken = localStorage.getItem('access_token')
-  
+
   // Debug logs
   if (import.meta.env.DEV) {
     console.log('Router guard:', {
@@ -172,14 +178,14 @@ router.beforeEach(async (to, _from, next) => {
       isAuthenticated: authStore.isAuthenticated
     })
   }
-  
+
   // Vérifier l'authentification
   if (to.meta.requiresAuth && !storedAccessToken) {
     if (import.meta.env.DEV) console.log('No token, redirecting to login')
     next({ name: 'login' })
     return
   }
-  
+
   // Si on a un token mais pas d'utilisateur chargé, essayer de charger les infos utilisateur
   if (to.meta.requiresAuth && storedAccessToken && !authStore.user) {
     if (import.meta.env.DEV) console.log('Token exists but no user, loading user details...')
@@ -197,11 +203,11 @@ router.beforeEach(async (to, _from, next) => {
       return
     }
   }
-  
+
   // Si connecté, vérifier les permissions selon le rôle
   if (to.meta.requiresAuth && storedAccessToken && authStore.user) {
     const isStaff = authStore.user.is_staff === true
-    
+
     // Bloquer l'accès au dashboard pour les non-staff (CustomerService)
     // Rediriger automatiquement vers /users
     if (to.path === '/' && !isStaff) {
@@ -209,11 +215,11 @@ router.beforeEach(async (to, _from, next) => {
       next({ name: 'users', replace: true })
       return
     }
-    
+
     // Note: Les permissions backend gèrent les accès aux autres pages
     // Si un CustomerService essaie d'accéder à une page non autorisée, le backend retournera une erreur
   }
-  
+
   // Redirection après login selon le rôle
   if (to.name === 'login' && authStore.isAuthenticated && authStore.user) {
     const isStaff = authStore.user.is_staff === true
@@ -222,7 +228,7 @@ router.beforeEach(async (to, _from, next) => {
     next({ name: isStaff ? 'dashboard' : 'users' })
     return
   }
-  
+
   if (import.meta.env.DEV) console.log('Navigation allowed')
   next()
 })

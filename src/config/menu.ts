@@ -60,6 +60,11 @@ export const menuItems = [
     icon: 'fas fa-bell'
   },
   {
+    path: '/publications',
+    name: 'Publications Admin',
+    icon: 'fas fa-bullhorn'
+  },
+  {
     path: '/send-notification',
     name: 'Envoyer Notification',
     icon: 'fas fa-bell-plus'

@@ -101,6 +101,22 @@
           <span class="stat-label">Duree moyenne caisse en cours (mois)</span>
           <span class="stat-value">{{ stats.avg_ongoing_caisse_duration_months || 0 }}</span>
         </div>
+        <div class="stat-item">
+          <span class="stat-label">Caisse ~3 mois (85-95 jours)</span>
+          <span class="stat-value">{{ stats.caisse_3_months || 0 }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Caisse ~6 mois (175-185 jours)</span>
+          <span class="stat-value">{{ stats.caisse_6_months || 0 }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Caisse ~1 an (360-375 jours)</span>
+          <span class="stat-value">{{ stats.caisse_1_year || 0 }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Caisse ~2 ans (720-740 jours)</span>
+          <span class="stat-value">{{ stats.caisse_2_years || 0 }}</span>
+        </div>
       </div>
     </div>
 

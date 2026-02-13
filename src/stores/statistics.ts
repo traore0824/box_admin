@@ -18,6 +18,10 @@ interface StatisticsState {
     all_days_caisse: number
     avg_caisse_duration_days: number
     avg_ongoing_caisse_duration_months: number
+    caisse_3_months: number
+    caisse_6_months: number
+    caisse_1_year: number
+    caisse_2_years: number
     total_transactions: number
     deposit_transactions: number
     withdrawal_transactions: number
@@ -48,6 +52,10 @@ export const useStatisticsStore = defineStore('statistics', () => {
     all_days_caisse: 0,
     avg_caisse_duration_days: 0,
     avg_ongoing_caisse_duration_months: 0,
+    caisse_3_months: 0,
+    caisse_6_months: 0,
+    caisse_1_year: 0,
+    caisse_2_years: 0,
     total_transactions: 0,
     deposit_transactions: 0,
     withdrawal_transactions: 0,

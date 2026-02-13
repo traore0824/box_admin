@@ -7,6 +7,7 @@ export interface ReminderLog {
   id: number
   user: number
   user_email: string
+  user_phone: string
   caisse: number
   caisse_name: string
   channel: 'push' | 'email' | 'call'
@@ -99,7 +100,6 @@ export const useReminderLogsStore = defineStore('reminderLogs', () => {
   async function updateLog(
     id: number,
     data: {
-      sent_at?: string
       success?: boolean
     },
     usePatch = true
@@ -108,7 +108,7 @@ export const useReminderLogsStore = defineStore('reminderLogs', () => {
       isLoading.value = true
       error.value = null
 
-      const response = await fetchWithAuth(`/box/reminder/logs/${id}`, {
+      const response = await fetchWithAuth(`/box/reminder/logs/${id}/`, {
         method: usePatch ? 'PATCH' : 'PUT',
         headers: {
           'Content-Type': 'application/json'

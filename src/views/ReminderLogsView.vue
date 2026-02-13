@@ -78,8 +78,8 @@
             <tr v-for="log in reminderLogsStore.logs" :key="log.id" class="hover:bg-gray-50">
               <td class="px-4 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900">{{ log.user_email }}</div>
+                <div class="text-sm text-gray-500" v-if="log.user_phone">{{ log.user_phone }}</div>
                 <div class="text-sm text-gray-500">ID: {{ log.user }}</div>
-
               </td>
               <td class="px-4 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">{{ log.caisse_name }}</div>
@@ -188,18 +188,7 @@
               </div>
 
               <form @submit.prevent="handleSubmit" class="space-y-4">
-                <div>
-                  <label for="sent_at" class="block text-sm font-medium text-gray-700 mb-1">
-                    Date et heure d'envoi
-                  </label>
-                  <input
-                    id="sent_at"
-                    v-model="formData.sent_at"
-                    type="datetime-local"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                  />
-                  <p class="mt-1 text-xs text-gray-500">Laissez vide si non envoyé</p>
-                </div>
+
 
                 <div>
                   <label class="flex items-center">
@@ -252,7 +241,6 @@ const dateFilter = ref<string | null>(null)
 const successFilter = ref<boolean | null>(null)
 
 const formData = ref({
-  sent_at: '',
   success: true
 })
 
@@ -294,7 +282,6 @@ const loadLogs = async () => {
 const openEditModal = (log: ReminderLog) => {
   editingLog.value = log
   formData.value = {
-    sent_at: log.sent_at ? formatDateTimeLocal(log.sent_at) : '',
     success: log.success
   }
   showModal.value = true
@@ -304,7 +291,6 @@ const closeModal = () => {
   showModal.value = false
   editingLog.value = null
   formData.value = {
-    sent_at: '',
     success: true
   }
 }
@@ -315,13 +301,6 @@ const handleSubmit = async () => {
   try {
     const updateData: any = {
       success: formData.value.success
-    }
-
-    if (formData.value.sent_at) {
-      // Convertir le datetime-local en format ISO
-      updateData.sent_at = new Date(formData.value.sent_at).toISOString()
-    } else {
-      updateData.sent_at = null
     }
 
     await reminderLogsStore.updateLog(editingLog.value.id, updateData)
