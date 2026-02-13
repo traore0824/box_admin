@@ -149,6 +149,7 @@ const routes = [
   {
     path: '/reminder-logs',
     name: 'reminder-logs',
+    component: ReminderLogsView,
     meta: { requiresAuth: true }
   },
   {
