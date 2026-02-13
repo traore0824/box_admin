@@ -126,6 +126,16 @@
           </MetricGrid>
 
           <div class="frequency-section">
+            <h4 class="section-title">Répartition par Durée (Estimée)</h4>
+            <MetricGrid>
+              <MetricItem :value="stats.caisse_3_months || 0" label="~3 mois" color="primary" />
+              <MetricItem :value="stats.caisse_6_months || 0" label="~6 mois" color="success" />
+              <MetricItem :value="stats.caisse_1_year || 0" label="~1 an" color="info" />
+              <MetricItem :value="stats.caisse_2_years || 0" label="~2 ans" color="warning" />
+            </MetricGrid>
+          </div>
+
+          <div class="frequency-section">
             <h4 class="section-title">Répartition par Fréquence</h4>
             <MetricGrid>
               <MetricItem :value="stats.all_days_caisse" label="Quotidienne" color="primary" />

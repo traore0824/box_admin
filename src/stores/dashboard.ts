@@ -80,6 +80,11 @@ interface DashboardStats {
   kyc_not_submitted?: number
   // Nouvelles statistiques Sécurité
   blocked_accounts?: number
+  // Nouvelles statistiques Durée Caisses
+  caisse_3_months?: number
+  caisse_6_months?: number
+  caisse_1_year?: number
+  caisse_2_years?: number
 }
 
 export const useDashboardStore = defineStore('dashboard', () => {
@@ -136,7 +141,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
     kyc_pending: 0,
     kyc_rejected: 0,
     kyc_not_submitted: 0,
-    blocked_accounts: 0
+    blocked_accounts: 0,
+    caisse_3_months: 0,
+    caisse_6_months: 0,
+    caisse_1_year: 0,
+    caisse_2_years: 0
   })
 
   const loading = ref(false)
@@ -216,7 +225,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
         kyc_pending: data.kyc_pending ?? 0,
         kyc_rejected: data.kyc_rejected ?? 0,
         kyc_not_submitted: data.kyc_not_submitted ?? 0,
-        blocked_accounts: data.blocked_accounts ?? 0
+        blocked_accounts: data.blocked_accounts ?? 0,
+        caisse_3_months: data.caisse_3_months ?? 0,
+        caisse_6_months: data.caisse_6_months ?? 0,
+        caisse_1_year: data.caisse_1_year ?? 0,
+        caisse_2_years: data.caisse_2_years ?? 0
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erreur lors du chargement des statistiques'
@@ -350,7 +363,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
       kyc_pending: 0,
       kyc_rejected: 0,
       kyc_not_submitted: 0,
-      blocked_accounts: 0
+      blocked_accounts: 0,
+      caisse_3_months: 0,
+      caisse_6_months: 0,
+      caisse_1_year: 0,
+      caisse_2_years: 0
     }
     error.value = null
   }
