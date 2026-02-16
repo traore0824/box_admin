@@ -344,8 +344,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { onMounted, ref, computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useWalletsStore } from '../stores/wallets'
 // import { useUsersStore } from '../stores/users' // Non utilisé pour l'instant
 import { useNotification } from '../services/notification'
@@ -353,6 +353,7 @@ import { formatCurrency } from '../utils/currency'
 
 const walletsStore = useWalletsStore()
 const route = useRoute()
+const router = useRouter()
 const viewMode = ref<'list' | 'history'>('list')
 const userIdInput = ref<number | null>(null)
 const searchQuery = ref('')
@@ -486,9 +487,26 @@ onMounted(async () => {
     }
   }
   
+  // Initialize from URL for list mode
+  const page = parseInt(route.query.page as string) || 1
+  if (route.query.q) searchQuery.value = route.query.q as string
+
   // Charger la liste des wallets au montage
-  await walletsStore.fetchWalletsList(1)
+  await walletsStore.fetchWalletsList(page, searchQuery.value || undefined)
 })
+
+// Sync store state back to URL query parameters for list mode
+watch(
+  () => [walletsStore.currentPage, searchQuery.value, viewMode.value],
+  ([page, q, mode]) => {
+    if (mode === 'list') {
+      const query: any = {}
+      if (page && page !== 1) query.page = page.toString()
+      if (q) query.q = q
+      router.replace({ query })
+    }
+  }
+)
 
 // Recherche avec debounce
 let searchTimeout: ReturnType<typeof setTimeout> | null = null

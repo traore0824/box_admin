@@ -416,11 +416,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, computed, ref, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useWithdrawalTransactionsStore } from '../stores/withdrawalTransactions'
 import { Transaction } from '../types/transaction'
 import { useNotification } from '../services/notification'
 
+const router = useRouter()
+const route = useRoute()
 const withdrawalTransactionsStore = useWithdrawalTransactionsStore()
 const notification = useNotification()
 
@@ -440,8 +443,29 @@ const feexpayStatusData = ref<any>(null)
 const feexpayError = ref<string | null>(null) */
 
 onMounted(() => {
-  withdrawalTransactionsStore.fetchTransactions()
+  const page = parseInt(route.query.page as string) || 1
+  if (route.query.q) withdrawalTransactionsStore.searchQuery = route.query.q as string
+  if (route.query.status) withdrawalTransactionsStore.statusFilter = route.query.status as string
+  
+  withdrawalTransactionsStore.fetchTransactions(page)
 })
+
+// Sync store state back to URL query parameters
+watch(
+  () => [
+    withdrawalTransactionsStore.currentPage,
+    withdrawalTransactionsStore.searchQuery,
+    withdrawalTransactionsStore.statusFilter
+  ],
+  ([page, q, status]) => {
+    const query: any = {}
+    if (page && page !== 1) query.page = page.toString()
+    if (q) query.q = q
+    if (status && status !== 'all') query.status = status
+
+    router.replace({ query })
+  }
+)
 
 const hasNextPage = computed(() => {
   const currentPage = withdrawalTransactionsStore.currentPage

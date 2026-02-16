@@ -497,13 +497,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted, computed, ref, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useTransactionsStore } from '../stores/transactions'
 import { Transaction } from '../types/transaction'
 import { useNotification } from '../services/notification'
 
 const router = useRouter()
+const route = useRoute()
 const transactionsStore = useTransactionsStore()
 const notification = useNotification()
 
@@ -523,8 +524,32 @@ const feexpayStatusData = ref<any>(null)
 const feexpayError = ref<string | null>(null)
 
 onMounted(() => {
-  transactionsStore.fetchTransactions()
+  const page = parseInt(route.query.page as string) || 1
+  if (route.query.q) transactionsStore.searchQuery = route.query.q as string
+  if (route.query.status) transactionsStore.statusFilter = route.query.status as string
+  if (route.query.type) transactionsStore.typeTransFilter = route.query.type as string
+  
+  transactionsStore.fetchTransactions(page)
 })
+
+// Sync store state back to URL query parameters
+watch(
+  () => [
+    transactionsStore.currentPage,
+    transactionsStore.searchQuery,
+    transactionsStore.statusFilter,
+    transactionsStore.typeTransFilter
+  ],
+  ([page, q, status, type]) => {
+    const query: any = {}
+    if (page && page !== 1) query.page = page.toString()
+    if (q) query.q = q
+    if (status && status !== 'all') query.status = status
+    if (type && type !== 'all') query.type = type
+
+    router.replace({ query })
+  }
+)
 
 const hasNextPage = computed(() => {
   const currentPage = transactionsStore.currentPage

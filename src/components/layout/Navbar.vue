@@ -201,11 +201,11 @@ const isSettingsOpen = ref(false)
 
 const unreadCount = computed(() => {
   // Calculer le nombre de notifications non lues
-  return notificationsStore.notifications.filter(n => (n as any).status === 'pending').length
+  return notificationsStore.notifications?.filter(n => (n as any).status === 'pending').length || 0
 })
 const recentNotifications = computed(() => {
   // Retourner les notifications récentes
-  return notificationsStore.notifications.slice(0, 5)
+  return notificationsStore.notifications?.slice(0, 5) || []
 })
 
 // Get all routes from router
@@ -246,7 +246,7 @@ const toggleProfile = () => {
 // Mark all notifications as read
 const markAllAsRead = () => {
   // Mettre à jour le statut des notifications localement
-  notificationsStore.notifications.forEach(n => {
+  notificationsStore.notifications?.forEach(n => {
     if ((n as any).status === 'pending') {
       (n as any).status = 'sent'
     }

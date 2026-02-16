@@ -57,7 +57,7 @@ export async function fetchWithAuth(
     if (import.meta.env.DEV) {
       console.log('Token expiré, tentative de refresh...')
     }
-    
+
     const refreshed = await refreshAccessToken()
     if (refreshed) {
       if (import.meta.env.DEV) {
@@ -70,10 +70,10 @@ export async function fetchWithAuth(
         console.log('Échec du refresh token')
       }
       authStore.logout()
-      
+
       // Redirection vers la page de login avec message d'erreur
       window.location.href = '/login?message=Votre+session+a+expiré.+Veuillez+vous+reconnecter.'
-      
+
       throw new Error('Session expirée, veuillez vous reconnecter')
     }
   }
@@ -109,7 +109,7 @@ async function refreshAccessToken(): Promise<boolean> {
     if (import.meta.env.DEV) {
       console.log('Tentative de refresh du token...')
     }
-    
+
     const response = await fetch(`${API_BASE_URL}/auth/refresh_token/`, {
       method: 'POST',
       headers: {
@@ -184,7 +184,19 @@ export async function del(endpoint: string, queryParams?: Record<string, string 
 
 // Nouvelle fonction pour récupérer les détails utilisateur
 export async function getUserDetails(): Promise<any> {
-  const response = await fetchWithAuth('/auth/me/', { method: 'GET' })
-  if (!response.ok) throw new Error('Erreur lors de la récupération des infos utilisateur')
-  return response.json()
+  try {
+    const response = await fetchWithAuth('/auth/me/', { method: 'GET' })
+    if (!response.ok) {
+      if (import.meta.env.DEV) {
+        console.warn('getUserDetails: Response not OK', response.status)
+      }
+      return null
+    }
+    return await response.json()
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error('getUserDetails: Error fetching user details', error)
+    }
+    return null
+  }
 }

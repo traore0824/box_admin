@@ -554,8 +554,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, reactive, nextTick, onBeforeUnmount } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted, ref, reactive, nextTick, onBeforeUnmount, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useUsersStore } from '../stores/users'
 import { useWalletsStore } from '../stores/wallets'
 import { useNotification } from '../services/notification'
@@ -565,6 +565,7 @@ import { formatCurrency, formatAmount } from '../utils/currency'
 const usersStore = useUsersStore()
 const walletsStore = useWalletsStore()
 const router = useRouter()
+const route = useRoute()
 const activeDropdown = ref<number | null>(null)
 const actionLoading = reactive<Record<number, boolean>>({})
 const dropdownPosition = ref<{top: number, left: number}>({top: 0, left: 0})
@@ -605,12 +606,41 @@ interface User {
 }
 
 onMounted(() => {
-  usersStore.fetchUsers()
+  // Initialize store state from URL query parameters
+  const page = parseInt(route.query.page as string) || 1
+  if (route.query.q) usersStore.searchQuery = route.query.q as string
+  if (route.query.block) usersStore.blockFilter = route.query.block as any
+  if (route.query.agent) usersStore.agentFilter = route.query.agent as any
+  if (route.query.no_caisse) usersStore.noCaisseFilter = route.query.no_caisse as any
+  
+  usersStore.fetchUsers(page)
+  
   document.addEventListener('click', handleClickOutside)
   document.addEventListener('keydown', handleEscape)
   window.addEventListener('scroll', handleScroll, true)
   window.addEventListener('resize', closeAllDropdowns)
 })
+
+// Sync store state back to URL query parameters
+watch(
+  () => [
+    usersStore.currentPage,
+    usersStore.searchQuery,
+    usersStore.blockFilter,
+    usersStore.agentFilter,
+    usersStore.noCaisseFilter
+  ],
+  ([page, q, block, agent, no_caisse]) => {
+    const query: any = {}
+    if (page && page !== 1) query.page = page.toString()
+    if (q) query.q = q
+    if (block && block !== 'all') query.block = block
+    if (agent && agent !== 'all') query.agent = agent
+    if (no_caisse && no_caisse !== 'all') query.no_caisse = no_caisse
+
+    router.replace({ query })
+  }
+)
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)

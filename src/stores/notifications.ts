@@ -66,7 +66,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
 
       const data: NotificationsResponse = await response.json()
 
-      notifications.value = data.results
+      notifications.value = data?.results || []
       totalCount.value = data.count
       hasNext.value = !!data.next
       hasPrevious.value = !!data.previous

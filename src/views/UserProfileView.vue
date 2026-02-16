@@ -49,6 +49,12 @@
               </span>
               <span :class="[
                 'px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full',
+                user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              ]">
+                {{ user.is_active ? 'Compte Activé' : 'Compte Inactif' }}
+              </span>
+              <span :class="[
+                'px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full',
                 user.agent_client ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
               ]">
                 {{ user.agent_client ? 'Agent' : 'Client' }}
@@ -100,6 +106,27 @@
             class="flex items-center justify-center px-4 py-3 border border-indigo-300 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
             <i class="fas fa-id-card mr-2"></i>
             Mettre à jour KYC
+          </button>
+
+          <!-- Modifier Profil -->
+          <button @click="openUpdateModal" :disabled="actionLoading"
+            class="flex items-center justify-center px-4 py-3 border border-orange-300 bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fas fa-user-edit mr-2"></i>
+            Modifier Profil
+          </button>
+
+          <!-- Activer Compte -->
+          <button v-if="!user.is_active" @click="handleActivateUser" :disabled="actionLoading"
+            class="flex items-center justify-center px-4 py-3 border border-emerald-300 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fas fa-check-circle mr-2"></i>
+            Activer Compte
+          </button>
+
+          <!-- Admin KYC Verify -->
+          <button @click="openAdminKycModal" :disabled="actionLoading"
+            class="flex items-center justify-center px-4 py-3 border border-blue-300 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fas fa-shield-alt mr-2"></i>
+            Vérifier KYC (Admin)
           </button>
 
           <!-- Voir Wallet -->
@@ -602,6 +629,90 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Modal Admin Update User -->
+    <Teleport to="body">
+      <div v-if="showUpdateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl mx-4 my-8">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Modifier les informations de l'utilisateur</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+              <input v-model="updateForm.first_name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+              <input v-model="updateForm.last_name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+              <input v-model="updateForm.phone" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Date de naissance</label>
+              <input v-model="updateForm.birthday" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Sexe</label>
+              <select v-model="updateForm.sexe" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                <option value="H">Homme</option>
+                <option value="F">Femme</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Carte ID</label>
+              <input v-model="updateForm.card_id" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" />
+            </div>
+          </div>
+          <div class="flex justify-end space-x-3">
+            <button @click="closeUpdateModal" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Annuler</button>
+            <button @click="handleAdminUpdate" :disabled="actionLoading" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50">Mettre à jour</button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Modal Admin KYC Verify -->
+    <Teleport to="body">
+      <div v-if="showAdminKycModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl mx-4 my-8">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Vérification KYC (Admin)</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+              <input v-model="kycForm.first_name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+              <input v-model="kycForm.last_name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Date de naissance</label>
+              <input v-model="kycForm.birthday" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Sexe</label>
+              <select v-model="kycForm.sexe" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                <option value="H">Homme</option>
+                <option value="F">Femme</option>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Carte ID</label>
+              <input v-model="kycForm.card_id" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">URLs des Photos (une par ligne)</label>
+              <textarea v-model="kycForm.photosString" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="https://url1.com&#10;https://url2.com"></textarea>
+            </div>
+          </div>
+          <div class="flex justify-end space-x-3">
+            <button @click="closeAdminKycModal" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Annuler</button>
+            <button @click="handleAdminKycVerify" :disabled="actionLoading" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50">Valider KYC</button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -646,6 +757,28 @@ const pendingAction = ref<(() => Promise<void>) | null>(null)
 const showKycModal = ref(false)
 const kycStatus = ref<string>('')
 const kycRejectionReason = ref('')
+
+// Update Modal State
+const showUpdateModal = ref(false)
+const updateForm = ref({
+  first_name: '',
+  last_name: '',
+  phone: '',
+  birthday: '',
+  sexe: '',
+  card_id: ''
+})
+
+// Admin KYC Modal State
+const showAdminKycModal = ref(false)
+const kycForm = ref({
+  first_name: '',
+  last_name: '',
+  birthday: '',
+  sexe: '',
+  card_id: '',
+  photosString: ''
+})
 
 // Wallet Modal State
 const showWalletModal = ref(false)
@@ -1085,6 +1218,107 @@ const loadWalletTransactionsForModal = () => {
     walletTransactionTypeFilter.value === 'all' ? undefined : walletTransactionTypeFilter.value,
     walletStatusFilter.value === 'all' ? undefined : walletStatusFilter.value
   )
+}
+
+// Handlers for new Admin APIs
+const openUpdateModal = () => {
+  if (!user.value) return
+  updateForm.value = {
+    first_name: user.value.first_name || '',
+    last_name: user.value.last_name || '',
+    phone: user.value.phone || '',
+    birthday: user.value.birthday || '',
+    sexe: user.value.sexe || 'H',
+    card_id: user.value.card_id || ''
+  }
+  showUpdateModal.value = true
+}
+
+const closeUpdateModal = () => {
+  showUpdateModal.value = false
+}
+
+const handleAdminUpdate = async () => {
+  if (!user.value) return
+  try {
+    actionLoading.value = true
+    await usersStore.adminUpdateUser({
+      user_id: user.value.id,
+      ...updateForm.value
+    })
+    notification.addNotification('Profil utilisateur mis à jour avec succès', 'success')
+    closeUpdateModal()
+    await loadUserInfo()
+  } catch (error: any) {
+    notification.addNotification(error.message || 'Erreur lors de la mise à jour', 'error')
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+const openAdminKycModal = () => {
+  if (!user.value) return
+  kycForm.value = {
+    first_name: user.value.first_name || '',
+    last_name: user.value.last_name || '',
+    birthday: user.value.birthday || '',
+    sexe: user.value.sexe || 'H',
+    card_id: user.value.card_id || '',
+    photosString: user.value.user_cards ? user.value.user_cards.join('\n') : ''
+  }
+  showAdminKycModal.value = true
+}
+
+const closeAdminKycModal = () => {
+  showAdminKycModal.value = false
+}
+
+const handleAdminKycVerify = async () => {
+  if (!user.value) return
+  try {
+    const photos = kycForm.value.photosString.split('\n').map(u => u.trim()).filter(u => u)
+    if (photos.length === 0) {
+      notification.addNotification('Veuillez fournir au moins une URL de photo', 'warning')
+      return
+    }
+
+    actionLoading.value = true
+    await usersStore.adminKycVerify({
+      user_id: user.value.id,
+      first_name: kycForm.value.first_name,
+      last_name: kycForm.value.last_name,
+      birthday: kycForm.value.birthday,
+      sexe: kycForm.value.sexe,
+      card_id: kycForm.value.card_id,
+      photos
+    })
+    notification.addNotification('KYC validé avec succès (admin)', 'success')
+    closeAdminKycModal()
+    await loadUserInfo()
+  } catch (error: any) {
+    notification.addNotification(error.message || 'Erreur lors de la validation KYC', 'error')
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+const handleActivateUser = async () => {
+  if (!user.value) return
+  modalTitle.value = 'Activer le compte'
+  modalMessage.value = `Êtes-vous sûr de vouloir activer le compte de ${user.value.first_name} ${user.value.last_name} ?`
+  pendingAction.value = async () => {
+    try {
+      actionLoading.value = true
+      await usersStore.adminActivateUser(user.value.id)
+      notification.addNotification('Compte activé avec succès', 'success')
+      await loadUserInfo()
+    } catch (error: any) {
+      notification.addNotification(error.message || 'Erreur lors de l\'activation', 'error')
+    } finally {
+      actionLoading.value = false
+    }
+  }
+  isModalOpen.value = true
 }
 
 const onModalConfirm = async () => {

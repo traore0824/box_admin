@@ -56,7 +56,7 @@
     </div>
 
     <!-- Loading State -->
-    <div v-if="notificationsStore.isLoading && notificationsStore.notifications.length === 0"
+    <div v-if="notificationsStore.isLoading && (!notificationsStore.notifications || notificationsStore.notifications.length === 0)"
       class="bg-white rounded-lg shadow-sm p-8">
       <div class="flex items-center justify-center">
         <i class="fas fa-spinner fa-spin text-2xl text-gray-400 mr-3"></i>
@@ -123,7 +123,7 @@
       </div>
 
       <!-- Empty State -->
-      <div v-if="notificationsStore.notifications.length === 0 && !notificationsStore.isLoading"
+      <div v-if="(!notificationsStore.notifications || notificationsStore.notifications.length === 0) && !notificationsStore.isLoading"
         class="py-12 text-center">
         <i class="fas fa-bell-slash text-4xl text-gray-300 mb-4"></i>
         <p class="text-gray-500 text-lg mb-2">Aucune notification trouvée</p>

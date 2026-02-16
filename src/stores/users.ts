@@ -31,6 +31,7 @@ interface User {
   pin_incorrect_count: number
   status?: 'pending' | 'accept' | 'reject' | null
   user_cards?: string[]
+  is_active: boolean
 }
 
 interface UsersResponse {
@@ -234,7 +235,7 @@ export const useUsersStore = defineStore('users', () => {
       }
 
       const result = await response.json()
-      
+
       // Mettre à jour l'utilisateur dans la liste
       const userIndex = users.value.findIndex(u => u.id === userId)
       if (userIndex !== -1) {
@@ -308,7 +309,7 @@ export const useUsersStore = defineStore('users', () => {
       }
 
       const result = await response.json()
-      
+
       // Rafraîchir la liste pour avoir les données à jour
       await fetchUsers(currentPage.value)
 
@@ -316,6 +317,91 @@ export const useUsersStore = defineStore('users', () => {
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Une erreur est survenue lors de la mise à jour du statut KYC.'
       console.error('Error updating KYC status:', err)
+      throw err
+    }
+  }
+
+  // Admin Update User
+  async function adminUpdateUser(payload: {
+    user_id: number
+    first_name?: string
+    last_name?: string
+    phone?: string
+    birthday?: string
+    sexe?: string
+    card_id?: string
+  }) {
+    try {
+      error.value = null
+      const response = await fetchWithAuth('/auth/admin-update-user/', {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.detail || data.message || 'Erreur lors de la mise à jour de l\'utilisateur.')
+      }
+
+      return await response.json()
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Erreur lors de la mise à jour'
+      console.error('Error in adminUpdateUser:', err)
+      throw err
+    }
+  }
+
+  // Admin KYC Verify
+  async function adminKycVerify(payload: {
+    user_id: number
+    first_name: string
+    last_name: string
+    birthday: string
+    sexe: string
+    card_id: string
+    photos: string[]
+  }) {
+    try {
+      error.value = null
+      const response = await fetchWithAuth('/auth/admin-verify-user/', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.detail || data.message || 'Erreur lors de la vérification KYC.')
+      }
+
+      return await response.json()
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Erreur lors de la vérification KYC'
+      console.error('Error in adminKycVerify:', err)
+      throw err
+    }
+  }
+
+  // Admin Activate User
+  async function adminActivateUser(userId: number) {
+    try {
+      error.value = null
+      const response = await fetchWithAuth('/auth/admin-activate-user/', {
+        method: 'POST',
+        body: JSON.stringify({ user_id: userId }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.detail || data.message || 'Erreur lors de l\'activation de l\'utilisateur.')
+      }
+
+      return await response.json()
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Erreur lors de l\'activation'
+      console.error('Error in adminActivateUser:', err)
       throw err
     }
   }
@@ -339,6 +425,9 @@ export const useUsersStore = defineStore('users', () => {
     toggleUserAgentStatus,
     resetUserPin,
     sendPinVerificationOtp,
-    updateKycStatus
+    updateKycStatus,
+    adminUpdateUser,
+    adminKycVerify,
+    adminActivateUser
   }
 })
