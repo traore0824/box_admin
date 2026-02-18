@@ -7,8 +7,8 @@
 
     <!-- Search and Filters -->
     <div class="space-y-3">
-      <!-- Barre de recherche - demi ligne -->
-      <div class="relative max-w-[50%]">
+      <!-- Barre de recherche -->
+      <div class="relative w-full sm:max-w-[50%]">
         <input v-model="usersStore.searchQuery" @input="() => usersStore.updateSearchQuery(usersStore.searchQuery)" type="text" placeholder="Rechercher un utilisateur..."
           class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm" />
         <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>

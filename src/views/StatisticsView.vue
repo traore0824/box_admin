@@ -11,130 +11,82 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
       <StatCard 
         title="Total Utilisateurs" 
         :value="stats.all_users?.toLocaleString() || '0'" 
-        icon="fas fa-users"
+        icon="users"
         color="primary" 
         :subtitle="`${stats.active_users || 0} actifs`"
-        :evolution="stats.evolution?.all_users"
+        :growth="stats.evolution?.all_users"
       />
       <StatCard 
         title="Utilisateurs Actifs" 
         :value="stats.active_users?.toLocaleString() || '0'"
-        icon="fas fa-user-check"
+        icon="user-check"
         color="success"
         :subtitle="`${stats.agent_users || 0} agents`"
-        :evolution="stats.evolution?.active_users"
+        :growth="stats.evolution?.active_users"
       />
       <StatCard 
         title="Total Caisses" 
         :value="stats.total_caisses?.toLocaleString() || '0'"
-        icon="fas fa-piggy-bank"
+        icon="piggy-bank"
         color="warning"
         :subtitle="`${stats.caisse_pending || 0} en cours`"
-        :evolution="stats.evolution?.total_caisses"
+        :growth="stats.evolution?.total_caisses"
       />
       <StatCard 
         title="Total Transactions" 
         :value="stats.total_transactions?.toLocaleString() || '0'"
-        icon="fas fa-exchange-alt"
+        icon="exchange-alt"
         color="info"
         :subtitle="`${stats.caisse_active_amount?.toLocaleString() || 0} actif`"
-        :evolution="stats.evolution?.total_transactions"
+        :growth="stats.evolution?.total_transactions"
       />
     </div>
 
     <!-- Statistiques Utilisateurs -->
-    <div class="stat-container">
-      <h2>Statistiques Utilisateurs</h2>
-      <div class="stat-list">
-        <div class="stat-item">
-          <span class="stat-label">Utilisateurs agents</span>
-          <span class="stat-value">{{ stats.agent_users }}</span>
+    <div class="stat-container p-4 sm:p-5">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">Statistiques Utilisateurs</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="stat-item flex justify-between p-3 border border-gray-100 rounded-lg">
+          <span class="stat-label text-gray-600 text-sm">Utilisateurs agents</span>
+          <span class="stat-value font-bold text-gray-900">{{ stats.agent_users }}</span>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">Utilisateurs inactifs</span>
-          <span class="stat-value">{{ stats.inactive_users }}</span>
+        <div class="stat-item flex justify-between p-3 border border-gray-100 rounded-lg">
+          <span class="stat-label text-gray-600 text-sm">Utilisateurs inactifs</span>
+          <span class="stat-value font-bold text-gray-900">{{ stats.inactive_users }}</span>
         </div>
       </div>
     </div>
 
     <!-- Statistiques Caisse -->
-    <div class="stat-container">
-      <h2>Statistiques Caisse</h2>
-      <div class="stat-list">
-        <div class="stat-item">
-          <span class="stat-label">Caisse terminées</span>
-          <span class="stat-value">{{ stats.caisse_done }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Caisse annulées</span>
-          <span class="stat-value">{{ stats.caisse_cancel }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Caisse en attente</span>
-          <span class="stat-value">{{ stats.caisse_pending }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Caisse désactivées</span>
-          <span class="stat-value">{{ stats.caisse_disabled }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Caisse de la semaine</span>
-          <span class="stat-value">{{ stats.all_week_caisse }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Caisse personnalisées</span>
-          <span class="stat-value">{{ stats.custom_caisse }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Caisse du mois</span>
-          <span class="stat-value">{{ stats.all_month_caisse }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Caisse du jour</span>
-          <span class="stat-value">{{ stats.all_days_caisse }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Duree moyenne caisse en cours (mois)</span>
-          <span class="stat-value">{{ stats.avg_ongoing_caisse_duration_months || 0 }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Caisse ~3 mois (85-95 jours)</span>
-          <span class="stat-value">{{ stats.caisse_3_months || 0 }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Caisse ~6 mois (175-185 jours)</span>
-          <span class="stat-value">{{ stats.caisse_6_months || 0 }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Caisse ~1 an (360-375 jours)</span>
-          <span class="stat-value">{{ stats.caisse_1_year || 0 }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Caisse ~2 ans (720-740 jours)</span>
-          <span class="stat-value">{{ stats.caisse_2_years || 0 }}</span>
+    <div class="stat-container p-4 sm:p-5">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">Statistiques Caisse</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div v-for="(val, label) in caisseStatsMap" :key="label" class="stat-item flex justify-between p-3 border border-gray-100 rounded-lg">
+          <span class="stat-label text-gray-600 text-sm">{{ label }}</span>
+          <span class="stat-value font-bold text-gray-900">{{ val }}</span>
         </div>
       </div>
     </div>
 
     <!-- Statistiques Transactions -->
-    <div class="stat-container">
-      <h2>Statistiques Transactions</h2>
-      <div class="stat-list">
-        <div class="stat-item">
-          <span class="stat-label">Dépôts</span>
-          <span class="stat-value">{{ stats.deposit_transactions }}</span>
+    <div class="stat-container p-4 sm:p-5">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">Statistiques Transactions</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="stat-item flex justify-between p-3 border border-gray-100 rounded-lg">
+          <span class="stat-label text-gray-600 text-sm">Dépôts</span>
+          <span class="stat-value font-bold text-gray-900">{{ stats.deposit_transactions }}</span>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">Retraits</span>
-          <span class="stat-value">{{ stats.withdrawal_transactions }}</span>
+        <div class="stat-item flex justify-between p-3 border border-gray-100 rounded-lg">
+          <span class="stat-label text-gray-600 text-sm">Retraits</span>
+          <span class="stat-value font-bold text-gray-900">{{ stats.withdrawal_transactions }}</span>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">Montant actif</span>
-          <span class="stat-value">{{ stats.caisse_active_amount }}</span>
+        <div class="stat-item flex justify-between p-3 border border-gray-100 rounded-lg">
+          <span class="stat-label text-gray-600 text-sm">Montant actif</span>
+          <span class="stat-value font-bold text-gray-900">{{ stats.caisse_active_amount }}</span>
         </div>
       </div>
     </div>
@@ -142,12 +94,28 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useStatisticsStore } from '../stores/statistics'
 import StatCard from '../components/StatCard.vue'
 
 const statisticsStore = useStatisticsStore()
-const stats = statisticsStore.stats
+const stats = computed(() => statisticsStore.stats)
+
+const caisseStatsMap = computed(() => ({
+  "Terminées": stats.value.caisse_done,
+  "Annulées": stats.value.caisse_cancel,
+  "En attente": stats.value.caisse_pending,
+  "Désactivées": stats.value.caisse_disabled,
+  "De la semaine": stats.value.all_week_caisse,
+  "Personnalisées": stats.value.custom_caisse,
+  "Du mois": stats.value.all_month_caisse,
+  "Du jour": stats.value.all_days_caisse,
+  "Durée moy. (mois)": stats.value.avg_ongoing_caisse_duration_months || 0,
+  "~3 mois": stats.value.caisse_3_months || 0,
+  "~6 mois": stats.value.caisse_6_months || 0,
+  "~1 an": stats.value.caisse_1_year || 0,
+  "~2 ans": stats.value.caisse_2_years || 0
+}))
 
 onMounted(() => {
   statisticsStore.fetchStatistics()
@@ -156,93 +124,34 @@ onMounted(() => {
 
 <style scoped>
 .statistics-container {
-  padding: 20px;
+  padding: 1rem;
   max-width: 1200px;
   margin: 0 auto;
 }
 
 .filter-container {
-  margin-bottom: 20px;
+  margin-bottom: 1.5rem;
 }
 
 .stat-container {
   background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.stat-container h2 {
-  color: #333;
-  margin-bottom: 15px;
-  font-size: 1.5rem;
-}
-
-.stat-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.stat-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px;
-  border: 1px solid #eee;
-  border-radius: 4px;
-}
-
-.stat-label {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.stat-value {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #333;
+  border-radius: 0.5rem;
+  margin-top: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 select {
-  padding: 8px 12px;
+  padding: 0.5rem 0.75rem;
   border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
   background-color: white;
   cursor: pointer;
 }
 
 select:focus {
   outline: none;
-  border-color: #4CAF50;
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-}
-
-.grid {
-  display: grid;
-  gap: 1.5rem;
-}
-
-.grid-cols-1 {
-  grid-template-columns: 1fr;
-}
-
-.grid-cols-2 {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-.grid-cols-4 {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-@media (max-width: 768px) {
-  .grid-cols-2 {
-    grid-template-columns: 1fr;
-  }
-  
-  .grid-cols-4 {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  border-color: #bc8a1a;
+  box-shadow: 0 0 0 2px rgba(188, 138, 26, 0.2);
 }
 </style>

@@ -607,11 +607,21 @@ onUnmounted(() => {
 }
 
 @media (max-width: 640px) {
+  .dashboard-container {
+    gap: 1rem;
+    padding: 0;
+  }
+
+  .dashboard-header,
+  .active-filters-container {
+    padding: 1rem;
+  }
 
   .kpi-cards,
   .stats-grid,
   .advanced-stats {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 }
 </style>

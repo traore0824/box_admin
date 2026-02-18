@@ -41,15 +41,15 @@
   
   <!-- Mobile Menu Overlay -->
   <div 
-    v-if="isMobileMenuOpen" 
+    v-if="uiStore.isSidebarOpen" 
     class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-    @click="isMobileMenuOpen = false"
+    @click="uiStore.closeSidebar()"
   ></div>
   
   <!-- Mobile Menu -->
   <div 
-    v-if="isMobileMenuOpen" 
-    class="fixed inset-y-0 left-0 w-full bg-white z-40 md:hidden flex flex-col h-screen"
+    v-if="uiStore.isSidebarOpen" 
+    class="fixed inset-y-0 left-0 w-[260px] bg-white z-40 md:hidden flex flex-col h-screen shadow-lg"
   >
     <!-- Logo -->
     <div class="h-16 border-b border-gray-200 flex items-center justify-center flex-shrink-0 z-10">
@@ -57,17 +57,14 @@
     </div>
     
     <!-- Navigation -->
-    <nav class="overflow-y-auto overflow-x-hidden px-4 py-6" style="max-height: calc(100vh - 64px - 120px); min-height: 0;">
+    <nav class="overflow-y-auto overflow-x-hidden px-4 py-6 flex-1">
       <ul class="space-y-1">
         <li v-for="item in filteredMenuItems" :key="item.path">
           <router-link 
             :to="item.path" 
             class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-colors relative"
             :class="{ 'bg-primary-50 text-primary font-medium': isActive(item.path) }"
-            :style="isActive(item.path) ? {
-              'box-shadow': 'inset 0 0 0 2px rgba(188, 138, 26, 0.3)'
-            } : {}"
-            @click="selectOption(item.path); isMobileMenuOpen = false"
+            @click="uiStore.closeSidebar()"
           >
             <i :class="item.icon" class="mr-3 text-lg flex-shrink-0"></i>
             <span class="truncate">{{ item.name }}</span>
@@ -79,11 +76,7 @@
     <!-- Mobile User Section -->
     <div class="border-t border-gray-200 py-4 px-6 bg-white flex-shrink-0">
       <div class="flex items-center space-x-3 mb-4">
-        <img 
-          :src="authStore.user?.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'" 
-          alt="User Avatar" 
-          class="w-10 h-10 rounded-full flex-shrink-0"
-        >
+        <AvatarIcon class="w-10 h-10 flex-shrink-0" />
         <div class="min-w-0 flex-1">
           <p class="font-medium text-gray-800 truncate">{{ authStore.user?.name || `${authStore.user?.first_name || ''} ${authStore.user?.last_name || ''}`.trim() || authStore.user?.email }}</p>
           <p class="text-xs text-gray-500 truncate">{{ authStore.user?.email }}</p>
@@ -102,12 +95,13 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
 import { useAuthStore } from '../../stores/auth'
+import { useUIStore } from '../../stores/ui'
 import { menuItems } from '../../config/menu'
 import AvatarIcon from '../AvatarIcon.vue'
 import { useRoute } from 'vue-router'
 
 const authStore = useAuthStore()
-const isMobileMenuOpen = ref(false)
+const uiStore = useUIStore()
 const selectedOption = ref('/')
 const route = useRoute()
 

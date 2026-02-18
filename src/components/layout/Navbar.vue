@@ -2,41 +2,12 @@
   <header class="bg-white border-b border-gray-200 h-16 sm:h-20 flex items-center justify-between px-4 sm:px-6">
     <!-- Mobile menu button -->
     <button 
-      @click="isMobileMenuOpen = !isMobileMenuOpen" 
-      class="text-gray-500 hover:text-gray-600 sm:hidden"
+      @click="uiStore.toggleSidebar()" 
+      class="text-gray-500 hover:text-gray-600 sm:hidden p-2"
     >
       <i class="fas fa-bars text-xl"></i>
     </button>
 
-    <!-- Mobile menu -->
-    <div 
-      v-if="isMobileMenuOpen" 
-      class="fixed inset-0 bg-black bg-opacity-50 z-50"
-      @click="isMobileMenuOpen = false"
-    >
-      <div class="fixed inset-y-0 right-0 w-full sm:w-64 bg-white shadow-lg z-50 p-4">
-        <button 
-          @click="isMobileMenuOpen = false" 
-          class="absolute top-4 right-4 text-gray-500 hover:text-gray-600"
-        >
-          <i class="fas fa-times text-xl"></i>
-        </button>
-
-        <!-- Menu items -->
-        <nav class="mt-8">
-          <router-link 
-            v-for="route in routes" 
-            :key="route.path" 
-            :to="route.path" 
-            class="block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            @click="isMobileMenuOpen = false"
-          >
-            {{ route.meta?.title || route.name }}
-          </router-link>
-        </nav>
-      </div>
-    </div>
-    
     <!-- Page title -->
     <h1 class="text-lg md:text-xl font-semibold text-gray-800 hidden md:block">
       {{ pageTitle }}
@@ -186,17 +157,18 @@
 import { ref, computed, watch } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { useNotificationsStore } from '../../stores/notifications'
+import { useUIStore } from '../../stores/ui'
 import { useRoute, useRouter } from 'vue-router'
 import AvatarIcon from '../AvatarIcon.vue'
 
 const authStore = useAuthStore()
 const notificationsStore = useNotificationsStore()
+const uiStore = useUIStore()
 const router = useRouter()
 const route = useRoute()
 
 const isNotificationsOpen = ref(false)
 const isProfileOpen = ref(false)
-const isMobileMenuOpen = ref(false)
 const isSettingsOpen = ref(false)
 
 const unreadCount = computed(() => {
@@ -206,11 +178,6 @@ const unreadCount = computed(() => {
 const recentNotifications = computed(() => {
   // Retourner les notifications récentes
   return notificationsStore.notifications?.slice(0, 5) || []
-})
-
-// Get all routes from router
-const routes = computed(() => {
-  return router.getRoutes().filter(route => route.meta?.title)
 })
 
 const pageTitle = computed(() => {
@@ -239,7 +206,6 @@ const toggleSettings = () => {
 const toggleProfile = () => {
   isProfileOpen.value = !isProfileOpen.value
   isNotificationsOpen.value = false
-  isMobileMenuOpen.value = false
   isSettingsOpen.value = false
 }
 
@@ -266,7 +232,7 @@ watch(
     isNotificationsOpen.value = false
     isProfileOpen.value = false
     isSettingsOpen.value = false
-    isMobileMenuOpen.value = false
+    uiStore.closeSidebar()
   }
 )
 </script>
