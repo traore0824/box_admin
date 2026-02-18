@@ -42,8 +42,8 @@
     </div>
 
     <!-- Transactions Table -->
-    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-      <div class="table-container sm:mx-0">
+    <div class="bg-white rounded-lg shadow-sm">
+      <div class="w-full overflow-x-auto">
         <table class="table">
           <thead class="bg-gray-50">
             <tr>

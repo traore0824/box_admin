@@ -14,7 +14,7 @@
           <Navbar />
           
           <!-- Page Content -->
-          <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6" style="height: 0;">
+          <main class="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50 p-4 md:p-6" style="height: 0;">
             <router-view></router-view>
           </main>
           <ToastContainer />
