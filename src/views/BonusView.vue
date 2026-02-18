@@ -57,7 +57,7 @@
         <div class="p-3 sm:p-4 border-b border-gray-200">
           <h2 class="text-base sm:text-lg font-semibold text-gray-800">Historique des Attributions de Bonus</h2>
         </div>
-        <div class="overflow-x-auto -mx-4 sm:mx-0">
+        <div class="overflow-x-auto sm:mx-0">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
@@ -168,7 +168,7 @@
         <div class="p-3 sm:p-4 border-b border-gray-200">
           <h2 class="text-base sm:text-lg font-semibold text-gray-800">Demandes de Retrait de Bonus</h2>
         </div>
-        <div class="overflow-x-auto -mx-4 sm:mx-0">
+        <div class="overflow-x-auto sm:mx-0">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
