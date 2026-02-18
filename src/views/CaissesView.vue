@@ -51,7 +51,7 @@
     <!-- Caisse List -->
     <div v-if="!caisseStore.isLoading && !caisseStore.error && caisseStore.caisses.length > 0"
       class="bg-white rounded-lg shadow-sm overflow-hidden">
-      <div class="table-container -mx-4 sm:mx-0">
+      <div class="table-container sm:mx-0">
         <table class="table">
           <thead class="bg-gray-50">
             <tr>
