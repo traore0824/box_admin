@@ -86,6 +86,84 @@
           <option value="single">Utilisateur spécifique</option>
         </select>
 
+        <!-- Specific User Selection -->
+        <div v-if="type === 'single'" class="mt-4">
+          <!-- Search Bar -->
+          <div class="flex gap-2 mb-4">
+            <div class="flex-1 relative">
+              <input v-model="searchQuery" type="text"
+                class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm"
+                placeholder="Rechercher par nom, prénom ou email..."
+                @input="debouncedSearch && debouncedSearch()" />
+              <i class="fas fa-search absolute left-3 top-2.5 h-4 w-4 text-gray-400"></i>
+            </div>
+          </div>
+
+          <!-- Selected User Display -->
+          <div v-if="selectedUserId" class="mb-4">
+            <p class="text-sm font-medium text-gray-700 mb-2">Utilisateur sélectionné :</p>
+            <div class="flex items-center justify-between px-3 py-2 bg-blue-50 rounded-md border border-blue-200">
+              <div>
+                <p class="text-sm font-medium text-gray-900">{{ getUserById(selectedUserId)?.first_name }} {{ getUserById(selectedUserId)?.last_name }}</p>
+                <p class="text-xs text-gray-500">{{ getUserById(selectedUserId)?.email }}</p>
+              </div>
+              <button @click="selectedUserId = null" class="text-gray-400 hover:text-red-500 transition-colors">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- User List -->
+          <div v-if="showUserList" class="border border-gray-200 rounded-md">
+            <div class="p-3 bg-gray-50 border-b border-gray-200">
+              <p class="text-sm font-medium text-gray-700">
+                Sélectionner un utilisateur *
+              </p>
+            </div>
+
+            <div class="max-h-64 overflow-y-auto">
+              <div v-if="!usersStore.isLoading && currentUsers.length === 0" class="p-4 text-center text-gray-500">
+                <p class="text-sm">Aucun utilisateur trouvé</p>
+                <p class="text-xs text-gray-400">Vérifiez votre recherche ou essayez avec d'autres termes</p>
+              </div>
+              <div v-else-if="usersStore.isLoading" class="p-4 text-center">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                <p class="mt-2 text-sm text-gray-500">Chargement...</p>
+              </div>
+              <div v-for="user in currentUsers" :key="user.id" @click="selectUser(user)"
+                class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0">
+                <div class="space-y-1">
+                  <div class="flex items-center gap-2">
+                    <p class="font-semibold text-gray-900 text-sm">{{ user.first_name }}</p>
+                    <span class="text-gray-600 text-sm">-</span>
+                    <p class="font-semibold text-gray-900 text-sm">{{ user.last_name }}</p>
+                  </div>
+                  <p class="text-sm text-gray-500">{{ user.email }}</p>
+                </div>
+                <div v-if="selectedUserId === user.id" class="text-primary">
+                  <i class="fas fa-check"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pagination -->
+            <div v-if="totalPages > 1"
+              class="flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200">
+              <p class="text-sm text-gray-700">
+                Page {{ currentPage }} - Total: {{ filteredUsers.length }} utilisateurs
+              </p>
+              <div class="flex items-center space-x-2">
+                <button @click="previousPage" :disabled="currentPage === 1"
+                  class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                  &lt;
+                </button>
+                <button @click="nextPage" :disabled="currentPage === totalPages"
+                  class="px-3 py-1 text-sm bg-primary text-white rounded hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                  &gt;
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -185,7 +263,6 @@
             </label>
           </div>
         </div>
-      </div>
       </div>
 
       <!-- Actions -->
