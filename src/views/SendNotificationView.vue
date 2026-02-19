@@ -86,85 +86,106 @@
           <option value="single">Utilisateur spécifique</option>
         </select>
 
-        <!-- Specific User Selection -->
-        <div v-if="type === 'single'" class="mt-4">
-          <!-- Search Bar -->
-          <div class="flex gap-2 mb-4">
-            <div class="flex-1 relative">
-              <input v-model="searchQuery" type="text"
-                class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm"
-                placeholder="Rechercher par nom, prénom ou email..."
-                @input="debouncedSearch && debouncedSearch()" />
-              <i class="fas fa-search absolute left-3 top-2.5 h-4 w-4 text-gray-400"></i>
+        </div>
+      </div>
+
+      <!-- Advanced Filters (Only for type='all') -->
+      <div v-if="type === 'all'" class="mb-6 border border-gray-200 rounded-lg overflow-hidden">
+        <button 
+          @click="showAdvancedFilters = !showAdvancedFilters"
+          class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+        >
+          <div class="flex items-center gap-2 font-medium text-gray-700">
+            <i class="fas fa-filter text-primary"></i>
+            Filtres avancés (Action ciblée)
+          </div>
+          <i class="fas" :class="showAdvancedFilters ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+        </button>
+
+        <div v-if="showAdvancedFilters" class="p-6 bg-white space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- KYC Status -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Statut KYC</label>
+              <select v-model="filters.kyc_status" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm">
+                <option :value="null">Tous les statuts</option>
+                <option value="pending">En attente</option>
+                <option value="accept">Accepté</option>
+                <option value="reject">Rejeté</option>
+              </select>
+            </div>
+
+            <!-- Account Active -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">État du compte</label>
+              <select v-model="filters.is_active" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm">
+                <option :value="null">Tous l'état</option>
+                <option :value="true">Activé</option>
+                <option :value="false">Inactif</option>
+              </select>
+            </div>
+
+            <!-- Account Blocked -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Blocage</label>
+              <select v-model="filters.is_block" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm">
+                <option :value="null">Peu importe</option>
+                <option :value="true">Utilisateurs bloqués</option>
+                <option :value="false">Utilisateurs non bloqués</option>
+              </select>
+            </div>
+
+            <!-- Sexe -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Sexe</label>
+              <select v-model="filters.sexe" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm">
+                <option :value="null">Tous</option>
+                <option value="H">Homme</option>
+                <option value="F">Femme</option>
+              </select>
+            </div>
+
+            <!-- Role Agent -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
+              <select v-model="filters.is_agent" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm">
+                <option :value="null">Tous</option>
+                <option :value="true">Agents uniquement</option>
+                <option :value="false">Clients uniquement</option>
+              </select>
+            </div>
+
+            <!-- Balance Range -->
+            <div class="space-y-1">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Solde (Portage)</label>
+              <div class="flex items-center gap-2">
+                <input v-model.number="filters.min_balance" type="number" placeholder="Min" class="w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm" />
+                <input v-model.number="filters.max_balance" type="number" placeholder="Max" class="w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm" />
+              </div>
             </div>
           </div>
 
-          <!-- Selected User Display -->
-          <div v-if="selectedUserId" class="mb-4">
-            <p class="text-sm font-medium text-gray-700 mb-2">Utilisateur sélectionné :</p>
-            <div class="flex items-center justify-between px-3 py-2 bg-blue-50 rounded-md border border-blue-200">
-              <div>
-                <p class="text-sm font-medium text-gray-900">{{ getUserById(selectedUserId)?.first_name }} {{ getUserById(selectedUserId)?.last_name }}</p>
-                <p class="text-xs text-gray-500">{{ getUserById(selectedUserId)?.email }}</p>
-              </div>
-              <button @click="selectedUserId = null" class="text-gray-400 hover:text-red-500 transition-colors">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-          </div>
-
-          <!-- User List -->
-          <div v-if="showUserList" class="border border-gray-200 rounded-md">
-            <div class="p-3 bg-gray-50 border-b border-gray-200">
-              <p class="text-sm font-medium text-gray-700">
-                Sélectionner un utilisateur *
-              </p>
-            </div>
-
-            <div class="max-h-64 overflow-y-auto">
-              <div v-if="!usersStore.isLoading && currentUsers.length === 0" class="p-4 text-center text-gray-500">
-                <p class="text-sm">Aucun utilisateur trouvé</p>
-                <p class="text-xs text-gray-400">Vérifiez votre recherche ou essayez avec d'autres termes</p>
-              </div>
-              <div v-else-if="usersStore.isLoading" class="p-4 text-center">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                <p class="mt-2 text-sm text-gray-500">Chargement...</p>
-              </div>
-              <div v-for="user in currentUsers" :key="user.id" @click="selectUser(user)"
-                class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0">
-                <div class="space-y-1">
-                  <div class="flex items-center gap-2">
-                    <p class="font-semibold text-gray-900 text-sm">{{ user.first_name }}</p>
-                    <span class="text-gray-600 text-sm">-</span>
-                    <p class="font-semibold text-gray-900 text-sm">{{ user.last_name }}</p>
-                  </div>
-                  <p class="text-sm text-gray-500">{{ user.email }}</p>
-                </div>
-                <div v-if="selectedUserId === user.id" class="text-primary">
-                  <i class="fas fa-check"></i>
-                </div>
-              </div>
-            </div>
-
-            <!-- Pagination -->
-            <div v-if="totalPages > 1"
-              class="flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200">
-              <p class="text-sm text-gray-700">
-                Page {{ currentPage }} - Total: {{ filteredUsers.length }} utilisateurs
-              </p>
-              <div class="flex items-center space-x-2">
-                <button @click="previousPage" :disabled="currentPage === 1"
-                  class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
-                  &lt;
-                </button>
-                <button @click="nextPage" :disabled="currentPage === totalPages"
-                  class="px-3 py-1 text-sm bg-primary text-white rounded hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                  &gt;
-                </button>
-              </div>
-            </div>
+          <!-- Boolean Filters -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-gray-100">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" v-model="filters.has_deposit" class="w-4 h-4 text-primary rounded border-gray-300" />
+              <span class="text-sm text-gray-700">A fait un dépôt</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" v-model="filters.has_withdrawal" class="w-4 h-4 text-primary rounded border-gray-300" />
+              <span class="text-sm text-gray-700">A fait un retrait</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" v-model="filters.has_cancellation" class="w-4 h-4 text-primary rounded border-gray-300" />
+              <span class="text-sm text-gray-700">A eu une annulation</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" v-model="filters.has_caisse" class="w-4 h-4 text-primary rounded border-gray-300" />
+              <span class="text-sm text-gray-700">Possède une caisse</span>
+            </label>
           </div>
         </div>
+      </div>
       </div>
 
       <!-- Actions -->
@@ -219,6 +240,22 @@ const searchQuery = ref('')
 const showUserList = ref(false)
 const currentPage = ref(1)
 const usersPerPage = 10
+
+// Advanced filters state
+const showAdvancedFilters = ref(false)
+const filters = ref({
+  kyc_status: null as string | null,
+  is_active: null as boolean | null,
+  is_block: null as boolean | null,
+  sexe: null as string | null,
+  min_balance: null as number | null,
+  max_balance: null as number | null,
+  is_agent: null as boolean | null,
+  has_deposit: false,
+  has_withdrawal: false,
+  has_cancellation: false,
+  has_caisse: false
+})
 
 // Computed properties
 const filteredUsers = computed(() => {
@@ -311,6 +348,20 @@ const clearForm = () => {
   searchQuery.value = ''
   showUserList.value = false
   currentPage.value = 1
+  showAdvancedFilters.value = false
+  filters.value = {
+    kyc_status: null,
+    is_active: null,
+    is_block: null,
+    sexe: null,
+    min_balance: null,
+    max_balance: null,
+    is_agent: null,
+    has_deposit: false,
+    has_withdrawal: false,
+    has_cancellation: false,
+    has_caisse: false
+  }
 }
 
 const sendNotification = async () => {
@@ -342,6 +393,21 @@ const sendNotification = async () => {
     // Ajouter l'image si elle existe
     if (notification.value.image_url) {
       data.image_url = notification.value.image_url
+    }
+
+    // Ajouter les filtres si type='all'
+    if (type.value === 'all') {
+      if (filters.value.kyc_status !== null) data.kyc_status = filters.value.kyc_status
+      if (filters.value.is_active !== null) data.is_active = filters.value.is_active
+      if (filters.value.is_block !== null) data.is_block = filters.value.is_block
+      if (filters.value.sexe !== null) data.sexe = filters.value.sexe
+      if (filters.value.min_balance !== null) data.min_balance = filters.value.min_balance
+      if (filters.value.max_balance !== null) data.max_balance = filters.value.max_balance
+      if (filters.value.is_agent !== null) data.is_agent = filters.value.is_agent
+      if (filters.value.has_deposit) data.has_deposit = true
+      if (filters.value.has_withdrawal) data.has_withdrawal = true
+      if (filters.value.has_cancellation) data.has_cancellation = true
+      if (filters.value.has_caisse) data.has_caisse = true
     }
 
     // Envoyer la notification

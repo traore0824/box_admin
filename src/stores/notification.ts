@@ -33,6 +33,17 @@ export const useNotificationStore = defineStore('notification', () => {
     content: string
     user_id?: number
     image_url?: string
+    kyc_status?: string | null
+    is_active?: boolean | null
+    is_block?: boolean | null
+    sexe?: string | null
+    min_balance?: number | null
+    max_balance?: number | null
+    is_agent?: boolean | null
+    has_deposit?: boolean | null
+    has_withdrawal?: boolean | null
+    has_cancellation?: boolean | null
+    has_caisse?: boolean | null
   }) {
     try {
       isLoading.value = true
@@ -56,6 +67,21 @@ export const useNotificationStore = defineStore('notification', () => {
 
       if (data.image_url) {
         payload.image_url = data.image_url
+      }
+
+      // Advanced filters (only for type="all")
+      if (data.type === 'all') {
+        if (data.kyc_status !== undefined) payload.kyc_status = data.kyc_status
+        if (data.is_active !== undefined) payload.is_active = data.is_active
+        if (data.is_block !== undefined) payload.is_block = data.is_block
+        if (data.sexe !== undefined) payload.sexe = data.sexe
+        if (data.min_balance !== undefined) payload.min_balance = data.min_balance
+        if (data.max_balance !== undefined) payload.max_balance = data.max_balance
+        if (data.is_agent !== undefined) payload.is_agent = data.is_agent
+        if (data.has_deposit !== undefined) payload.has_deposit = data.has_deposit
+        if (data.has_withdrawal !== undefined) payload.has_withdrawal = data.has_withdrawal
+        if (data.has_cancellation !== undefined) payload.has_cancellation = data.has_cancellation
+        if (data.has_caisse !== undefined) payload.has_caisse = data.has_caisse
       }
 
       const response = await fetchWithAuth('/box/send-notification', {
