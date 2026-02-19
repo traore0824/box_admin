@@ -911,7 +911,7 @@ const formatNullValue = (value: any): string => {
 
 // Fonction pour revenir en arrière
 const goBack = () => {
-  router.push({ name: 'users' })
+  router.back()
 }
 
 // Charger les informations de l'utilisateur

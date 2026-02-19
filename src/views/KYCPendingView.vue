@@ -85,6 +85,13 @@
 
           <!-- Actions -->
           <div class="lg:w-48 flex flex-col gap-3">
+            <router-link 
+              :to="{ name: 'user-profile', params: { id: user.id.toString() } }"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center"
+            >
+              <i class="fas fa-user-circle mr-2"></i>
+              Voir Profil
+            </router-link>
             <button 
               @click="openAcceptModal(user)"
               :disabled="kycStore.isLoading || processingUserId === user.id"

@@ -508,7 +508,7 @@ const getCaisseStatusClass = (status: string): string => {
 
 // Fonction pour revenir en arrière
 const goBack = () => {
-  router.push({ name: 'transactions' })
+  router.back()
 }
 
 // Fonction pour voir le profil utilisateur

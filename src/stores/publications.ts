@@ -30,7 +30,7 @@ export const usePublicationsStore = defineStore('publications', () => {
         isLoading.value = true
         error.value = null
         try {
-            const response = await fetchWithAuth(`/api/publications?page=${page}`, {
+            const response = await fetchWithAuth(`/box/publications?page=${page}`, {
                 method: 'GET'
             })
 
@@ -62,7 +62,7 @@ export const usePublicationsStore = defineStore('publications', () => {
 
     async function markAsRead(id: string) {
         try {
-            const response = await fetchWithAuth('/api/publications/mark-read', {
+            const response = await fetchWithAuth('/box/publications/mark-read', {
                 method: 'POST',
                 body: { publication_id: id }
             })
@@ -88,7 +88,7 @@ export const usePublicationsStore = defineStore('publications', () => {
         isLoading.value = true
         error.value = null
         try {
-            const response = await fetchWithAuth('/api/admin/publications', {
+            const response = await fetchWithAuth('/box/admin/publications', {
                 method: 'POST',
                 body: data
             })
