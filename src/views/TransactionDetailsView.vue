@@ -532,62 +532,17 @@ const loadTransactionDetails = async () => {
       throw new Error('ID transaction invalide')
     }
 
-    // Charger la transaction depuis l'API
-    // Essayer d'abord avec la référence publique
-    let response = await fetchWithAuth('/box/all-transaction', {
-      queryParams: { 
-        page: '1', 
-        page_size: '100',
-        public_reference: id
-      }
-    })
+    // Charger la transaction directement via son ID
+    const response = await fetchWithAuth(`/box/transaction/${transactionId.value}`)
 
     if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Transaction non trouvée')
+      }
       throw new Error('Erreur lors de la récupération des détails de la transaction')
     }
 
-    let data = await response.json()
-    
-    // Chercher la transaction par ID dans les résultats
-    let foundTransaction = data.results?.find((t: any) => t.id === transactionId.value)
-    
-    // Si pas trouvé, essayer de chercher par référence publique
-    if (!foundTransaction) {
-      foundTransaction = data.results?.find((t: any) => t.public_reference === id)
-    }
-
-    // Si toujours pas trouvé, essayer une recherche directe sans filtre et parcourir plusieurs pages
-    if (!foundTransaction) {
-      let page = 1
-      const maxPages = 10 // Limiter à 10 pages pour éviter une boucle infinie
-      
-      while (page <= maxPages && !foundTransaction) {
-        response = await fetchWithAuth('/box/all-transaction', {
-          queryParams: { 
-            page: page.toString(), 
-            page_size: '100'
-          }
-        })
-        
-        if (!response.ok) break
-        
-        data = await response.json()
-        foundTransaction = data.results?.find((t: any) => t.id === transactionId.value)
-        
-        if (!foundTransaction && !data.next) {
-          // Plus de pages disponibles
-          break
-        }
-        
-        page++
-      }
-    }
-
-    if (!foundTransaction) {
-      throw new Error('Transaction non trouvée')
-    }
-
-    transaction.value = foundTransaction
+    transaction.value = await response.json()
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
     console.error('Error loading transaction details:', err)
