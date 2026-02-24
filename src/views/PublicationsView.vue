@@ -92,7 +92,7 @@
               <div class="prose prose-sm max-w-none text-gray-600" v-html="formatContent(publication.content)"></div>
             </div>
             
-            <div class="ml-4 flex-shrink-0">
+            <div class="ml-4 flex-shrink-0 flex flex-col space-y-2">
               <button
                 v-if="!publication.is_read"
                 @click="markAsRead(publication.id)"
@@ -102,10 +102,20 @@
                 <i class="fas fa-check mr-1"></i>
                 Marquer lu
               </button>
-              <span v-else class="text-green-600 text-sm flex items-center">
+              <span v-else class="text-green-600 text-sm flex items-center mb-2">
                 <i class="fas fa-check-double mr-1"></i>
                 Lu
               </span>
+              
+              <button
+                v-if="authStore.user?.is_staff"
+                @click="openEditModal(publication)"
+                class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                title="Modifier"
+              >
+                <i class="fas fa-edit mr-1"></i>
+                Modifier
+              </button>
             </div>
           </div>
         </div>
@@ -115,14 +125,14 @@
     <!-- Create Publication Modal -->
     <div v-if="showCreateModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
       <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" @click="showCreateModal = false"></div>
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" @click="closeCreateModal"></div>
 
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
         <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
           <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
             <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="modal-title">
-              Nouvelle Publication
+              {{ isEditing ? 'Modifier la Publication' : 'Nouvelle Publication' }}
             </h3>
             
             <div class="space-y-4">
@@ -192,16 +202,16 @@
           <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
             <button 
               type="button" 
-              @click="handleCreate"
+              @click="handleSubmit"
               :disabled="publicationsStore.isLoading || isUploading"
               class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
             >
               <i v-if="publicationsStore.isLoading" class="fas fa-spinner animate-spin mr-2"></i>
-              Publier
+              {{ isEditing ? 'Mettre à jour' : 'Publier' }}
             </button>
             <button 
               type="button" 
-              @click="showCreateModal = false"
+              @click="closeCreateModal"
               class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
             >
               Annuler
@@ -233,6 +243,9 @@ const newPub = reactive({
   is_active: true
 })
 
+const isEditing = ref(false)
+const editingId = ref<string | null>(null)
+
 onMounted(() => {
   publicationsStore.fetchPublications()
 })
@@ -259,23 +272,48 @@ const removeImage = (index: number) => {
   newPub.images.splice(index, 1)
 }
 
-const handleCreate = async () => {
+const openEditModal = (publication: any) => {
+  isEditing.value = true
+  editingId.value = publication.id
+  newPub.title = publication.title
+  newPub.content = publication.content
+  newPub.images = [...publication.images]
+  newPub.is_active = publication.is_active
+  showCreateModal.value = true
+}
+
+const handleSubmit = async () => {
   if (!newPub.title || !newPub.content) {
     alert('Veuillez remplir le titre et le contenu')
     return
   }
   
   try {
-    await publicationsStore.createPublication({ ...newPub })
+    if (isEditing.value && editingId.value) {
+      await publicationsStore.updatePublication(editingId.value, { ...newPub })
+    } else {
+      await publicationsStore.createPublication({ ...newPub })
+    }
+    
     showCreateModal.value = false
-    // Reset form
-    newPub.title = ''
-    newPub.content = ''
-    newPub.images = []
-    newPub.is_active = true
+    resetForm()
   } catch (err) {
     // Error handled by store
   }
+}
+
+const resetForm = () => {
+  isEditing.value = false
+  editingId.value = null
+  newPub.title = ''
+  newPub.content = ''
+  newPub.images = []
+  newPub.is_active = true
+}
+
+const closeCreateModal = () => {
+  showCreateModal.value = false
+  resetForm()
 }
 
 const formatDate = (dateString: string) => {

@@ -109,6 +109,34 @@ export const usePublicationsStore = defineStore('publications', () => {
         }
     }
 
+    async function updatePublication(id: string, data: Partial<{ title: string; content: string; images: string[]; is_active: boolean }>) {
+        isLoading.value = true
+        error.value = null
+        try {
+            const response = await fetchWithAuth(`/box/admin/publications/${id}/`, {
+                method: 'PATCH',
+                body: data
+            })
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}))
+                throw new Error(errorData.message || 'Erreur lors de la modification de la publication')
+            }
+
+            const updatedPub: Publication = await response.json()
+            const index = publications.value.findIndex(p => p.id === id)
+            if (index !== -1) {
+                publications.value[index] = updatedPub
+            }
+            return updatedPub
+        } catch (err: any) {
+            error.value = err.message || 'Une erreur est survenue'
+            throw err
+        } finally {
+            isLoading.value = false
+        }
+    }
+
     return {
         publications,
         isLoading,
@@ -118,6 +146,7 @@ export const usePublicationsStore = defineStore('publications', () => {
         itemsPerPage,
         fetchPublications,
         markAsRead,
-        createPublication
+        createPublication,
+        updatePublication
     }
 })
