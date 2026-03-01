@@ -26,8 +26,10 @@ interface DashboardStats {
   caisse_cancel: number
   caisse_pending: number
   caisse_disabled: number
-  caisse_free: number
-  caisse_locked: number
+  caisse_free_pending: number
+  caisse_free_not_pending: number
+  caisse_locked_pending: number
+  caisse_locked_not_pending: number
   all_week_caisse: number
   custom_caisse: number
   all_month_caisse: number
@@ -100,8 +102,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
     caisse_cancel: 0,
     caisse_pending: 0,
     caisse_disabled: 0,
-    caisse_free: 0,
-    caisse_locked: 0,
+    caisse_free_pending: 0,
+    caisse_free_not_pending: 0,
+    caisse_locked_pending: 0,
+    caisse_locked_not_pending: 0,
     all_week_caisse: 0,
     custom_caisse: 0,
     all_month_caisse: 0,
@@ -203,8 +207,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
         ...stats.value,
         ...data,
         // S'assurer que les nouvelles stats ont des valeurs par défaut si absentes
-        caisse_free: data.caisse_free ?? 0,
-        caisse_locked: data.caisse_locked ?? 0,
+        caisse_free_pending: data.caisse_free_pending ?? 0,
+        caisse_free_not_pending: data.caisse_free_not_pending ?? 0,
+        caisse_locked_pending: data.caisse_locked_pending ?? 0,
+        caisse_locked_not_pending: data.caisse_locked_not_pending ?? 0,
         total_wallets: data.total_wallets ?? 0,
         active_wallets: data.active_wallets ?? 0,
         total_wallets_balance: data.total_wallets_balance ?? 0,
@@ -327,8 +333,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
       caisse_cancel: 0,
       caisse_pending: 0,
       caisse_disabled: 0,
-      caisse_free: 0,
-      caisse_locked: 0,
+      caisse_free_pending: 0,
+      caisse_free_not_pending: 0,
+      caisse_locked_pending: 0,
+      caisse_locked_not_pending: 0,
       all_week_caisse: 0,
       custom_caisse: 0,
       all_month_caisse: 0,

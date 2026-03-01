@@ -122,10 +122,24 @@
             <MetricItem :value="stats.caisse_done" label="Terminées" color="success" border />
             <MetricItem :value="stats.caisse_cancel" label="Annulées" color="danger" border />
             <MetricItem :value="stats.caisse_disabled" label="Désactivées" color="secondary" border />
-            <MetricItem :value="stats.caisse_free" label="Caisses Libres" color="info" border />
-            <MetricItem :value="stats.caisse_locked" label="Caisses Bloquées" color="danger" border />
             <MetricItem :value="stats.avg_ongoing_caisse_duration_months || 0" label="Durée Moyenne en Cours (mois)" color="info" border />
           </MetricGrid>
+
+          <div class="frequency-section">
+            <h4 class="section-title">Caisses Libres</h4>
+            <MetricGrid>
+              <MetricItem :value="stats.caisse_free_pending" label="Libres en Cours" color="info" border />
+              <MetricItem :value="stats.caisse_free_not_pending" label="Libres Terminées/Annulées" color="secondary" border />
+            </MetricGrid>
+          </div>
+
+          <div class="frequency-section">
+            <h4 class="section-title">Caisses Bloquées</h4>
+            <MetricGrid>
+              <MetricItem :value="stats.caisse_locked_pending" label="Bloquées en Cours" color="danger" border />
+              <MetricItem :value="stats.caisse_locked_not_pending" label="Bloquées Terminées/Annulées" color="secondary" border />
+            </MetricGrid>
+          </div>
 
           <div class="frequency-section">
             <h4 class="section-title">Répartition par Durée (Estimée)</h4>
