@@ -158,7 +158,7 @@
                   <!-- Dropdown Menu avec positionnement fixe -->
                   <Teleport to="body">
                     <div v-if="activeDropdown === user.id" :style="getDropdownStyle(user.id)"
-                      class="fixed w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-[9999] transform transition-all duration-100"
+                      class="fixed w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-[9999] transform transition-all duration-100 max-h-[400px] overflow-y-auto"
                       :class="dropdownAnimation" role="menu">
                       <div class="py-1" role="none">
                         <!-- Action Bloquer/Débloquer -->
@@ -692,15 +692,24 @@ function updateDropdownPosition(userId: number) {
     const rect = button.getBoundingClientRect()
     const windowHeight = window.innerHeight
     const windowWidth = window.innerWidth
-    const dropdownHeight = 120 // hauteur approximative du dropdown
+    const maxDropdownHeight = 400 // hauteur max avec scroll
     const dropdownWidth = 192 // largeur du dropdown (w-48 = 12rem = 192px)
     
     let top = rect.bottom + 4
     let left = rect.right - dropdownWidth
     
-    // Ajustement si le dropdown dépasse en bas
-    if (top + dropdownHeight > windowHeight) {
-      top = rect.top - dropdownHeight - 4
+    // Calculer l'espace disponible en bas et en haut
+    const spaceBelow = windowHeight - rect.bottom - 8
+    const spaceAbove = rect.top - 8
+    
+    // Si pas assez d'espace en bas, ouvrir vers le haut
+    if (spaceBelow < 200 && spaceAbove > spaceBelow) {
+      // Ouvrir vers le haut
+      const availableHeight = Math.min(maxDropdownHeight, spaceAbove)
+      top = rect.top - availableHeight - 4
+    } else {
+      // Ouvrir vers le bas (comportement par défaut)
+      top = rect.bottom + 4
     }
     
     // Ajustement si le dropdown dépasse à gauche
