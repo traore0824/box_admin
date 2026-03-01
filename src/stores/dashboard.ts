@@ -56,8 +56,10 @@ interface DashboardStats {
   // Nouvelles statistiques Commissions
   total_commissions_generated?: number
   total_commissions_withdrawn?: number
+  commission_withdrawals_count?: number
   commission_available?: number
-  commission_total?: number
+  commission_total_all_time?: number
+  commission_withdrawn_all_time?: number
   // Nouvelles statistiques Bonus de Parrainage
   total_referral_bonus_attributed?: number
   total_referral_bonus_withdrawn?: number
@@ -131,8 +133,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
     total_wallet_withdrawals: 0,
     total_commissions_generated: 0,
     total_commissions_withdrawn: 0,
+    commission_withdrawals_count: 0,
     commission_available: 0,
-    commission_total: 0,
+    commission_total_all_time: 0,
+    commission_withdrawn_all_time: 0,
     total_referral_bonus_attributed: 0,
     total_referral_bonus_withdrawn: 0,
     total_referral_bonus_available: 0,
@@ -219,8 +223,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
         total_wallet_withdrawals: data.total_wallet_withdrawals ?? 0,
         total_commissions_generated: data.total_commissions_generated ?? 0,
         total_commissions_withdrawn: data.total_commissions_withdrawn ?? 0,
+        commission_withdrawals_count: data.commission_withdrawals_count ?? 0,
         commission_available: data.commission_available ?? 0,
-        commission_total: data.commission_total ?? 0,
+        commission_total_all_time: data.commission_total_all_time ?? 0,
+        commission_withdrawn_all_time: data.commission_withdrawn_all_time ?? 0,
         total_referral_bonus_attributed: data.total_referral_bonus_attributed ?? 0,
         total_referral_bonus_withdrawn: data.total_referral_bonus_withdrawn ?? 0,
         total_referral_bonus_available: data.total_referral_bonus_available ?? 0,
@@ -361,8 +367,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
       total_wallet_withdrawals: 0,
       total_commissions_generated: 0,
       total_commissions_withdrawn: 0,
+      commission_withdrawals_count: 0,
       commission_available: 0,
-      commission_total: 0,
+      commission_total_all_time: 0,
+      commission_withdrawn_all_time: 0,
       total_referral_bonus_attributed: 0,
       total_referral_bonus_withdrawn: 0,
       total_referral_bonus_available: 0,

@@ -181,12 +181,15 @@
           <MetricGrid>
             <MetricItem :value="formatCurrency(stats.commission_available || 0)" label="Commission Disponible"
               color="success" />
-            <MetricItem :value="formatCurrency(stats.commission_total || 0)" label="Commission Totale"
+            <MetricItem :value="formatCurrency(stats.commission_total_all_time || 0)" label="Commission Totale (Tout le temps)"
               color="primary" />
+            <MetricItem :value="stats.commission_withdrawals_count || 0" label="Nombre de Retraits (Période)"
+              color="info" />
           </MetricGrid>
           <div class="amounts-section">
             <AmountDisplay :value="stats.total_commissions_generated || 0" label="Commissions Générées (Période)" />
             <AmountDisplay :value="stats.total_commissions_withdrawn || 0" label="Commissions Retirées (Période)" />
+            <AmountDisplay :value="stats.commission_withdrawn_all_time || 0" label="Total Retraits (Tout le temps)" />
           </div>
         </DashboardSection>
 
