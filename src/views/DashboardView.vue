@@ -122,6 +122,8 @@
             <MetricItem :value="stats.caisse_done" label="Terminées" color="success" border />
             <MetricItem :value="stats.caisse_cancel" label="Annulées" color="danger" border />
             <MetricItem :value="stats.caisse_disabled" label="Désactivées" color="secondary" border />
+            <MetricItem :value="stats.caisse_free" label="Caisses Libres" color="info" border />
+            <MetricItem :value="stats.caisse_locked" label="Caisses Bloquées" color="danger" border />
             <MetricItem :value="stats.avg_ongoing_caisse_duration_months || 0" label="Durée Moyenne en Cours (mois)" color="info" border />
           </MetricGrid>
 
