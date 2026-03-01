@@ -137,8 +137,8 @@ export const useCommissionsStore = defineStore('commissions', () => {
     }
   }
 
-  // Retirer des commissions
-  async function withdrawCommissions(commissionTransactionIds: number[], totalAmount: string, notes?: string) {
+  // Retirer des commissions - Nouvelle API simplifiée
+  async function withdrawCommissions(amount: number | string, notes?: string) {
     try {
       isLoading.value = true
       error.value = null
@@ -146,14 +146,17 @@ export const useCommissionsStore = defineStore('commissions', () => {
       const response = await fetchWithAuth('/box/commission/withdrawal', {
         method: 'POST',
         body: {
-          commission_transaction_ids: commissionTransactionIds,
-          total_amount: totalAmount,
+          amount: amount,
           notes: notes || ''
         }
       })
 
       if (!response.ok) {
         const data = await response.json()
+        // Gérer les erreurs de validation
+        if (data.amount && Array.isArray(data.amount)) {
+          throw new Error(data.amount[0])
+        }
         throw new Error(data.detail || data.message || 'Erreur lors du retrait des commissions')
       }
 

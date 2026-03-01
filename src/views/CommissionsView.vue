@@ -3,19 +3,16 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
       <h1 class="text-2xl font-bold text-gray-900">Gestion des Commissions</h1>
-      <!-- Bouton de réconciliation commenté -->
-      <!--
-      <div class="mt-4 sm:mt-0 flex space-x-3">
+      <div class="mt-4 sm:mt-0">
         <button 
-          @click="handleReconcile"
-          :disabled="commissionsStore.isLoading"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="openWithdrawModal"
+          :disabled="commissionsStore.isLoading || !hasAvailableCommission"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <i class="fas fa-sync-alt mr-2"></i>
-          Réconcilier
+          <i class="fas fa-money-bill-wave mr-2"></i>
+          Retirer Commission
         </button>
       </div>
-      -->
     </div>
 
     <!-- Commission Totale -->
@@ -68,14 +65,6 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                <input 
-                  type="checkbox" 
-                  v-model="selectAll"
-                  @change="toggleSelectAll"
-                  class="rounded border-gray-300"
-                />
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Référence
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -97,15 +86,6 @@
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <tr v-for="transaction in commissionsStore.commissionTransactions" :key="transaction.id">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <input 
-                  type="checkbox" 
-                  :value="transaction.id"
-                  v-model="selectedTransactions"
-                  :disabled="transaction.is_withdrawn"
-                  class="rounded border-gray-300"
-                />
-              </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                 {{ transaction.transaction?.public_reference || 'N/A' }}
               </td>
@@ -134,23 +114,6 @@
             </tr>
           </tbody>
         </table>
-      </div>
-
-      <!-- Actions -->
-      <div v-if="selectedTransactions.length > 0" class="p-4 bg-gray-50 border-t border-gray-200">
-        <div class="flex items-center justify-between">
-          <p class="text-sm text-gray-700">
-            {{ selectedTransactions.length }} commission(s) sélectionnée(s) - 
-            Total: <span class="font-semibold">{{ formatCurrency(calculateSelectedTotal()) }}</span>
-          </p>
-          <button 
-            @click="openWithdrawModal"
-            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-          >
-            <i class="fas fa-money-bill-wave mr-2"></i>
-            Retirer
-          </button>
-        </div>
       </div>
 
       <!-- Pagination -->
@@ -243,71 +206,81 @@
       <div v-if="showWithdrawModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
           <h3 class="text-xl font-semibold text-gray-800 mb-4">Retirer des Commissions</h3>
+          
           <div class="mb-4">
-            <p class="text-sm text-gray-600 mb-2">Montant total sélectionné:</p>
-            <p class="text-2xl font-bold text-green-600">{{ formatCurrency(calculateSelectedTotal()) }}</p>
+            <p class="text-sm text-gray-600 mb-2">Commission disponible:</p>
+            <p class="text-2xl font-bold text-green-600">
+              {{ formatCurrency(parseFloat(String(commissionsStore.commission?.available_amount || '0'))) }}
+            </p>
           </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Montant à retirer <span class="text-red-500">*</span>
+            </label>
+            <input 
+              v-model.number="withdrawAmount"
+              type="number"
+              step="0.01"
+              min="0"
+              :max="parseFloat(String(commissionsStore.commission?.available_amount || '0'))"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="Entrez le montant"
+            />
+            <p v-if="withdrawAmountError" class="mt-1 text-sm text-red-600">{{ withdrawAmountError }}</p>
+          </div>
+
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">Notes (optionnel)</label>
             <textarea 
               v-model="withdrawNotes"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
               rows="3"
+              placeholder="Raison du retrait..."
             ></textarea>
           </div>
+
           <div class="flex justify-end space-x-3">
             <button 
-              @click="showWithdrawModal = false"
+              @click="closeWithdrawModal"
               class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
             >
               Annuler
             </button>
             <button 
               @click="handleWithdraw"
-              :disabled="commissionsStore.isLoading"
-              class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+              :disabled="commissionsStore.isLoading || !isValidWithdrawAmount"
+              class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Confirmer
+              <i v-if="commissionsStore.isLoading" class="fas fa-spinner fa-spin mr-2"></i>
+              Confirmer le retrait
             </button>
           </div>
         </div>
       </div>
     </Teleport>
 
-    <!-- Modal de Réconciliation -->
-    <ConfirmationModal
-      :is-open="showReconcileModal"
-      title="Réconcilier les commissions"
-      message="Êtes-vous sûr de vouloir réconcilier les commissions ? Cette action vérifiera la cohérence entre le montant total et la somme des transactions."
-      :loading="commissionsStore.isLoading"
-      @confirm="confirmReconcile"
-      @cancel="showReconcileModal = false"
-    />
+    <!-- Modal de Réconciliation - Supprimé car non utilisé -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useCommissionsStore } from '../stores/commissions'
-import { useNotification } from '../services/notification'
-import ConfirmationModal from '../components/ConfirmationModal.vue'
 import { formatCurrency } from '../utils/currency'
 
 const commissionsStore = useCommissionsStore()
-const selectedTransactions = ref<number[]>([])
-const selectAll = ref(false)
 const isWithdrawnFilter = ref<boolean | null>(null)
 const showWithdrawModal = ref(false)
+const withdrawAmount = ref<number>(0)
 const withdrawNotes = ref('')
-const showReconcileModal = ref(false)
+const withdrawAmountError = ref('')
 
 onMounted(async () => {
   await commissionsStore.fetchCommission()
   await commissionsStore.fetchCommissionTransactions(1, null)
   await commissionsStore.fetchWithdrawals()
 })
-
-// formatCurrency est importé depuis utils/currency
 
 const formatDate = (date: string): string => {
   return new Date(date).toLocaleDateString('fr-FR', {
@@ -319,74 +292,55 @@ const formatDate = (date: string): string => {
   })
 }
 
-const calculateSelectedTotal = (): number => {
-  return selectedTransactions.value.reduce((total, id) => {
-    const transaction = commissionsStore.commissionTransactions.find(t => t.id === id)
-    return total + (transaction ? parseFloat(transaction.commission) : 0)
-  }, 0)
-}
+const hasAvailableCommission = computed(() => {
+  const available = parseFloat(String(commissionsStore.commission?.available_amount || '0'))
+  return available > 0
+})
 
-const toggleSelectAll = () => {
-  if (selectAll.value) {
-    selectedTransactions.value = commissionsStore.commissionTransactions
-      .filter(t => !t.is_withdrawn)
-      .map(t => t.id)
-  } else {
-    selectedTransactions.value = []
+const isValidWithdrawAmount = computed(() => {
+  if (!withdrawAmount.value || withdrawAmount.value <= 0) {
+    return false
   }
-}
+  const available = parseFloat(String(commissionsStore.commission?.available_amount || '0'))
+  return withdrawAmount.value <= available
+})
 
 const openWithdrawModal = () => {
-  if (selectedTransactions.value.length === 0) return
+  withdrawAmount.value = 0
+  withdrawNotes.value = ''
+  withdrawAmountError.value = ''
   showWithdrawModal.value = true
+}
+
+const closeWithdrawModal = () => {
+  showWithdrawModal.value = false
+  withdrawAmount.value = 0
+  withdrawNotes.value = ''
+  withdrawAmountError.value = ''
 }
 
 const handleWithdraw = async () => {
   try {
-    // Validation de sécurité
-    if (selectedTransactions.value.length === 0) {
+    // Validation
+    withdrawAmountError.value = ''
+    
+    if (!withdrawAmount.value || withdrawAmount.value <= 0) {
+      withdrawAmountError.value = 'Le montant doit être supérieur à 0'
       return
     }
     
-    const totalAmount = calculateSelectedTotal()
-    
-    // Validation : montant doit être positif
-    if (totalAmount <= 0) {
-      const notification = useNotification()
-      notification.addNotification('Le montant doit être supérieur à 0', 'error')
-      return
-    }
-    
-    // Validation : montant ne doit pas dépasser un seuil raisonnable (sécurité)
-    if (totalAmount > 100000000) { // 100 millions XOF
-      const notification = useNotification()
-      notification.addNotification('Montant trop élevé. Veuillez contacter le support.', 'error')
+    const available = parseFloat(String(commissionsStore.commission?.available_amount || '0'))
+    if (withdrawAmount.value > available) {
+      withdrawAmountError.value = `Le montant ne peut pas dépasser ${formatCurrency(available)}`
       return
     }
     
     await commissionsStore.withdrawCommissions(
-      selectedTransactions.value,
-      totalAmount.toFixed(2),
-      withdrawNotes.value.substring(0, 500) // Limiter la longueur des notes
+      withdrawAmount.value,
+      withdrawNotes.value
     )
-    selectedTransactions.value = []
-    selectAll.value = false
-    showWithdrawModal.value = false
-    withdrawNotes.value = ''
-  } catch (error) {
-    // L'erreur est déjà gérée dans le store
-  }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const handleReconcile = async () => {
-  showReconcileModal.value = true
-}
-
-const confirmReconcile = async () => {
-  try {
-    await commissionsStore.reconcileCommissions()
-    showReconcileModal.value = false
+    
+    closeWithdrawModal()
   } catch (error) {
     // L'erreur est déjà gérée dans le store
   }
