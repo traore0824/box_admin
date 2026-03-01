@@ -462,65 +462,6 @@
               <option value="reject">Rejeté</option>
             </select>
           </div>
-
-          <!-- Upload Pièce d'identité -->
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Pièce d'identité
-            </label>
-            <div class="flex items-center gap-3">
-              <input 
-                type="file"
-                ref="idCardFileInput"
-                @change="handleIdCardFileSelect"
-                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                class="hidden"
-              />
-              <button
-                @click="triggerIdCardFileInput"
-                :disabled="uploadingIdCard"
-                class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                <i class="fas fa-id-card"></i>
-                {{ uploadingIdCard ? 'Upload en cours...' : 'Sélectionner la pièce' }}
-              </button>
-              <span v-if="idCardUrl" class="text-sm text-green-600 flex items-center gap-1">
-                <i class="fas fa-check-circle"></i>
-                Fichier uploadé
-              </span>
-            </div>
-            <p v-if="idCardUrl" class="text-xs text-gray-500 mt-1 truncate">{{ idCardUrl }}</p>
-          </div>
-
-          <!-- Upload Selfie -->
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Selfie
-            </label>
-            <div class="flex items-center gap-3">
-              <input 
-                type="file"
-                ref="selfieFileInput"
-                @change="handleSelfieFileSelect"
-                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                class="hidden"
-              />
-              <button
-                @click="triggerSelfieFileInput"
-                :disabled="uploadingSelfie"
-                class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                <i class="fas fa-camera"></i>
-                {{ uploadingSelfie ? 'Upload en cours...' : 'Sélectionner le selfie' }}
-              </button>
-              <span v-if="selfieUrl" class="text-sm text-green-600 flex items-center gap-1">
-                <i class="fas fa-check-circle"></i>
-                Fichier uploadé
-              </span>
-            </div>
-            <p v-if="selfieUrl" class="text-xs text-gray-500 mt-1 truncate">{{ selfieUrl }}</p>
-          </div>
-
           <div v-if="kycStatus === 'reject'" class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">
               Raison du rejet <span class="text-red-500">*</span>
@@ -542,7 +483,7 @@
             </button>
             <button 
               @click="confirmKycUpdate"
-              :disabled="!kycStatus || (kycStatus === 'reject' && !kycRejectionReason.trim()) || actionLoading || uploadingIdCard || uploadingSelfie"
+              :disabled="!kycStatus || (kycStatus === 'reject' && !kycRejectionReason.trim()) || actionLoading"
               class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50"
             >
               Mettre à jour
@@ -760,14 +701,70 @@
               <label class="block text-sm font-medium text-gray-700 mb-1">Carte ID</label>
               <input v-model="kycForm.card_id" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" />
             </div>
+            
+            <!-- Upload Pièce d'identité -->
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">URLs des Photos (une par ligne)</label>
-              <textarea v-model="kycForm.photosString" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="https://url1.com&#10;https://url2.com"></textarea>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Pièce d'identité
+              </label>
+              <div class="flex items-center gap-3">
+                <input 
+                  type="file"
+                  ref="adminIdCardFileInput"
+                  @change="handleAdminIdCardFileSelect"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  class="hidden"
+                />
+                <button
+                  type="button"
+                  @click="triggerAdminIdCardFileInput"
+                  :disabled="uploadingAdminIdCard"
+                  class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <i class="fas fa-id-card"></i>
+                  {{ uploadingAdminIdCard ? 'Upload en cours...' : 'Sélectionner la pièce' }}
+                </button>
+                <span v-if="adminIdCardUrl" class="text-sm text-green-600 flex items-center gap-1">
+                  <i class="fas fa-check-circle"></i>
+                  Fichier uploadé
+                </span>
+              </div>
+              <p v-if="adminIdCardUrl" class="text-xs text-gray-500 mt-1 truncate">{{ adminIdCardUrl }}</p>
+            </div>
+
+            <!-- Upload Selfie -->
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Selfie
+              </label>
+              <div class="flex items-center gap-3">
+                <input 
+                  type="file"
+                  ref="adminSelfieFileInput"
+                  @change="handleAdminSelfieFileSelect"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  class="hidden"
+                />
+                <button
+                  type="button"
+                  @click="triggerAdminSelfieFileInput"
+                  :disabled="uploadingAdminSelfie"
+                  class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <i class="fas fa-camera"></i>
+                  {{ uploadingAdminSelfie ? 'Upload en cours...' : 'Sélectionner le selfie' }}
+                </button>
+                <span v-if="adminSelfieUrl" class="text-sm text-green-600 flex items-center gap-1">
+                  <i class="fas fa-check-circle"></i>
+                  Fichier uploadé
+                </span>
+              </div>
+              <p v-if="adminSelfieUrl" class="text-xs text-gray-500 mt-1 truncate">{{ adminSelfieUrl }}</p>
             </div>
           </div>
           <div class="flex justify-end space-x-3">
             <button @click="closeAdminKycModal" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Annuler</button>
-            <button @click="handleAdminKycVerify" :disabled="actionLoading" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50">Valider KYC</button>
+            <button @click="handleAdminKycVerify" :disabled="actionLoading || uploadingAdminIdCard || uploadingAdminSelfie" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50">Valider KYC</button>
           </div>
         </div>
       </div>
@@ -818,12 +815,6 @@ const pendingAction = ref<(() => Promise<void>) | null>(null)
 const showKycModal = ref(false)
 const kycStatus = ref<string>('')
 const kycRejectionReason = ref('')
-const idCardFileInput = ref<HTMLInputElement | null>(null)
-const selfieFileInput = ref<HTMLInputElement | null>(null)
-const idCardUrl = ref<string>('')
-const selfieUrl = ref<string>('')
-const uploadingIdCard = ref(false)
-const uploadingSelfie = ref(false)
 
 // Update Modal State
 const showUpdateModal = ref(false)
@@ -846,6 +837,12 @@ const kycForm = ref({
   card_id: '',
   photosString: ''
 })
+const adminIdCardFileInput = ref<HTMLInputElement | null>(null)
+const adminSelfieFileInput = ref<HTMLInputElement | null>(null)
+const adminIdCardUrl = ref<string>('')
+const adminSelfieUrl = ref<string>('')
+const uploadingAdminIdCard = ref(false)
+const uploadingAdminSelfie = ref(false)
 
 // Wallet Modal State
 const showWalletModal = ref(false)
@@ -1227,8 +1224,6 @@ const openKycModal = () => {
   if (!user.value) return
   kycStatus.value = user.value.status || 'null'
   kycRejectionReason.value = ''
-  idCardUrl.value = ''
-  selfieUrl.value = ''
   showKycModal.value = true
 }
 
@@ -1236,58 +1231,6 @@ const closeKycModal = () => {
   showKycModal.value = false
   kycStatus.value = ''
   kycRejectionReason.value = ''
-  idCardUrl.value = ''
-  selfieUrl.value = ''
-}
-
-const triggerIdCardFileInput = () => {
-  idCardFileInput.value?.click()
-}
-
-const triggerSelfieFileInput = () => {
-  selfieFileInput.value?.click()
-}
-
-const handleIdCardFileSelect = async (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  
-  if (!file) return
-  
-  try {
-    uploadingIdCard.value = true
-    const url = await uploadStore.uploadFile(file, 'image')
-    idCardUrl.value = url
-    notification.addNotification('Pièce d\'identité uploadée avec succès', 'success')
-  } catch (error: any) {
-    console.error('Erreur lors de l\'upload de la pièce d\'identité:', error)
-    notification.addNotification(`Erreur: ${error.message || 'Impossible d\'uploader la pièce d\'identité'}`, 'error')
-  } finally {
-    uploadingIdCard.value = false
-    // Reset input
-    if (target) target.value = ''
-  }
-}
-
-const handleSelfieFileSelect = async (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  
-  if (!file) return
-  
-  try {
-    uploadingSelfie.value = true
-    const url = await uploadStore.uploadFile(file, 'image')
-    selfieUrl.value = url
-    notification.addNotification('Selfie uploadé avec succès', 'success')
-  } catch (error: any) {
-    console.error('Erreur lors de l\'upload du selfie:', error)
-    notification.addNotification(`Erreur: ${error.message || 'Impossible d\'uploader le selfie'}`, 'error')
-  } finally {
-    uploadingSelfie.value = false
-    // Reset input
-    if (target) target.value = ''
-  }
 }
 
 const confirmKycUpdate = async () => {
@@ -1295,17 +1238,10 @@ const confirmKycUpdate = async () => {
   
   try {
     actionLoading.value = true
-    
-    // Construire le tableau des URLs
-    const userCards: string[] = []
-    if (idCardUrl.value) userCards.push(idCardUrl.value)
-    if (selfieUrl.value) userCards.push(selfieUrl.value)
-    
     await usersStore.updateKycStatus(
       user.value.id,
       kycStatus.value as 'pending' | 'accept' | 'reject' | 'null',
-      kycStatus.value === 'reject' ? kycRejectionReason.value : undefined,
-      userCards.length > 0 ? userCards : undefined
+      kycStatus.value === 'reject' ? kycRejectionReason.value : undefined
     )
     notification.addNotification('Statut KYC mis à jour avec succès', 'success')
     closeKycModal()
@@ -1394,19 +1330,81 @@ const openAdminKycModal = () => {
     card_id: user.value.card_id || '',
     photosString: user.value.user_cards ? user.value.user_cards.join('\n') : ''
   }
+  adminIdCardUrl.value = ''
+  adminSelfieUrl.value = ''
   showAdminKycModal.value = true
 }
 
 const closeAdminKycModal = () => {
   showAdminKycModal.value = false
+  adminIdCardUrl.value = ''
+  adminSelfieUrl.value = ''
+}
+
+const triggerAdminIdCardFileInput = () => {
+  adminIdCardFileInput.value?.click()
+}
+
+const triggerAdminSelfieFileInput = () => {
+  adminSelfieFileInput.value?.click()
+}
+
+const handleAdminIdCardFileSelect = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  
+  if (!file) return
+  
+  try {
+    uploadingAdminIdCard.value = true
+    const url = await uploadStore.uploadFile(file, 'image')
+    adminIdCardUrl.value = url
+    notification.addNotification('Pièce d\'identité uploadée avec succès', 'success')
+  } catch (error: any) {
+    console.error('Erreur lors de l\'upload de la pièce d\'identité:', error)
+    notification.addNotification(`Erreur: ${error.message || 'Impossible d\'uploader la pièce d\'identité'}`, 'error')
+  } finally {
+    uploadingAdminIdCard.value = false
+    if (target) target.value = ''
+  }
+}
+
+const handleAdminSelfieFileSelect = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  
+  if (!file) return
+  
+  try {
+    uploadingAdminSelfie.value = true
+    const url = await uploadStore.uploadFile(file, 'image')
+    adminSelfieUrl.value = url
+    notification.addNotification('Selfie uploadé avec succès', 'success')
+  } catch (error: any) {
+    console.error('Erreur lors de l\'upload du selfie:', error)
+    notification.addNotification(`Erreur: ${error.message || 'Impossible d\'uploader le selfie'}`, 'error')
+  } finally {
+    uploadingAdminSelfie.value = false
+    if (target) target.value = ''
+  }
 }
 
 const handleAdminKycVerify = async () => {
   if (!user.value) return
   try {
-    const photos = kycForm.value.photosString.split('\n').map(u => u.trim()).filter(u => u)
+    // Construire le tableau des URLs - priorité aux fichiers uploadés
+    const photos: string[] = []
+    if (adminIdCardUrl.value) photos.push(adminIdCardUrl.value)
+    if (adminSelfieUrl.value) photos.push(adminSelfieUrl.value)
+    
+    // Si aucun fichier uploadé, utiliser le champ texte (pour compatibilité)
+    if (photos.length === 0 && kycForm.value.photosString) {
+      const textPhotos = kycForm.value.photosString.split('\n').map(u => u.trim()).filter(u => u)
+      photos.push(...textPhotos)
+    }
+    
     if (photos.length === 0) {
-      notification.addNotification('Veuillez fournir au moins une URL de photo', 'warning')
+      notification.addNotification('Veuillez uploader au moins une photo (pièce d\'identité ou selfie)', 'warning')
       return
     }
 

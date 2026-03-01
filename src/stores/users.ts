@@ -285,8 +285,7 @@ export const useUsersStore = defineStore('users', () => {
   async function updateKycStatus(
     userId: number, 
     status: 'pending' | 'accept' | 'reject' | 'null', 
-    rejectionReason?: string,
-    userCards?: string[]
+    rejectionReason?: string
   ) {
     try {
       error.value = null
@@ -298,10 +297,6 @@ export const useUsersStore = defineStore('users', () => {
 
       if (status === 'reject' && rejectionReason) {
         body.rejection_reason = rejectionReason
-      }
-
-      if (userCards && userCards.length > 0) {
-        body.user_cards = userCards
       }
 
       const response = await fetchWithAuth('/auth/update-kyc-status/', {
