@@ -477,7 +477,7 @@
                 class="hidden"
               />
               <button
-                @click="$refs.idCardFileInput?.click()"
+                @click="triggerIdCardFileInput"
                 :disabled="uploadingIdCard"
                 class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
@@ -506,7 +506,7 @@
                 class="hidden"
               />
               <button
-                @click="$refs.selfieFileInput?.click()"
+                @click="triggerSelfieFileInput"
                 :disabled="uploadingSelfie"
                 class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
@@ -1238,6 +1238,14 @@ const closeKycModal = () => {
   kycRejectionReason.value = ''
   idCardUrl.value = ''
   selfieUrl.value = ''
+}
+
+const triggerIdCardFileInput = () => {
+  idCardFileInput.value?.click()
+}
+
+const triggerSelfieFileInput = () => {
+  selfieFileInput.value?.click()
 }
 
 const handleIdCardFileSelect = async (event: Event) => {
