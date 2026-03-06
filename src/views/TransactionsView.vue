@@ -122,6 +122,17 @@
                     <span class="hidden sm:inline">Détails</span>
                   </button>
 
+                  <!-- Bouton Notifier (uniquement pour les transactions échouées) -->
+                  <button
+                    v-if="transaction.status === 'error' && transaction.type_trans === 'deposit'"
+                    @click="notifyFailedDeposit(transaction)"
+                    class="btn btn-sm text-xs bg-orange-500 text-white hover:bg-orange-600"
+                    title="Notifier l'utilisateur du dépôt échoué"
+                  >
+                    <i class="fas fa-bell mr-1"></i>
+                    <span class="hidden sm:inline">Notifier</span>
+                  </button>
+
                   <!-- Bouton Mettre à jour le statut (si status !== error && status !== accept) -->
                   <button
                     v-if="transaction.status !== 'error' && transaction.status !== 'accept'"
@@ -660,5 +671,37 @@ const closeValidationModal = () => {
 // Voir les détails de la transaction
 const viewTransactionDetails = (transactionId: number) => {
   router.push({ name: 'transaction-details', params: { id: transactionId.toString() } })
+}
+
+// Notifier l'utilisateur d'un dépôt échoué
+const notifyFailedDeposit = (transaction: Transaction) => {
+  const userEmail = transaction.caisse.created_by.email
+  
+  // Contenu pré-rempli pour la notification
+  const title = 'Dépôt non réussi'
+  const content = `Bonjour 👋
+
+Nous avons constaté que votre dépôt n'a pas abouti. Si vous avez besoin d'aide, merci de contacter notre support directement depuis l'application BOX :
+
+Menu Profil → Support.
+
+📱 WhatsApp : 0192757655
+🔗 Lien direct : https://wa.me/message/DJGHZABMTWZYO1
+
+Notre équipe est disponible pour vous assister rapidement.
+
+Merci pour votre compréhension.`
+
+  // Rediriger vers la page de notification avec les paramètres pré-remplis
+  router.push({
+    name: 'send-notification',
+    query: {
+      type: 'single',
+      channel: 'push',
+      email: userEmail,
+      title: title,
+      content: content
+    }
+  })
 }
 </script>

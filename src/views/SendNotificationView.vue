@@ -286,6 +286,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { debounce } from 'lodash'
+import { useRoute } from 'vue-router'
 import { useUsersStore } from '../stores/users'
 import { useNotification } from '../services/notification'
 import { useNotificationStore } from '../stores/notification'
@@ -377,6 +378,36 @@ onMounted(() => {
       notificationService.addNotification('Erreur lors de la recherche des utilisateurs', 'error')
     }
   }, 300)
+
+  // Pré-remplir les champs depuis les query params
+  const route = useRoute()
+  if (route.query.title) {
+    notification.value.title = route.query.title as string
+  }
+  if (route.query.content) {
+    notification.value.content = route.query.content as string
+  }
+  if (route.query.type) {
+    type.value = route.query.type as 'all' | 'single'
+  }
+  if (route.query.channel) {
+    channel.value = route.query.channel as 'email' | 'push' | 'both'
+  }
+  if (route.query.email && type.value === 'single') {
+    // Rechercher l'utilisateur par email
+    const userEmail = route.query.email as string
+    searchQuery.value = userEmail
+    showUserList.value = true
+    usersStore.searchQuery = userEmail
+    usersStore.fetchUsers(1).then(() => {
+      // Sélectionner automatiquement l'utilisateur si trouvé
+      const foundUser = usersStore.users.find(u => u.email === userEmail)
+      if (foundUser) {
+        selectedUserId.value = foundUser.id
+        showUserList.value = false
+      }
+    })
+  }
 })
 
 onUnmounted(() => {
