@@ -261,6 +261,10 @@
               <input type="checkbox" v-model="filters.has_caisse" class="w-4 h-4 text-primary rounded border-gray-300" />
               <span class="text-sm text-gray-700">Possède une caisse</span>
             </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" v-model="filters.has_disabled_caisse" class="w-4 h-4 text-primary rounded border-gray-300" />
+              <span class="text-sm text-gray-700">A une caisse désactivée</span>
+            </label>
           </div>
         </div>
       </div>
@@ -332,7 +336,8 @@ const filters = ref({
   has_deposit: false,
   has_withdrawal: false,
   has_cancellation: false,
-  has_caisse: false
+  has_caisse: false,
+  has_disabled_caisse: false
 })
 
 // Computed properties
@@ -468,7 +473,8 @@ const clearForm = () => {
     has_deposit: false,
     has_withdrawal: false,
     has_cancellation: false,
-    has_caisse: false
+    has_caisse: false,
+    has_disabled_caisse: false
   }
 }
 
@@ -516,6 +522,7 @@ const sendNotification = async () => {
       if (filters.value.has_withdrawal) data.has_withdrawal = true
       if (filters.value.has_cancellation) data.has_cancellation = true
       if (filters.value.has_caisse) data.has_caisse = true
+      if (filters.value.has_disabled_caisse) data.has_disabled_caisse = true
     }
 
     // Envoyer la notification
