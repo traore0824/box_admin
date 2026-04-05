@@ -214,6 +214,25 @@
                   </label>
                 </div>
 
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <label class="flex items-center">
+                    <input
+                      v-model="formData.is_ilimited_caisse"
+                      type="checkbox"
+                      class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+                    />
+                    <span class="ml-2 text-sm text-gray-700">Caisse illimitée</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input
+                      v-model="formData.is_generique"
+                      type="checkbox"
+                      class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+                    />
+                    <span class="ml-2 text-sm text-gray-700">Message générique</span>
+                  </label>
+                </div>
+
                 <div class="flex justify-end gap-3 pt-4">
                   <button
                     type="button"
@@ -265,7 +284,9 @@ const activeFilter = ref<boolean | null>(null)
 const formData = reactive({
   title: '',
   content: '',
-  is_active: true
+  is_active: true,
+  is_ilimited_caisse: true,
+  is_generique: false
 })
 
 const totalPages = computed(() => {
@@ -309,6 +330,8 @@ const openEditModal = (message: ReminderMessage) => {
   formData.title = message.title
   formData.content = message.content
   formData.is_active = message.is_active
+  formData.is_ilimited_caisse = message.is_ilimited_caisse
+  formData.is_generique = message.is_generique
   showModal.value = true
 }
 
@@ -322,6 +345,8 @@ const resetForm = () => {
   formData.title = ''
   formData.content = ''
   formData.is_active = true
+  formData.is_ilimited_caisse = true
+  formData.is_generique = false
 }
 
 const handleSubmit = async () => {

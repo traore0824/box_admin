@@ -106,6 +106,8 @@ export const useReminderMessagesStore = defineStore('reminderMessages', () => {
     title: string
     content: string
     is_active?: boolean
+    is_ilimited_caisse?: boolean
+    is_generique?: boolean
   }) {
     try {
       isLoading.value = true
@@ -119,7 +121,9 @@ export const useReminderMessagesStore = defineStore('reminderMessages', () => {
         body: JSON.stringify({
           title: data.title,
           content: data.content,
-          is_active: data.is_active !== undefined ? data.is_active : true
+          is_active: data.is_active !== undefined ? data.is_active : true,
+          is_ilimited_caisse: data.is_ilimited_caisse !== undefined ? data.is_ilimited_caisse : true,
+          is_generique: data.is_generique !== undefined ? data.is_generique : false
         })
       })
 
@@ -149,6 +153,8 @@ export const useReminderMessagesStore = defineStore('reminderMessages', () => {
       title?: string
       content?: string
       is_active?: boolean
+      is_ilimited_caisse?: boolean
+      is_generique?: boolean
     },
     usePatch = true
   ) {

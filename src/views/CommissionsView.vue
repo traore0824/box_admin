@@ -173,6 +173,9 @@
                 Retiré par
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Notes
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Date
               </th>
             </tr>
@@ -199,7 +202,13 @@
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ withdrawal.withdrawn_by.email }}
+                {{ withdrawal.withdrawn_by_email }}
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500 max-w-xs">
+                <span v-if="withdrawal.notes" :title="withdrawal.notes" class="truncate block max-w-[200px]">
+                  {{ withdrawal.notes }}
+                </span>
+                <span v-else class="text-gray-300">—</span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ formatDate(withdrawal.created_at) }}

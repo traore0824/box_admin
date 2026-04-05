@@ -31,14 +31,15 @@ interface CommissionTransaction {
 interface CommissionWithdrawal {
   id: number
   total_amount: string
+  calculated_total: string
+  discrepancy: string
   status: 'pending' | 'completed' | 'cancelled'
-  withdrawn_by: {
-    id: number
-    email: string
-  }
+  withdrawn_by: number
+  withdrawn_by_email: string
+  notes: string | null
+  validation_errors: string | null
   created_at: string
   completed_at: string | null
-  notes: string | null
 }
 
 interface ReconcileResponse {
