@@ -80,6 +80,9 @@
                 Statut
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Notes
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Date
               </th>
             </tr>
@@ -107,6 +110,12 @@
                 >
                   {{ transaction.is_withdrawn ? 'Retirée' : 'Disponible' }}
                 </span>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500 max-w-xs">
+                <span v-if="transaction.notes" :title="transaction.notes" class="truncate block max-w-[200px]">
+                  {{ transaction.notes }}
+                </span>
+                <span v-else class="text-gray-300">—</span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ formatDate(transaction.created_at) }}

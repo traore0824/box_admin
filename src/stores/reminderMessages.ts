@@ -7,7 +7,9 @@ export interface ReminderMessage {
   id: number
   title: string
   content: string
-  active: boolean
+  is_active: boolean
+  is_ilimited_caisse: boolean
+  is_generique: boolean
   created_at: string
   updated_at: string
 }
@@ -103,7 +105,7 @@ export const useReminderMessagesStore = defineStore('reminderMessages', () => {
   async function createMessage(data: {
     title: string
     content: string
-    active?: boolean
+    is_active?: boolean
   }) {
     try {
       isLoading.value = true
@@ -117,7 +119,7 @@ export const useReminderMessagesStore = defineStore('reminderMessages', () => {
         body: JSON.stringify({
           title: data.title,
           content: data.content,
-          active: data.active !== undefined ? data.active : true
+          is_active: data.is_active !== undefined ? data.is_active : true
         })
       })
 
@@ -146,7 +148,7 @@ export const useReminderMessagesStore = defineStore('reminderMessages', () => {
     data: {
       title?: string
       content?: string
-      active?: boolean
+      is_active?: boolean
     },
     usePatch = true
   ) {

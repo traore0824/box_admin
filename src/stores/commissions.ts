@@ -24,6 +24,7 @@ interface CommissionTransaction {
   commission: string
   commission_rate: string
   is_withdrawn: boolean
+  notes: string | null
   created_at: string
 }
 

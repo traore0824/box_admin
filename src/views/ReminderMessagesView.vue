@@ -56,7 +56,6 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titre</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date de création</th>
               <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -69,8 +68,8 @@
                 <div class="text-sm text-gray-500 truncate max-w-xs">{{ message.content }}</div>
               </td>
               <td class="px-4 py-4 whitespace-nowrap">
-                <span class="px-2 py-1 text-xs font-semibold rounded-full" :class="message.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
-                  {{ message.active ? 'Actif' : 'Inactif' }}
+                <span class="px-2 py-1 text-xs font-semibold rounded-full" :class="message.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
+                  {{ message.is_active ? 'Actif' : 'Inactif' }}
                 </span>
               </td>
               <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -207,7 +206,7 @@
                 <div>
                   <label class="flex items-center">
                     <input
-                      v-model="formData.active"
+                      v-model="formData.is_active"
                       type="checkbox"
                       class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
                     />
@@ -266,7 +265,7 @@ const activeFilter = ref<boolean | null>(null)
 const formData = reactive({
   title: '',
   content: '',
-  active: true
+  is_active: true
 })
 
 const totalPages = computed(() => {
@@ -309,7 +308,7 @@ const openEditModal = (message: ReminderMessage) => {
   editingMessage.value = message
   formData.title = message.title
   formData.content = message.content
-  formData.active = message.active
+  formData.is_active = message.is_active
   showModal.value = true
 }
 
@@ -322,7 +321,7 @@ const closeModal = () => {
 const resetForm = () => {
   formData.title = ''
   formData.content = ''
-  formData.active = true
+  formData.is_active = true
 }
 
 const handleSubmit = async () => {
