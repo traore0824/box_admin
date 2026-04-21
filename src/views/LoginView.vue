@@ -77,7 +77,12 @@ const showPassword = ref(false)
 async function handleLogin() {
   try {
     await authStore.login(email.value, password.value)
-    await router.push({ name: 'dashboard' })
+    if (authStore.requires2FA) {
+      await router.push({ name: 'verify-2fa' })
+    } else {
+      const isStaff = authStore.user?.is_staff === true
+      await router.push({ name: isStaff ? 'dashboard' : 'users' })
+    }
   } catch (err) {
     // L'erreur est déjà gérée dans le store
   }

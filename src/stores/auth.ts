@@ -28,6 +28,7 @@ interface User {
   pin_define: boolean
   pin_incorrect_count: number
   is_staff: boolean
+  double_auth?: boolean
   name?: string
   avatar?: string
 }
@@ -46,6 +47,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const tokenCheckInterval = ref<number | undefined>(undefined)
+  const requires2FA = ref(false)
 
   // Vérifier si le token est expiré (fonction gardée pour usage futur)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -97,6 +99,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
     accessToken.value = null
     refreshToken.value = null
+    requires2FA.value = false
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
   }
@@ -140,9 +143,11 @@ export const useAuthStore = defineStore('auth', () => {
           setUser(userDetails)
         } catch (err) {
           console.error('Erreur lors de la récupération des infos utilisateur:', err)
-          // Ne pas bloquer le login si getUserDetails échoue, on utilisera les données du login
         }
       }
+
+      // Vérifier si le 2FA est requis
+      requires2FA.value = !!data.user?.double_auth
       
       startTokenCheck()
       return true
@@ -156,6 +161,37 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function logout() {
     clearAuth()
+  }
+  // Vérifier le code 2FA
+  async function verify2FA(code: string) {
+    try {
+      isLoading.value = true
+      error.value = null
+
+      const response = await fetchWithAuth('/auth/verify-2fa-session/', {
+        method: 'POST',
+        body: { code }
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        const messages: Record<string, string> = {
+          CODE_REQUIRED: 'Le code est requis',
+          INVALID_CODE: 'Code incorrect, veuillez réessayer',
+          '2FA_NOT_CONFIGURED': 'Le 2FA n\'est pas configuré sur ce compte',
+          NOT_ADMIN: 'Accès non autorisé'
+        }
+        throw new Error(messages[data.code] || data.message || 'Erreur de vérification')
+      }
+
+      requires2FA.value = false
+      return true
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Erreur de vérification'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
   }
 
   async function autoLogin() {
@@ -213,11 +249,13 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading,
     error,
     isAuthenticated,
+    requires2FA,
     setUser,
     setTokens,
     clearAuth,
     login,
     logout,
+    verify2FA,
     autoLogin,
     sendOtp
   }

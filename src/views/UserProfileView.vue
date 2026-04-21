@@ -94,8 +94,8 @@
             Réinitialiser PIN
           </button>
 
-          <!-- Envoyer OTP PIN -->
-          <button @click="handleSendPinVerificationOtp" :disabled="actionLoading"
+          <!-- Envoyer OTP PIN — uniquement si compte bloqué -->
+          <button v-if="user.is_block" @click="handleSendPinVerificationOtp" :disabled="actionLoading"
             class="flex items-center justify-center px-4 py-3 border border-cyan-300 bg-cyan-50 text-cyan-700 rounded-lg hover:bg-cyan-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
             <i class="fas fa-mobile-alt mr-2"></i>
             Envoyer OTP PIN
@@ -116,14 +116,14 @@
           </button>
 
           <!-- Activer Compte -->
-          <button v-if="!user.is_active" @click="handleActivateUser" :disabled="actionLoading"
+          <button v-if="user.is_active === false" @click="handleActivateUser" :disabled="actionLoading"
             class="flex items-center justify-center px-4 py-3 border border-emerald-300 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
             <i class="fas fa-check-circle mr-2"></i>
             Activer Compte
           </button>
 
-          <!-- Admin KYC Verify -->
-          <button @click="openAdminKycModal" :disabled="actionLoading"
+          <!-- Admin KYC Verify — uniquement si KYC non vérifié -->
+          <button v-if="user.status !== 'accept'" @click="openAdminKycModal" :disabled="actionLoading"
             class="flex items-center justify-center px-4 py-3 border border-blue-300 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
             <i class="fas fa-shield-alt mr-2"></i>
             Vérifier KYC (Admin)
@@ -134,6 +134,16 @@
             class="flex items-center justify-center px-4 py-3 border border-teal-300 bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
             <i class="fas fa-wallet mr-2"></i>
             Voir Wallet
+          </button>
+
+          <!-- Voir Photos KYC — uniquement si KYC approuvé et photos disponibles -->
+          <button
+            v-if="user.status === 'accept' && user.user_cards && user.user_cards.length > 0"
+            @click="showKycImagesModal = true"
+            :disabled="actionLoading"
+            class="flex items-center justify-center px-4 py-3 border border-green-300 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fas fa-images mr-2"></i>
+            Photos KYC
           </button>
         </div>
       </div>
@@ -426,6 +436,93 @@
       </div>
     </div>
 
+    <!-- Historique des blocages -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <i class="fas fa-history mr-2 text-primary"></i>
+        Historique des blocages
+      </h3>
+      <div v-if="blockHistoryStore.isLoading" class="text-center py-8">
+        <i class="fas fa-spinner fa-spin text-2xl text-primary"></i>
+      </div>
+      <div v-else-if="blockHistoryStore.history.length === 0" class="text-center py-8 text-gray-500">
+        Aucun historique de blocage
+      </div>
+      <div v-else class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Événement</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Raison</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Détail</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Effectué par</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr v-for="entry in blockHistoryStore.history" :key="entry.id">
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                {{ formatDateTime(entry.created_at) }}
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap">
+                <span :class="[
+                  'px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full',
+                  entry.event === 'blocked' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                ]">
+                  <i :class="['fas mr-1', entry.event === 'blocked' ? 'fa-lock' : 'fa-unlock']"></i>
+                  {{ entry.event_label }}
+                </span>
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                {{ entry.reason_label }}
+              </td>
+              <td class="px-4 py-3 text-sm text-gray-500 max-w-xs" :title="entry.reason_detail">
+                {{ entry.reason_detail }}
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap">
+                <span :class="[
+                  'px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full',
+                  entry.is_automatic ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'
+                ]">
+                  {{ entry.is_automatic ? 'Automatique' : 'Manuel' }}
+                </span>
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                <span v-if="entry.performed_by">
+                  {{ entry.performed_by.full_name }}
+                  <span class="text-xs text-gray-400 block">{{ entry.performed_by.email }}</span>
+                </span>
+                <span v-else class="text-gray-400">Système</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- Pagination -->
+        <div v-if="blockHistoryStore.count > blockHistoryStore.pageSize" class="flex items-center justify-between px-4 py-3 border-t border-gray-200">
+          <p class="text-sm text-gray-700">
+            Page {{ blockHistoryStore.currentPage }} sur {{ Math.ceil(blockHistoryStore.count / blockHistoryStore.pageSize) }}
+          </p>
+          <div class="flex gap-2">
+            <button
+              @click="blockHistoryStore.fetchBlockHistory(userId!, blockHistoryStore.currentPage - 1)"
+              :disabled="blockHistoryStore.currentPage === 1"
+              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <button
+              @click="blockHistoryStore.fetchBlockHistory(userId!, blockHistoryStore.currentPage + 1)"
+              :disabled="blockHistoryStore.currentPage * blockHistoryStore.pageSize >= blockHistoryStore.count"
+              class="px-3 py-1 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Confirmation Modal -->
     <ConfirmationModal :is-open="isModalOpen" :title="modalTitle" :message="modalMessage" @confirm="onModalConfirm"
       @cancel="onModalCancel" />
@@ -630,6 +727,55 @@
       </div>
     </Teleport>
 
+    <!-- Modal Photos KYC -->
+    <Teleport to="body">
+      <div v-if="showKycImagesModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-3xl mx-4 my-8">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">Photos KYC</h3>
+            <button @click="showKycImagesModal = false" class="text-gray-400 hover:text-gray-600">
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div
+              v-for="(url, index) in user.user_cards"
+              :key="index"
+              class="relative group cursor-pointer"
+              @click="selectedKycImage = url"
+            >
+              <img
+                :src="url"
+                :alt="`Photo KYC ${index + 1}`"
+                class="w-full h-56 object-cover rounded-lg border border-gray-200 hover:border-primary transition-colors"
+              />
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-opacity flex items-center justify-center">
+                <i class="fas fa-search-plus text-white opacity-0 group-hover:opacity-100 text-2xl transition-opacity"></i>
+              </div>
+              <p class="text-xs text-gray-500 mt-1 text-center">
+                {{ index === 0 ? 'Pièce d\'identité' : 'Selfie' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Visionneuse image KYC plein écran -->
+    <Teleport to="body">
+      <div v-if="selectedKycImage" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-95" @click="selectedKycImage = null">
+        <button @click="selectedKycImage = null" class="absolute top-4 right-4 text-white bg-black bg-opacity-70 rounded-full p-3 hover:bg-opacity-90 z-10">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+        <img
+          :src="selectedKycImage"
+          alt="Photo KYC"
+          class="max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl"
+          @click.stop
+        />
+      </div>
+    </Teleport>
+
     <!-- Modal Admin Update User -->
     <Teleport to="body">
       <div v-if="showUpdateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
@@ -781,6 +927,7 @@ import { useNotification } from '../services/notification'
 import { useUsersStore } from '../stores/users'
 import { useWalletsStore } from '../stores/wallets'
 import { useUploadStore } from '../stores/upload'
+import { useBlockHistoryStore } from '../stores/blockHistory'
 import ConfirmationModal from '../components/ConfirmationModal.vue'
 
 const route = useRoute()
@@ -789,6 +936,7 @@ const notification = useNotification()
 const usersStore = useUsersStore()
 const walletsStore = useWalletsStore()
 const uploadStore = useUploadStore()
+const blockHistoryStore = useBlockHistoryStore()
 
 // State
 const user = ref<any>(null)
@@ -848,6 +996,10 @@ const uploadingAdminSelfie = ref(false)
 const showWalletModal = ref(false)
 const walletTransactionTypeFilter = ref('all')
 const walletStatusFilter = ref('all')
+
+// KYC Images Modal State
+const showKycImagesModal = ref(false)
+const selectedKycImage = ref<string | null>(null)
 
 // Fonction pour générer les initiales
 const getUserInitials = (user: any): string => {
@@ -1008,7 +1160,8 @@ const loadUserInfo = async () => {
       loadWalletBalance(),
       loadTransactions(),
       loadWalletTransactions(),
-      loadCaisses()
+      loadCaisses(),
+      blockHistoryStore.fetchBlockHistory(userId.value)
     ])
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Une erreur est survenue'

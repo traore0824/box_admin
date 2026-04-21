@@ -24,12 +24,20 @@ import ReminderMessagesView from '../views/ReminderMessagesView.vue'
 import ReminderLogsView from '../views/ReminderLogsView.vue'
 import CaisseDetailsView from '../views/CaisseDetailsView.vue'
 import PublicationsView from '../views/PublicationsView.vue'
+import Verify2FAView from '../views/Verify2FAView.vue'
+import WeeklySampleView from '../views/WeeklySampleView.vue'
 
 const routes = [
   {
     path: '/login',
     name: 'login',
     component: LoginView,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/verify-2fa',
+    name: 'verify-2fa',
+    component: Verify2FAView,
     meta: { requiresAuth: false }
   },
   {
@@ -157,6 +165,12 @@ const routes = [
     name: 'publications',
     component: PublicationsView,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/weekly-sample',
+    name: 'weekly-sample',
+    component: WeeklySampleView,
+    meta: { requiresAuth: true }
   }
 ]
 
@@ -185,6 +199,16 @@ router.beforeEach(async (to, _from, next) => {
     if (import.meta.env.DEV) console.log('No token, redirecting to login')
     next({ name: 'login' })
     return
+  }
+
+  // Si 2FA requis et pas encore vérifié, bloquer l'accès
+  if (to.meta.requiresAuth && storedAccessToken && to.name !== 'verify-2fa') {
+    const authStore = useAuthStore()
+    if (authStore.requires2FA) {
+      if (import.meta.env.DEV) console.log('2FA required, redirecting to verify-2fa')
+      next({ name: 'verify-2fa' })
+      return
+    }
   }
 
   // Si on a un token mais pas d'utilisateur chargé, essayer de charger les infos utilisateur

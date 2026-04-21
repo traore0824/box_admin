@@ -1,1 +1,1 @@
-export const API_BASE_URL = 'https://box.api.babilonbg.net'
+export const API_BASE_URL = import.meta.env.API_BASE_URL

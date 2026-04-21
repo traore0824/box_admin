@@ -80,6 +80,14 @@ export async function fetchWithAuth(
 
   // Gestion des autres erreurs d'authentification
   if (response.status === 403) {
+    const data = await response.clone().json().catch(() => ({}))
+    
+    // Si 2FA requis, rediriger vers la page de vérification
+    if (data.code === '2FA_REQUIRED') {
+      window.location.href = '/verify-2fa'
+      throw new Error('Vérification 2FA requise')
+    }
+
     if (import.meta.env.DEV) {
       console.log('Accès non autorisé')
     }

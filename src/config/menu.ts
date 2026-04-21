@@ -85,6 +85,11 @@ export const menuItems = [
     icon: 'fas fa-envelope'
   },
   {
+    path: '/weekly-sample',
+    name: 'Sélection hebdomadaire',
+    icon: 'fas fa-calendar-week'
+  },
+  {
     path: '/settings',
     name: 'Paramètres',
     icon: 'fas fa-cog'

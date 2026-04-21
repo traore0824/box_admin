@@ -4,7 +4,7 @@
       <div>Chargement...</div>
     </div>
     <div v-else>
-      <div v-if="authStore.isAuthenticated" class="flex h-screen overflow-hidden">
+      <div v-if="authStore.isAuthenticated && !isFullscreenRoute" class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <Sidebar />
         
@@ -21,21 +21,27 @@
         </div>
       </div>
 
-      <!-- Login Screen -->
+      <!-- Login / 2FA / pages sans layout -->
       <router-view v-else></router-view>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue'
+import { onBeforeMount, ref, computed } from 'vue'
 import { useAuthStore } from './stores/auth'
+import { useRoute } from 'vue-router'
 import Sidebar from './components/layout/Sidebar.vue'
 import Navbar from './components/layout/Navbar.vue'
 import ToastContainer from './components/ToastContainer.vue'
 
 const authStore = useAuthStore()
+const route = useRoute()
 const isAuthLoading = ref(true)
+
+// Routes qui s'affichent sans le layout (sidebar/navbar)
+const fullscreenRoutes = ['login', 'verify-2fa']
+const isFullscreenRoute = computed(() => fullscreenRoutes.includes(route.name as string))
 
 onBeforeMount(async () => {
   await authStore.autoLogin()
