@@ -105,6 +105,19 @@ const uiStore = useUIStore()
 const selectedOption = ref('/')
 const route = useRoute()
 
+// Computed pour les informations utilisateur
+const userName = computed(() => {
+  if (!authStore.user) return ''
+  return authStore.user.name || 
+         `${authStore.user.first_name || ''} ${authStore.user.last_name || ''}`.trim() || 
+         authStore.user.email || 
+         ''
+})
+
+const userEmail = computed(() => {
+  return authStore.user?.email || ''
+})
+
 // Filtrer le menu selon le rôle : les non-staff ne voient pas les pages staffOnly
 const filteredMenuItems = computed(() => {
   // Si l'utilisateur n'est pas encore chargé, retourner un menu vide

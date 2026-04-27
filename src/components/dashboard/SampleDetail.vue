@@ -50,13 +50,13 @@
                     <i class="fas fa-phone"></i> À appeler
                   </span>
                 </div>
-                <p class="text-xs text-gray-500">{{ entry.user.email }}</p>
+                <p class="text-xs text-gray-500">{{ entry.user.email || 'N/A' }}</p>
                 <p v-if="entry.user.phone" class="text-xs text-gray-500">{{ entry.user.phone }}</p>
 
                 <!-- Appelé par / quand -->
                 <div v-if="entry.called" class="mt-1 text-xs text-gray-500">
                   Appelé le {{ formatDate(entry.called_at!) }}
-                  <span v-if="entry.called_by"> · par {{ entry.called_by.email }}</span>
+                  <span v-if="entry.called_by"> · par {{ entry.called_by.email || 'N/A' }}</span>
                 </div>
                 <div v-if="entry.notes" class="mt-1 text-xs text-gray-600 italic bg-yellow-50 px-2 py-1 rounded">
                   "{{ entry.notes }}"

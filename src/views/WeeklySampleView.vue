@@ -6,7 +6,7 @@
         <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Sélection hebdomadaire</h1>
         <p v-if="store.current" class="text-sm text-gray-500 mt-1">
           Générée le {{ formatDate(store.current.created_at) }}
-          · par {{ store.current.generated_by.email }}
+          <span v-if="store.current.generated_by">· par {{ store.current.generated_by.email }}</span>
         </p>
       </div>
       <div class="flex gap-3">
