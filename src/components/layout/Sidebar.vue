@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white border-r border-gray-200 w-[260px] hidden md:block relative h-screen">
+  <div v-if="authStore.user" class="bg-white border-r border-gray-200 w-[260px] hidden md:block relative h-screen">
     <!-- Logo -->
     <div class="h-16 border-b border-gray-200 flex items-center justify-center z-10 bg-white">
       <h1 class="text-2xl font-bold text-primary">BOX Admin</h1>
@@ -41,14 +41,14 @@
   
   <!-- Mobile Menu Overlay -->
   <div 
-    v-if="uiStore.isSidebarOpen" 
+    v-if="uiStore.isSidebarOpen && authStore.user" 
     class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
     @click="uiStore.closeSidebar()"
   ></div>
   
   <!-- Mobile Menu -->
   <div 
-    v-if="uiStore.isSidebarOpen" 
+    v-if="uiStore.isSidebarOpen && authStore.user" 
     class="fixed inset-y-0 left-0 w-[260px] bg-white z-40 md:hidden flex flex-col h-screen shadow-lg"
   >
     <!-- Logo -->
@@ -107,7 +107,12 @@ const route = useRoute()
 
 // Filtrer le menu selon le rôle : les non-staff ne voient pas les pages staffOnly
 const filteredMenuItems = computed(() => {
-  const isStaff = authStore.user?.is_staff === true
+  // Si l'utilisateur n'est pas encore chargé, retourner un menu vide
+  if (!authStore.user) {
+    return []
+  }
+  
+  const isStaff = authStore.user.is_staff === true
   if (isStaff) {
     return menuItems
   }
