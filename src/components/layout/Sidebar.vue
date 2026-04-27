@@ -105,15 +105,14 @@ const uiStore = useUIStore()
 const selectedOption = ref('/')
 const route = useRoute()
 
-// Filtrer le menu selon le rôle : CustomerService ne voit pas certaines sections
+// Filtrer le menu selon le rôle : les non-staff ne voient pas les pages staffOnly
 const filteredMenuItems = computed(() => {
   const isStaff = authStore.user?.is_staff === true
   if (isStaff) {
     return menuItems
   }
-  // CustomerService : masquer le dashboard, le wallet et les commissions
-  const hiddenPaths = ['/', '/wallets', '/commissions']
-  return menuItems.filter(item => !hiddenPaths.includes(item.path))
+  // Non-staff (agents/chargés de clientèle) : masquer les pages staffOnly
+  return menuItems.filter(item => !item.staffOnly)
 })
 
 // Définir le dashboard comme option par défaut (ou users pour CustomerService)

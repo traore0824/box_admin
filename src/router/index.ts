@@ -233,16 +233,24 @@ router.beforeEach(async (to, _from, next) => {
   if (to.meta.requiresAuth && storedAccessToken && authStore.user) {
     const isStaff = authStore.user.is_staff === true
 
-    // Bloquer l'accès au dashboard pour les non-staff (CustomerService)
-    // Rediriger automatiquement vers /users
-    if (to.path === '/' && !isStaff) {
-      if (import.meta.env.DEV) console.log('CustomerService cannot access dashboard, redirecting to users')
+    // Pages réservées aux staff uniquement
+    const staffOnlyPaths = [
+      '/',
+      '/wallets',
+      '/commissions',
+      '/publications',
+      '/reminder-messages',
+      '/reminder-logs',
+      '/contact-box',
+      '/settings'
+    ]
+
+    // Bloquer l'accès aux pages staff pour les non-staff (agents/chargés de clientèle)
+    if (!isStaff && staffOnlyPaths.includes(to.path)) {
+      if (import.meta.env.DEV) console.log('Non-staff user cannot access staff-only page, redirecting to users')
       next({ name: 'users', replace: true })
       return
     }
-
-    // Note: Les permissions backend gèrent les accès aux autres pages
-    // Si un CustomerService essaie d'accéder à une page non autorisée, le backend retournera une erreur
   }
 
   // Redirection après login selon le rôle

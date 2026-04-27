@@ -1,8 +1,16 @@
-export const menuItems = [
+export interface MenuItem {
+  path: string
+  name: string
+  icon: string
+  staffOnly?: boolean // Pages réservées aux administrateurs
+}
+
+export const menuItems: MenuItem[] = [
   {
     path: '/',
     name: 'Dashboard',
-    icon: 'fas fa-home'
+    icon: 'fas fa-home',
+    staffOnly: true // Dashboard réservé aux staff
   },
   {
     path: '/users',
@@ -27,7 +35,8 @@ export const menuItems = [
   {
     path: '/commissions',
     name: 'Commissions',
-    icon: 'fas fa-money-bill-wave'
+    icon: 'fas fa-money-bill-wave',
+    staffOnly: true // Commissions réservées aux staff
   },
   {
     path: '/bonus',
@@ -42,7 +51,8 @@ export const menuItems = [
   {
     path: '/wallets',
     name: 'Wallets',
-    icon: 'fas fa-wallet'
+    icon: 'fas fa-wallet',
+    staffOnly: true // Wallets réservés aux staff
   },
   {
     path: '/networks',
@@ -62,7 +72,8 @@ export const menuItems = [
   {
     path: '/publications',
     name: 'Publications Admin',
-    icon: 'fas fa-bullhorn'
+    icon: 'fas fa-bullhorn',
+    staffOnly: true // Publications réservées aux staff
   },
   {
     path: '/send-notification',
@@ -72,17 +83,20 @@ export const menuItems = [
   {
     path: '/reminder-messages',
     name: 'Messages de Rappel',
-    icon: 'fas fa-clock'
+    icon: 'fas fa-clock',
+    staffOnly: true // Messages de rappel réservés aux staff
   },
   {
     path: '/reminder-logs',
     name: 'Rappels non envoyés',
-    icon: 'fas fa-list-alt'
+    icon: 'fas fa-list-alt',
+    staffOnly: true // Logs de rappel réservés aux staff
   },
   {
     path: '/contact-box',
     name: 'Messages de Contact',
-    icon: 'fas fa-envelope'
+    icon: 'fas fa-envelope',
+    staffOnly: true // Messages de contact réservés aux staff
   },
   {
     path: '/weekly-sample',
@@ -92,6 +106,7 @@ export const menuItems = [
   {
     path: '/settings',
     name: 'Paramètres',
-    icon: 'fas fa-cog'
+    icon: 'fas fa-cog',
+    staffOnly: true // Paramètres réservés aux staff
   }
 ];
