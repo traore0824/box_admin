@@ -26,6 +26,8 @@ import CaisseDetailsView from '../views/CaisseDetailsView.vue'
 import PublicationsView from '../views/PublicationsView.vue'
 import Verify2FAView from '../views/Verify2FAView.vue'
 import WeeklySampleView from '../views/WeeklySampleView.vue'
+import ChallengesView from '../views/ChallengesView.vue'
+import PointsConfigView from '../views/PointsConfigView.vue'
 
 const routes = [
   {
@@ -171,6 +173,18 @@ const routes = [
     name: 'weekly-sample',
     component: WeeklySampleView,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/challenges',
+    name: 'challenges',
+    component: ChallengesView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/points-config',
+    name: 'points-config',
+    component: PointsConfigView,
+    meta: { requiresAuth: true }
   }
 ]
 
@@ -242,7 +256,9 @@ router.beforeEach(async (to, _from, next) => {
       '/reminder-messages',
       '/reminder-logs',
       '/contact-box',
-      '/settings'
+      '/settings',
+      '/challenges',
+      '/points-config'
     ]
 
     // Bloquer l'accès aux pages staff pour les non-staff (agents/chargés de clientèle)

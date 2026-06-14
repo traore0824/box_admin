@@ -190,6 +190,161 @@
         </div>
       </div>
 
+      <!-- Historique du solde -->
+      <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900">Historique du solde</h2>
+            <p v-if="caisseStore.balanceHistoryTotal > 0" class="text-sm text-gray-500 mt-0.5">
+              {{ caisseStore.balanceHistoryTotal }} mouvement(s)
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <!-- Solde actuel -->
+            <div v-if="caisseStore.balanceHistoryCurrentAmount > 0" class="text-right">
+              <p class="text-xs text-gray-500">Solde actuel</p>
+              <p class="text-base font-bold text-primary">{{ formatCurrency(caisseStore.balanceHistoryCurrentAmount) }}</p>
+            </div>
+            <button
+              @click="loadBalanceHistory(caisseStore.balanceHistoryPage)"
+              :disabled="caisseStore.balanceHistoryLoading"
+              class="btn btn-outline btn-sm"
+            >
+              <i v-if="caisseStore.balanceHistoryLoading" class="fas fa-spinner fa-spin mr-2"></i>
+              <i v-else class="fas fa-sync mr-2"></i>
+              Actualiser
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div v-if="caisseStore.balanceHistoryLoading && caisseStore.balanceHistory.length === 0" class="flex justify-center items-center py-10">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+
+        <!-- Error -->
+        <div v-else-if="caisseStore.balanceHistoryError" class="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
+          <i class="fas fa-exclamation-circle mr-2"></i>{{ caisseStore.balanceHistoryError }}
+        </div>
+
+        <!-- Table -->
+        <div v-else-if="caisseStore.balanceHistory.length > 0" class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Motif</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Avant</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Variation</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Après</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Déclenché par</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-for="entry in caisseStore.balanceHistory" :key="entry.id" class="hover:bg-gray-50 transition-colors">
+                <!-- Date -->
+                <td class="px-4 py-3 whitespace-nowrap text-gray-600">
+                  {{ formatDateTime(entry.created_at) }}
+                </td>
+                <!-- Motif -->
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <span
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+                    :class="reasonBadgeClass(entry.reason)"
+                  >
+                    <i :class="reasonIcon(entry.reason)"></i>
+                    {{ entry.reason_label }}
+                  </span>
+                  <p v-if="entry.note" class="text-xs text-gray-400 mt-0.5 max-w-[160px] truncate" :title="entry.note">
+                    {{ entry.note }}
+                  </p>
+                </td>
+                <!-- Avant -->
+                <td class="px-4 py-3 whitespace-nowrap text-right text-gray-500 font-mono text-xs">
+                  {{ formatCurrency(entry.amount_before) }}
+                </td>
+                <!-- Delta -->
+                <td class="px-4 py-3 whitespace-nowrap text-right font-semibold font-mono">
+                  <span :class="entry.delta >= 0 ? 'text-green-600' : 'text-red-600'">
+                    {{ entry.delta >= 0 ? '+' : '' }}{{ formatCurrency(entry.delta) }}
+                  </span>
+                </td>
+                <!-- Après -->
+                <td class="px-4 py-3 whitespace-nowrap text-right font-semibold font-mono text-gray-900">
+                  {{ formatCurrency(entry.amount_after) }}
+                </td>
+                <!-- Déclenché par -->
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <div v-if="entry.triggered_by" class="flex items-center gap-1.5">
+                    <div class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span class="text-xs text-gray-600 font-medium">
+                        {{ triggeredByInitials(entry.triggered_by) }}
+                      </span>
+                    </div>
+                    <div>
+                      <p class="text-xs font-medium text-gray-800 leading-tight">
+                        {{ entry.triggered_by.first_name }} {{ entry.triggered_by.last_name }}
+                      </p>
+                      <p class="text-xs text-gray-400 leading-tight">{{ entry.triggered_by.email }}</p>
+                    </div>
+                  </div>
+                  <span v-else class="text-gray-300 text-xs">—</span>
+                </td>
+                <!-- Transaction -->
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <router-link
+                    v-if="entry.transaction_id"
+                    :to="{ name: 'transaction-details', params: { id: entry.transaction_id.toString() } }"
+                    class="inline-flex items-center gap-1 text-primary hover:underline text-xs font-medium"
+                    :title="entry.transaction_reference || undefined"
+                  >
+                    <i class="fas fa-external-link-alt text-[10px]"></i>
+                    {{ entry.transaction_reference ? truncateRef(entry.transaction_reference) : `#${entry.transaction_id}` }}
+                  </router-link>
+                  <span v-else class="text-gray-300 text-xs">—</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Pagination -->
+          <div class="px-4 py-3 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p class="text-xs text-gray-500">
+              Page <span class="font-semibold">{{ caisseStore.balanceHistoryPage }}</span> sur
+              <span class="font-semibold">{{ caisseStore.balanceHistoryTotalPages() }}</span>
+            </p>
+            <div class="flex items-center gap-2">
+              <button
+                @click="loadBalanceHistory(caisseStore.balanceHistoryPage - 1)"
+                :disabled="caisseStore.balanceHistoryPage === 1 || caisseStore.balanceHistoryLoading"
+                class="btn btn-outline btn-sm flex items-center gap-1"
+              >
+                <i class="fas fa-chevron-left text-xs"></i>
+                Précédent
+              </button>
+              <span class="px-3 py-1 bg-primary text-white text-xs rounded-md font-medium">
+                {{ caisseStore.balanceHistoryPage }}
+              </span>
+              <button
+                @click="loadBalanceHistory(caisseStore.balanceHistoryPage + 1)"
+                :disabled="caisseStore.balanceHistoryPage >= caisseStore.balanceHistoryTotalPages() || caisseStore.balanceHistoryLoading"
+                class="btn btn-outline btn-sm flex items-center gap-1"
+              >
+                Suivant
+                <i class="fas fa-chevron-right text-xs"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty -->
+        <div v-else class="text-center py-10">
+          <i class="fas fa-history text-gray-300 text-4xl mb-3"></i>
+          <p class="text-gray-500 text-sm">Aucun mouvement de solde enregistré</p>
+        </div>
+      </div>
+
       <!-- Transactions -->
       <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6">
         <div class="flex items-center justify-between mb-4">
@@ -292,10 +447,11 @@ import { useRoute } from 'vue-router'
 import { fetchWithAuth } from '../stores/fetchwithtoken'
 import { useNotification } from '../services/notification'
 import { Transaction } from '../types/transaction'
-import { Caisse } from '../stores/caisse'
+import { Caisse, useCaisseStore, type BalanceHistoryEntry } from '../stores/caisse'
 
 const route = useRoute()
 const notification = useNotification()
+const caisseStore = useCaisseStore()
 
 const caisse = ref<Caisse | null>(null)
 const isLoading = ref(false)
@@ -324,6 +480,48 @@ const formatFrequence = (frequence: string) => {
     custom: 'Personnalisée'
   }
   return labels[frequence] || frequence
+}
+
+const loadBalanceHistory = async (page = 1) => {
+  if (!caisse.value) return
+  try {
+    await caisseStore.fetchBalanceHistory(caisse.value.id, page)
+  } catch {
+    notification.addNotification("Erreur lors du chargement de l'historique du solde", 'error')
+  }
+}
+
+// ── Balance history helpers ───────────────────────────────────────
+const reasonBadgeClass = (reason: BalanceHistoryEntry['reason']): string => {
+  const map: Record<string, string> = {
+    deposit: 'bg-green-100 text-green-800',
+    withdrawal: 'bg-orange-100 text-orange-800',
+    cancellation: 'bg-red-100 text-red-800',
+    adjustment: 'bg-blue-100 text-blue-800',
+    unknown: 'bg-gray-100 text-gray-600'
+  }
+  return map[reason] ?? map.unknown
+}
+
+const reasonIcon = (reason: BalanceHistoryEntry['reason']): string => {
+  const map: Record<string, string> = {
+    deposit: 'fas fa-arrow-down',
+    withdrawal: 'fas fa-arrow-up',
+    cancellation: 'fas fa-times',
+    adjustment: 'fas fa-sliders-h',
+    unknown: 'fas fa-question'
+  }
+  return map[reason] ?? map.unknown
+}
+
+const triggeredByInitials = (user: NonNullable<BalanceHistoryEntry['triggered_by']>): string => {
+  const f = user.first_name?.charAt(0)?.toUpperCase() ?? ''
+  const l = user.last_name?.charAt(0)?.toUpperCase() ?? ''
+  return f + l || user.email.charAt(0).toUpperCase()
+}
+
+const truncateRef = (ref: string): string => {
+  return ref.length > 18 ? ref.slice(0, 15) + '…' : ref
 }
 
 const loadCaisse = async () => {
@@ -387,7 +585,10 @@ const loadTransactions = async () => {
 onMounted(async () => {
   await loadCaisse()
   if (caisse.value) {
-    await loadTransactions()
+    await Promise.all([
+      loadTransactions(),
+      loadBalanceHistory(1)
+    ])
   }
 })
 </script>

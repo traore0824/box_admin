@@ -34,11 +34,33 @@ interface User {
   is_active: boolean
 }
 
+export type UserSegmentKey =
+  | 'never_created_caisse'
+  | 'has_caisse'
+  | 'more_than_2_caisses'
+  | 'active_caisse'
+  | 'active_caisse_blocked'
+  | 'withdrawn_with_other_caisse'
+  | 'withdrawn_stopped'
+  | 'onboarding_48h'
+
+export const USER_SEGMENT_LABELS: Record<UserSegmentKey, string> = {
+  never_created_caisse: 'Jamais créé de caisse',
+  has_caisse: 'Au moins 1 caisse',
+  more_than_2_caisses: 'Plus de 2 caisses',
+  active_caisse: 'Caisse en cours',
+  active_caisse_blocked: 'Caisse en cours + bloqué',
+  withdrawn_with_other_caisse: 'Retrait + autre caisse',
+  withdrawn_stopped: 'Retrait + arrêté',
+  onboarding_48h: 'Onboarding 48h (caisse + dépôt)',
+}
+
 interface UsersResponse {
   count: number
   next: string | null
   previous: string | null
   results: User[]
+  user_segments?: Partial<Record<UserSegmentKey, number>>
 }
 
 export const useUsersStore = defineStore('users', () => {
@@ -49,6 +71,10 @@ export const useUsersStore = defineStore('users', () => {
   const blockFilter = ref<'all' | 'blocked' | 'unblocked'>('all')
   const agentFilter = ref<'all' | 'agent' | 'client'>('all')
   const noCaisseFilter = ref<'all' | 'no_caisse'>('all')
+  const segmentFilter = ref<'all' | UserSegmentKey>('all')
+  const startDate = ref('')
+  const endDate = ref('')
+  const userSegments = ref<Partial<Record<UserSegmentKey, number>>>({})
   const totalUsers = ref(0)
   const currentPage = ref(1)
   const itemsPerPage = 10
@@ -57,6 +83,44 @@ export const useUsersStore = defineStore('users', () => {
   // On garde juste users.value qui contient déjà les résultats filtrés du backend
   const filteredUsers = computed(() => users.value)
 
+  function resetListFilters() {
+    searchQuery.value = ''
+    blockFilter.value = 'all'
+    agentFilter.value = 'all'
+    noCaisseFilter.value = 'all'
+    segmentFilter.value = 'all'
+    startDate.value = ''
+    endDate.value = ''
+    currentPage.value = 1
+  }
+
+  let isHydratingFromRoute = false
+
+  function initFromRouteQuery(query: Record<string, unknown>) {
+    isHydratingFromRoute = true
+    resetListFilters()
+
+    const str = (key: string) => {
+      const v = query[key]
+      return typeof v === 'string' ? v : ''
+    }
+
+    if (str('q')) searchQuery.value = str('q')
+    if (str('block')) blockFilter.value = str('block') as typeof blockFilter.value
+    if (str('agent')) agentFilter.value = str('agent') as typeof agentFilter.value
+    if (str('no_caisse')) noCaisseFilter.value = str('no_caisse') as typeof noCaisseFilter.value
+    const segment = str('user_segment')
+    if (segment && segment in USER_SEGMENT_LABELS) {
+      segmentFilter.value = segment as UserSegmentKey
+    }
+    if (str('start_date')) startDate.value = str('start_date')
+    if (str('end_date')) endDate.value = str('end_date')
+
+    const page = parseInt(str('page'), 10)
+    currentPage.value = Number.isFinite(page) && page > 0 ? page : 1
+    isHydratingFromRoute = false
+  }
+
   function applyFilters() {
     // Réinitialiser à la page 1 et recharger les utilisateurs avec les nouveaux filtres
     currentPage.value = 1
@@ -64,14 +128,8 @@ export const useUsersStore = defineStore('users', () => {
   }
 
   // Watcher pour appliquer automatiquement les filtres quand ils changent
-  let isInitialLoad = true
-  watch([blockFilter, agentFilter, noCaisseFilter], () => {
-    // Ignorer le premier déclenchement (montage initial)
-    if (isInitialLoad) {
-      isInitialLoad = false
-      return
-    }
-    // Appliquer les filtres automatiquement
+  watch([blockFilter, agentFilter, noCaisseFilter, segmentFilter, startDate, endDate], () => {
+    if (isHydratingFromRoute) return
     applyFilters()
   })
 
@@ -104,8 +162,16 @@ export const useUsersStore = defineStore('users', () => {
       }
 
       // Ajouter le filtre utilisateurs sans caisse
-      if (noCaisseFilter.value === 'no_caisse') {
+      if (segmentFilter.value !== 'all') {
+        queryParams.user_segment = segmentFilter.value
+      } else if (noCaisseFilter.value === 'no_caisse') {
         queryParams.without_caisse = 'true'
+      }
+      if (startDate.value) {
+        queryParams.start_date = startDate.value
+      }
+      if (endDate.value) {
+        queryParams.end_date = endDate.value
       }
 
       const response = await fetchWithAuth('/auth/listUser/', {
@@ -136,6 +202,7 @@ export const useUsersStore = defineStore('users', () => {
       const data: UsersResponse = await response.json()
       users.value = data.results
       totalUsers.value = data.count
+      userSegments.value = data.user_segments ?? {}
       currentPage.value = page
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erreur lors de la récupération des utilisateurs'
@@ -418,6 +485,11 @@ export const useUsersStore = defineStore('users', () => {
     blockFilter,
     agentFilter,
     noCaisseFilter,
+    segmentFilter,
+    startDate,
+    endDate,
+    userSegments,
+    USER_SEGMENT_LABELS,
     totalUsers,
     currentPage,
     itemsPerPage,
@@ -425,6 +497,8 @@ export const useUsersStore = defineStore('users', () => {
     fetchUsers,
     updateSearchQuery,
     applyFilters,
+    resetListFilters,
+    initFromRouteQuery,
     toggleUserBlockStatus,
     toggleUserAgentStatus,
     resetUserPin,

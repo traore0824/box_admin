@@ -14,31 +14,63 @@
         <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
       </div>
       
-      <!-- Filtres - juste en dessous de la recherche -->
-      <div class="flex flex-wrap gap-3">
+      <!-- Filtres -->
+      <div class="flex flex-wrap gap-3 items-end">
+        <div class="flex-1 sm:flex-initial min-w-[130px]">
+          <label class="block text-xs text-gray-500 mb-1">Du</label>
+          <input v-model="usersStore.startDate" type="date" @change="usersStore.applyFilters"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+        </div>
+        <div class="flex-1 sm:flex-initial min-w-[130px]">
+          <label class="block text-xs text-gray-500 mb-1">Au</label>
+          <input v-model="usersStore.endDate" type="date" @change="usersStore.applyFilters"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+        </div>
+        <div class="flex-1 sm:flex-initial min-w-[160px]">
+          <label class="block text-xs text-gray-500 mb-1">Segment</label>
+          <select v-model="usersStore.segmentFilter" @change="onSegmentFilterChange"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+            <option value="all">Tous les segments</option>
+            <option v-for="(label, key) in USER_SEGMENT_LABELS" :key="key" :value="key">{{ label }}</option>
+          </select>
+        </div>
         <div class="flex-1 sm:flex-initial min-w-[140px]">
+          <label class="block text-xs text-gray-500 mb-1">Blocage</label>
           <select v-model="usersStore.blockFilter" @change="usersStore.applyFilters"
-            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
-            <option value="all">Tous les statuts</option>
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+            <option value="all">Tous</option>
             <option value="blocked">Bloqués</option>
             <option value="unblocked">Non bloqués</option>
           </select>
         </div>
-        <div class="flex-1 sm:flex-initial min-w-[140px]">
+        <div class="flex-1 sm:flex-initial min-w-[120px]">
+          <label class="block text-xs text-gray-500 mb-1">Type</label>
           <select v-model="usersStore.agentFilter" @change="usersStore.applyFilters"
-            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
-            <option value="all">Tous les types</option>
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+            <option value="all">Tous</option>
             <option value="agent">Agents</option>
             <option value="client">Clients</option>
           </select>
         </div>
-        <div class="flex-1 sm:flex-initial min-w-[140px]">
-          <select v-model="usersStore.noCaisseFilter" @change="usersStore.applyFilters"
-            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
-            <option value="all">Tous</option>
-            <option value="no_caisse">Sans caisse</option>
-          </select>
-        </div>
+      </div>
+
+      <!-- Compteurs segments (période inscription) -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+        <button
+          v-for="(label, key) in USER_SEGMENT_LABELS"
+          :key="key"
+          type="button"
+          @click="applySegmentFromCard(key)"
+          :class="[
+            'text-left p-2 rounded-lg border text-xs transition-colors',
+            usersStore.segmentFilter === key
+              ? 'border-primary bg-primary/10 text-primary'
+              : 'border-gray-200 bg-white hover:border-primary/40'
+          ]"
+        >
+          <div class="font-semibold text-lg leading-tight">{{ usersStore.userSegments[key] ?? 0 }}</div>
+          <div class="text-gray-600 mt-0.5 leading-snug">{{ label }}</div>
+        </button>
       </div>
     </div>
 
@@ -113,6 +145,11 @@
                       user.is_block ? 'fa-lock' : 'fa-unlock'
                     ]"></i>
                     {{ user.is_block ? 'Bloqué' : 'Actif' }}
+                  </span>
+                  <span v-if="user.is_suspect"
+                    class="px-2 inline-flex items-center text-xs leading-5 font-semibold rounded-full w-fit bg-yellow-100 text-yellow-800 border border-yellow-300">
+                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                    SUSPECT
                   </span>
                   <div v-if="user.is_block && user.reason_block" class="relative group">
                     <span class="text-xs text-gray-600 cursor-help underline decoration-dotted">
@@ -553,8 +590,8 @@
 
 <script setup lang="ts">
 import { onMounted, ref, reactive, nextTick, onBeforeUnmount, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useUsersStore } from '../stores/users'
+import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router'
+import { useUsersStore, USER_SEGMENT_LABELS, type UserSegmentKey } from '../stores/users'
 import { useWalletsStore } from '../stores/wallets'
 import { useNotification } from '../services/notification'
 import ConfirmationModal from '../components/ConfirmationModal.vue'
@@ -595,6 +632,9 @@ interface User {
   id: number;
   is_block: boolean;
   reason_block?: string | null;
+  is_suspect?: boolean;
+  suspect_reason?: string | null;
+  suspect_marked_at?: string | null;
   agent_client?: boolean;
   first_name?: string | null; 
   last_name?: string | null;
@@ -603,16 +643,23 @@ interface User {
   user_cards?: string[];
 }
 
+const onSegmentFilterChange = () => {
+  usersStore.applyFilters()
+}
+
+const applySegmentFromCard = (key: UserSegmentKey) => {
+  usersStore.segmentFilter = usersStore.segmentFilter === key ? 'all' : key
+  onSegmentFilterChange()
+}
+
+const skipUrlSync = ref(false)
+
 onMounted(() => {
-  // Initialize store state from URL query parameters
-  const page = parseInt(route.query.page as string) || 1
-  if (route.query.q) usersStore.searchQuery = route.query.q as string
-  if (route.query.block) usersStore.blockFilter = route.query.block as any
-  if (route.query.agent) usersStore.agentFilter = route.query.agent as any
-  if (route.query.no_caisse) usersStore.noCaisseFilter = route.query.no_caisse as any
-  
-  usersStore.fetchUsers(page)
-  
+  skipUrlSync.value = true
+  usersStore.initFromRouteQuery(route.query)
+  usersStore.fetchUsers(usersStore.currentPage)
+  skipUrlSync.value = false
+
   document.addEventListener('click', handleClickOutside)
   document.addEventListener('keydown', handleEscape)
   window.addEventListener('scroll', handleScroll, true)
@@ -626,19 +673,32 @@ watch(
     usersStore.searchQuery,
     usersStore.blockFilter,
     usersStore.agentFilter,
-    usersStore.noCaisseFilter
+    usersStore.noCaisseFilter,
+    usersStore.segmentFilter,
+    usersStore.startDate,
+    usersStore.endDate,
   ],
-  ([page, q, block, agent, no_caisse]) => {
-    const query: any = {}
+  ([page, q, block, agent, no_caisse, segment, startDate, endDate]) => {
+    if (skipUrlSync.value) return
+
+    const query: Record<string, string> = {}
     if (page && page !== 1) query.page = page.toString()
-    if (q) query.q = q
-    if (block && block !== 'all') query.block = block
-    if (agent && agent !== 'all') query.agent = agent
-    if (no_caisse && no_caisse !== 'all') query.no_caisse = no_caisse
+    if (q) query.q = q as string
+    if (block && block !== 'all') query.block = block as string
+    if (agent && agent !== 'all') query.agent = agent as string
+    if (no_caisse && no_caisse !== 'all') query.no_caisse = no_caisse as string
+    if (segment && segment !== 'all') query.user_segment = segment as string
+    if (startDate) query.start_date = startDate as string
+    if (endDate) query.end_date = endDate as string
 
     router.replace({ query })
   }
 )
+
+onBeforeRouteLeave(() => {
+  skipUrlSync.value = true
+  usersStore.resetListFilters()
+})
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)

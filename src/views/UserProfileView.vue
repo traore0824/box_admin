@@ -59,6 +59,11 @@
               ]">
                 {{ user.agent_client ? 'Agent' : 'Client' }}
               </span>
+              <span v-if="user.is_suspect"
+                class="px-3 py-1 inline-flex items-center text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-300">
+                <i class="fas fa-exclamation-triangle mr-1"></i>
+                SUSPECT
+              </span>
             </div>
           </div>
         </div>
@@ -145,6 +150,14 @@
             <i class="fas fa-images mr-2"></i>
             Photos KYC
           </button>
+
+          <!-- Marquer / Retirer Suspect -->
+          <button @click="openSuspectModal" :disabled="actionLoading"
+            class="flex items-center justify-center px-4 py-3 border rounded-lg transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+            :class="user.is_suspect ? 'border-yellow-400 bg-yellow-50 text-yellow-800 hover:bg-yellow-100' : 'border-yellow-300 bg-yellow-50 text-yellow-700 hover:bg-yellow-100'">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            {{ user.is_suspect ? 'Retirer Suspect' : 'Marquer Suspect' }}
+          </button>
         </div>
       </div>
 
@@ -191,6 +204,173 @@
             ]">
               {{ getKycStatusLabel(user.status) }}
             </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historique KYC -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between mb-5">
+          <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+            <i class="fas fa-id-card mr-2 text-primary"></i>
+            Historique KYC
+            <span v-if="kycStatus2FA && kycStatus2FA.history.length > 0" class="ml-2 text-xs font-normal text-gray-400">
+              ({{ kycStatus2FA.history.length }} demande{{ kycStatus2FA.history.length > 1 ? 's' : '' }})
+            </span>
+          </h3>
+          <button
+            @click="loadKycHistory"
+            :disabled="kycHistoryLoading"
+            class="text-xs px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 flex items-center gap-1.5"
+          >
+            <i class="fas" :class="kycHistoryLoading ? 'fa-spinner fa-spin' : 'fa-sync'"></i>
+            Actualiser
+          </button>
+        </div>
+
+        <!-- Loading -->
+        <div v-if="kycHistoryLoading && !kycStatus2FA" class="text-center py-10">
+          <i class="fas fa-spinner fa-spin text-2xl text-primary"></i>
+        </div>
+
+        <!-- Pas de données KYC -->
+        <div v-else-if="!kycStatus2FA" class="text-center py-10 text-gray-400">
+          <i class="fas fa-id-card text-4xl mb-3"></i>
+          <p class="text-sm">Aucune donnée KYC disponible pour cet utilisateur</p>
+        </div>
+
+        <div v-else class="space-y-5">
+          <!-- Statut actuel en-tête -->
+          <div class="flex flex-wrap items-center gap-3 p-4 rounded-lg border"
+            :class="{
+              'bg-green-50 border-green-200': kycStatus2FA.status === 'accept',
+              'bg-yellow-50 border-yellow-200': kycStatus2FA.status === 'pending',
+              'bg-red-50 border-red-200': kycStatus2FA.status === 'reject',
+              'bg-gray-50 border-gray-200': !kycStatus2FA.status
+            }"
+          >
+            <div>
+              <p class="text-xs text-gray-500 mb-1">Statut actuel</p>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold"
+                :class="getKycStatusClass(kycStatus2FA.status)"
+              >
+                <i class="fas" :class="{
+                  'fa-check-circle': kycStatus2FA.status === 'accept',
+                  'fa-clock': kycStatus2FA.status === 'pending',
+                  'fa-times-circle': kycStatus2FA.status === 'reject',
+                  'fa-question-circle': !kycStatus2FA.status
+                }"></i>
+                {{ getKycStatusLabel(kycStatus2FA.status) }}
+              </span>
+            </div>
+            <div v-if="kycStatus2FA.card_id">
+              <p class="text-xs text-gray-500 mb-1">N° pièce</p>
+              <p class="font-mono font-semibold text-gray-800 text-sm">{{ kycStatus2FA.card_id }}</p>
+            </div>
+            <div v-if="kycStatus2FA.rejection_reason" class="w-full">
+              <p class="text-xs text-gray-500 mb-1">Raison du rejet</p>
+              <p class="text-sm text-red-700 bg-white bg-opacity-70 px-3 py-2 rounded border border-red-200">{{ kycStatus2FA.rejection_reason }}</p>
+            </div>
+          </div>
+
+          <!-- Tableau historique des demandes -->
+          <div>
+            <p class="text-sm font-medium text-gray-700 mb-3">
+              <i class="fas fa-history mr-1.5 text-gray-400"></i>
+              Toutes les demandes
+            </p>
+            <div class="space-y-4">
+              <div
+                v-for="(req, index) in kycStatus2FA.history"
+                :key="req.id"
+                class="border rounded-lg overflow-hidden"
+                :class="{
+                  'border-green-200': req.status === 'verified',
+                  'border-red-200': req.status === 'rejected',
+                  'border-yellow-200': ['pending','in_review','needs_revision'].includes(req.status),
+                  'border-gray-200': !req.status
+                }"
+              >
+                <!-- Request header -->
+                <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-3"
+                  :class="{
+                    'bg-green-50': req.status === 'verified',
+                    'bg-red-50': req.status === 'rejected',
+                    'bg-yellow-50': ['pending','in_review','needs_revision'].includes(req.status),
+                    'bg-gray-50': !req.status
+                  }"
+                >
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-medium text-gray-400">#{{ kycStatus2FA.history.length - index }}</span>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold"
+                      :class="kycReqStatusClass(req.status)"
+                    >
+                      <i class="fas" :class="kycReqStatusIcon(req.status)"></i>
+                      {{ kycReqStatusLabel(req.status) }}
+                    </span>
+                    <span v-if="index === 0" class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">Dernière</span>
+                  </div>
+                  <div class="flex items-center gap-4 text-xs text-gray-500">
+                    <span v-if="req.submitted_at">
+                      <i class="fas fa-paper-plane mr-1"></i>
+                      {{ formatDateTime(req.submitted_at) }}
+                    </span>
+                    <span v-if="req.reviewed_at">
+                      <i class="fas fa-check mr-1"></i>
+                      Révisée : {{ formatDateTime(req.reviewed_at) }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Request body -->
+                <div class="p-4 space-y-3">
+                  <!-- Reviewer info + notes -->
+                  <div class="flex flex-wrap gap-4 text-sm">
+                    <div v-if="req.reviewed_by_email">
+                      <p class="text-xs text-gray-500">Révisé par</p>
+                      <p class="font-medium text-gray-800">{{ req.reviewed_by_email }}</p>
+                    </div>
+                    <div v-if="req.rejection_reason">
+                      <p class="text-xs text-gray-500">Raison du rejet</p>
+                      <p class="text-red-700 bg-red-50 px-2 py-1 rounded text-xs mt-0.5 max-w-sm">{{ req.rejection_reason }}</p>
+                    </div>
+                    <div v-if="req.review_notes">
+                      <p class="text-xs text-gray-500">Notes</p>
+                      <p class="text-gray-700 bg-gray-50 px-2 py-1 rounded text-xs mt-0.5 max-w-sm">{{ req.review_notes }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Documents de cette demande -->
+                  <div v-if="req.documents && req.documents.length > 0">
+                    <p class="text-xs text-gray-500 mb-2">Documents</p>
+                    <div class="flex flex-wrap gap-3">
+                      <div
+                        v-for="doc in req.documents"
+                        :key="doc.id"
+                        class="relative group cursor-pointer rounded-lg overflow-hidden border-2 border-gray-200 hover:border-primary transition-colors w-28 h-20 flex-shrink-0"
+                        @click="selectedKycImage = doc.file_url"
+                      >
+                        <img
+                          :src="doc.file_url"
+                          :alt="doc.document_type"
+                          class="w-full h-full object-cover"
+                          @error="handleKycImgError($event)"
+                        />
+                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
+                          <i class="fas fa-search-plus text-white opacity-0 group-hover:opacity-100 drop-shadow"></i>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-[10px] text-center py-0.5 px-1 leading-tight">
+                          {{ kycDocTypeLabel(doc.document_type) }}
+                        </div>
+                        <div v-if="doc.is_verified" class="absolute top-1 right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                          <i class="fas fa-check text-white text-[8px]"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -915,6 +1095,66 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Modal Suspect -->
+    <Teleport to="body">
+      <div v-if="showSuspectModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+              <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900">
+              {{ user?.is_suspect ? 'Retirer le marquage suspect' : 'Marquer comme suspect' }}
+            </h3>
+          </div>
+
+          <p class="text-sm text-gray-600 mb-4">
+            {{ user?.is_suspect
+              ? `Confirmer le retrait du marquage suspect pour ${user?.first_name} ${user?.last_name}. Les transactions déjà flagguées restent inchangées.`
+              : `Marquer ${user?.first_name} ${user?.last_name} comme suspect. Les prochaines transactions seront flagguées.`
+            }}
+          </p>
+
+          <!-- Champ raison (uniquement pour marquer) -->
+          <div v-if="!user?.is_suspect" class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Raison <span class="text-gray-400">(optionnel)</span>
+            </label>
+            <textarea
+              v-model="suspectReason"
+              rows="3"
+              placeholder="Ex: Activité inhabituelle détectée..."
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm"
+            ></textarea>
+          </div>
+
+          <!-- Info raison existante (pour démarquer) -->
+          <div v-if="user?.is_suspect && user?.suspect_reason" class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p class="text-xs text-gray-500 mb-1">Raison du marquage actuel</p>
+            <p class="text-sm text-gray-800">{{ user.suspect_reason }}</p>
+            <p v-if="user.suspect_marked_at" class="text-xs text-gray-400 mt-1">
+              {{ new Date(user.suspect_marked_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) }}
+            </p>
+          </div>
+
+          <div class="flex justify-end gap-3">
+            <button @click="showSuspectModal = false" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 text-sm">
+              Annuler
+            </button>
+            <button
+              @click="handleToggleSuspect"
+              :disabled="actionLoading"
+              class="px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              :class="user?.is_suspect ? 'bg-gray-700 text-white hover:bg-gray-800' : 'bg-yellow-500 text-white hover:bg-yellow-600'"
+            >
+              <i v-if="actionLoading" class="fas fa-spinner fa-spin mr-1"></i>
+              {{ user?.is_suspect ? 'Retirer le suspect' : 'Confirmer marquage' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -1000,6 +1240,154 @@ const walletStatusFilter = ref('all')
 // KYC Images Modal State
 const showKycImagesModal = ref(false)
 const selectedKycImage = ref<string | null>(null)
+
+// Suspect Modal State
+const showSuspectModal = ref(false)
+const suspectReason = ref('')
+
+function openSuspectModal() {
+  suspectReason.value = ''
+  showSuspectModal.value = true
+}
+
+async function handleToggleSuspect() {
+  if (!user.value) return
+  try {
+    actionLoading.value = true
+    const body: Record<string, string> = { user_id: String(user.value.id) }
+    if (!user.value.is_suspect && suspectReason.value.trim()) {
+      body.reason = suspectReason.value.trim()
+    }
+    const response = await fetchWithAuth('/auth/toggle-suspect/', {
+      method: 'POST',
+      body
+    })
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}))
+      throw new Error(data.detail || 'Erreur lors de la mise à jour')
+    }
+    const data = await response.json()
+    user.value = data.user
+    showSuspectModal.value = false
+  } catch (err) {
+    alert(err instanceof Error ? err.message : 'Erreur inattendue')
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+// KYC History State
+interface KycDocument { document_type: string; url: string }
+interface KycDocumentV2 {
+  id: string
+  document_type: string
+  file_url: string
+  expiry_date: string | null
+  is_verified: boolean
+  verification_notes: string | null
+  created_at: string
+  updated_at: string
+}
+interface KycRequest {
+  id: string
+  user: number
+  user_email: string
+  status: string
+  submitted_at: string | null
+  reviewed_at: string | null
+  reviewed_by: number | null
+  reviewed_by_email: string | null
+  review_notes: string | null
+  rejection_reason: string | null
+  documents: KycDocumentV2[]
+  created_at: string
+  updated_at: string
+}
+interface KycStatusV2 {
+  status: string | null
+  card_id: string | null
+  rejection_reason: string | null
+  documents: KycDocument[]
+  history: KycRequest[]
+}
+const kycStatus2FA = ref<KycStatusV2 | null>(null)
+const kycHistoryLoading = ref(false)
+
+const kycDocTypeLabel = (type: string): string => {
+  const labels: Record<string, string> = {
+    id_card: 'Carte d\'identité',
+    passport: 'Passeport',
+    driver_license: 'Permis',
+    selfie: 'Selfie'
+  }
+  return labels[type] ?? type
+}
+
+const kycReqStatusLabel = (status: string): string => {
+  const labels: Record<string, string> = {
+    verified: 'Vérifié',
+    rejected: 'Rejeté',
+    pending: 'En attente',
+    in_review: 'En cours',
+    needs_revision: 'À réviser'
+  }
+  return labels[status] ?? status
+}
+
+const kycReqStatusClass = (status: string): string => {
+  const map: Record<string, string> = {
+    verified: 'bg-green-100 text-green-800',
+    rejected: 'bg-red-100 text-red-800',
+    pending: 'bg-yellow-100 text-yellow-800',
+    in_review: 'bg-blue-100 text-blue-800',
+    needs_revision: 'bg-orange-100 text-orange-800'
+  }
+  return map[status] ?? 'bg-gray-100 text-gray-600'
+}
+
+const kycReqStatusIcon = (status: string): string => {
+  const map: Record<string, string> = {
+    verified: 'fa-check-circle',
+    rejected: 'fa-times-circle',
+    pending: 'fa-clock',
+    in_review: 'fa-search',
+    needs_revision: 'fa-exclamation-circle'
+  }
+  return map[status] ?? 'fa-question-circle'
+}
+
+const handleKycImgError = (e: Event) => {
+  const img = e.target as HTMLImageElement
+  img.style.display = 'none'
+}
+
+const loadKycHistory = async () => {
+  if (!userId.value) return
+  try {
+    kycHistoryLoading.value = true
+    const response = await fetchWithAuth('/auth/kyc/status/', {
+      method: 'GET',
+      queryParams: { user_id: userId.value.toString() }
+    })
+    if (!response.ok) {
+      kycStatus2FA.value = null
+      return
+    }
+    const data = await response.json()
+    kycStatus2FA.value = {
+      status: data.status ?? null,
+      card_id: data.card_id ?? null,
+      rejection_reason: data.rejection_reason ?? null,
+      documents: Array.isArray(data.documents) ? data.documents : [],
+      history: Array.isArray(data.history) ? data.history : []
+    }
+  } catch (err) {
+    console.error('Error loading KYC history:', err)
+    kycStatus2FA.value = null
+  } finally {
+    kycHistoryLoading.value = false
+  }
+}
 
 // Fonction pour générer les initiales
 const getUserInitials = (user: any): string => {
@@ -1161,7 +1549,8 @@ const loadUserInfo = async () => {
       loadTransactions(),
       loadWalletTransactions(),
       loadCaisses(),
-      blockHistoryStore.fetchBlockHistory(userId.value)
+      blockHistoryStore.fetchBlockHistory(userId.value),
+      loadKycHistory()
     ])
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Une erreur est survenue'

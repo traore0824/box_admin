@@ -45,6 +45,7 @@ export interface Transaction {
   caisse: Caisse
   type_trans: string
   phone: string
+  is_suspect_transaction: boolean
 }
 
 export interface TransactionsResponse {

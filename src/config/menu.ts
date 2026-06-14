@@ -104,6 +104,18 @@ export const menuItems: MenuItem[] = [
     icon: 'fas fa-calendar-week'
   },
   {
+    path: '/challenges',
+    name: 'Challenges',
+    icon: 'fas fa-trophy',
+    staffOnly: true
+  },
+  {
+    path: '/points-config',
+    name: 'Points BOX',
+    icon: 'fas fa-star',
+    staffOnly: true
+  },
+  {
     path: '/settings',
     name: 'Paramètres',
     icon: 'fas fa-cog',

@@ -116,11 +116,70 @@
                 <i class="fas fa-edit mr-1"></i>
                 Modifier
               </button>
+
+              <button
+                v-if="authStore.user?.is_staff"
+                @click="openRepublishConfirm(publication)"
+                :disabled="republishingId === publication.id"
+                class="inline-flex items-center px-3 py-1.5 border border-indigo-300 text-xs font-medium rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Republier"
+              >
+                <i
+                  class="fas mr-1"
+                  :class="republishingId === publication.id ? 'fa-spinner animate-spin' : 'fa-redo-alt'"
+                ></i>
+                {{ republishingId === publication.id ? '...' : 'Republier' }}
+              </button>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Republish Confirmation Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showRepublishModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
+        @click.self="closeRepublishConfirm"
+      >
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+          <div class="flex items-start gap-4 mb-4">
+            <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-redo-alt text-indigo-600"></i>
+            </div>
+            <div>
+              <h3 class="text-base font-semibold text-gray-900">Republier cette publication ?</h3>
+              <p class="text-sm text-gray-500 mt-1">
+                <span class="font-medium text-gray-700">« {{ republishTarget?.title }} »</span>
+              </p>
+            </div>
+          </div>
+          <ul class="text-sm text-gray-600 space-y-1.5 mb-5 bg-indigo-50 rounded-lg p-3">
+            <li class="flex items-center gap-2"><i class="fas fa-check text-indigo-500 w-4"></i> La publication repassera en tête du fil</li>
+            <li class="flex items-center gap-2"><i class="fas fa-check text-indigo-500 w-4"></i> Elle sera marquée comme <strong>active</strong></li>
+            <li class="flex items-center gap-2"><i class="fas fa-check text-indigo-500 w-4"></i> Toutes les lectures seront réinitialisées</li>
+          </ul>
+          <div class="flex justify-end gap-3">
+            <button
+              @click="closeRepublishConfirm"
+              :disabled="republishingId !== null"
+              class="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+            >
+              Annuler
+            </button>
+            <button
+              @click="confirmRepublish"
+              :disabled="republishingId !== null"
+              class="px-4 py-2 text-sm text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              <i class="fas" :class="republishingId ? 'fa-spinner animate-spin' : 'fa-redo-alt'"></i>
+              {{ republishingId ? 'Republication...' : 'Confirmer' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
     <!-- Create Publication Modal -->
     <div v-if="showCreateModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -148,14 +207,8 @@
               </div>
               
               <div>
-                <label for="content" class="block text-sm font-medium text-gray-700">Contenu</label>
-                <textarea 
-                  id="content" 
-                  rows="4" 
-                  v-model="newPub.content"
-                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm"
-                  placeholder="Contenu détaillé..."
-                ></textarea>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Contenu</label>
+                <RichTextEditor v-model="newPub.content" placeholder="Contenu détaillé..." />
               </div>
 
               <div>
@@ -228,6 +281,8 @@ import { ref, onMounted, reactive } from 'vue'
 import { usePublicationsStore } from '../stores/publications'
 import { useAuthStore } from '../stores/auth'
 import { useUploadStore } from '../stores/upload'
+import { useNotification } from '../services/notification'
+import RichTextEditor from '../components/RichTextEditor.vue'
 
 const publicationsStore = usePublicationsStore()
 const authStore = useAuthStore()
@@ -235,6 +290,42 @@ const uploadStore = useUploadStore()
 
 const showCreateModal = ref(false)
 const isUploading = ref(false)
+
+// Republish state
+const showRepublishModal = ref(false)
+const republishTarget = ref<{ id: string; title: string } | null>(null)
+const republishingId = ref<string | null>(null)
+
+const openRepublishConfirm = (publication: { id: string; title: string }) => {
+  republishTarget.value = publication
+  showRepublishModal.value = true
+}
+
+const closeRepublishConfirm = () => {
+  if (republishingId.value) return
+  showRepublishModal.value = false
+  republishTarget.value = null
+}
+
+const confirmRepublish = async () => {
+  if (!republishTarget.value) return
+  const id = republishTarget.value.id
+  republishingId.value = id
+  try {
+    const result = await publicationsStore.republishPublication(id)
+    const notification = useNotification()
+    notification.addNotification(
+      `Publication republiée — ${result.reads_reset_count} lecture(s) réinitialisée(s)`,
+      'success'
+    )
+    showRepublishModal.value = false
+    republishTarget.value = null
+  } catch {
+    // Error handled in store
+  } finally {
+    republishingId.value = null
+  }
+}
 
 const newPub = reactive({
   title: '',

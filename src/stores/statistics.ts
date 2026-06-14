@@ -32,6 +32,7 @@ interface StatisticsState {
       total_caisses: number
       total_transactions: number
     }
+    user_segments?: Record<string, number>
   }
 }
 
@@ -70,10 +71,17 @@ export const useStatisticsStore = defineStore('statistics', () => {
 
   const filter = ref<'all' | 'todays' | 'this_week' | 'this_month'>('all')
 
+  const dateFrom = ref('')
+  const dateTo = ref('')
+
   const fetchStatistics = async () => {
     try {
+      const queryParams: Record<string, string> = { q: filter.value }
+      if (dateFrom.value) queryParams.start_date = dateFrom.value
+      if (dateTo.value) queryParams.end_date = dateTo.value
+
       const response = await fetchWithAuth('/box/statistic', {
-        queryParams: { q: filter.value }
+        queryParams
       })
 
       if (!response.ok) {

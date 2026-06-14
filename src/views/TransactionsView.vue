@@ -98,15 +98,22 @@
                 </span>
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
-                <span class="badge text-xs" :class="{
-                  'badge-success': transaction.status === 'accept',
-                  'badge-danger': transaction.status === 'error',
-                  'bg-gray-100 text-gray-800': transaction.status === 'pending',
-                  'bg-orange-100 text-orange-800': transaction.status === 'expired',
-                  'bg-yellow-100 text-yellow-800': transaction.status === 'timeout'
-                }">
-                  {{ transaction.status === 'accept' ? 'Success' : transaction.status === 'error' ? 'Erreur' : transaction.status === 'pending' ? 'Pending' : transaction.status === 'expired' ? 'Expired' : transaction.status === 'timeout' ? 'Timeout' : transaction.status }}
-                </span>
+                <div class="flex flex-col gap-1">
+                  <span class="badge text-xs" :class="{
+                    'badge-success': transaction.status === 'accept',
+                    'badge-danger': transaction.status === 'error',
+                    'bg-gray-100 text-gray-800': transaction.status === 'pending',
+                    'bg-orange-100 text-orange-800': transaction.status === 'expired',
+                    'bg-yellow-100 text-yellow-800': transaction.status === 'timeout'
+                  }">
+                    {{ transaction.status === 'accept' ? 'Success' : transaction.status === 'error' ? 'Erreur' : transaction.status === 'pending' ? 'Pending' : transaction.status === 'expired' ? 'Expired' : transaction.status === 'timeout' ? 'Timeout' : transaction.status }}
+                  </span>
+                  <span v-if="transaction.is_suspect_transaction"
+                    class="inline-flex items-center px-1.5 py-0.5 text-xs font-semibold rounded bg-yellow-100 text-yellow-800 border border-yellow-300 w-fit">
+                    <i class="fas fa-exclamation-triangle mr-1 text-[10px]"></i>
+                    SUSPECT
+                  </span>
+                </div>
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ transaction.caisse.created_by.email }}</td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ transaction.caisse.name }}</td>

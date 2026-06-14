@@ -2,6 +2,38 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { fetchWithAuth } from './fetchwithtoken'
 
+export type BalanceHistoryReason = 'deposit' | 'withdrawal' | 'cancellation' | 'adjustment' | 'unknown'
+
+export interface BalanceHistoryEntry {
+  id: number
+  caisse: number
+  amount_before: number
+  amount_after: number
+  delta: number
+  reason: BalanceHistoryReason
+  reason_label: string
+  transaction_id: number | null
+  transaction_type: string | null
+  transaction_reference: string | null
+  triggered_by: {
+    id: number
+    email: string
+    first_name: string
+    last_name: string
+  } | null
+  note: string | null
+  created_at: string
+}
+
+export interface BalanceHistoryResponse {
+  count: number
+  next: string | null
+  previous: string | null
+  caisse_id: number
+  current_amount_already_paid: number
+  results: BalanceHistoryEntry[]
+}
+
 
 export interface Caisse {
   id: number
@@ -100,6 +132,46 @@ export const useCaisseStore = defineStore('caisse', () => {
     }
   }
 
+  // ── Balance history ──────────────────────────────────────────────
+  const balanceHistory = ref<BalanceHistoryEntry[]>([])
+  const balanceHistoryLoading = ref(false)
+  const balanceHistoryError = ref<string | null>(null)
+  const balanceHistoryPage = ref(1)
+  const balanceHistoryTotal = ref(0)
+  const balanceHistoryCurrentAmount = ref<number>(0)
+  const PAGE_SIZE = 20
+
+  const balanceHistoryTotalPages = (): number => Math.ceil(balanceHistoryTotal.value / PAGE_SIZE)
+
+  async function fetchBalanceHistory(caisseId: number, page = 1) {
+    try {
+      balanceHistoryLoading.value = true
+      balanceHistoryError.value = null
+
+      const response = await fetchWithAuth(`/box/caisse/balance-history/${caisseId}/`, {
+        method: 'GET',
+        queryParams: { page: page.toString(), page_size: PAGE_SIZE.toString() }
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.detail || data.message || "Erreur lors de la récupération de l'historique")
+      }
+
+      const data: BalanceHistoryResponse = await response.json()
+      balanceHistory.value = data.results
+      balanceHistoryTotal.value = data.count
+      balanceHistoryPage.value = page
+      balanceHistoryCurrentAmount.value = data.current_amount_already_paid
+    } catch (err) {
+      balanceHistoryError.value = err instanceof Error ? err.message : 'Une erreur est survenue'
+      console.error('Error fetching balance history:', err)
+      throw err
+    } finally {
+      balanceHistoryLoading.value = false
+    }
+  }
+
   return {
     caisses,
     isLoading,
@@ -107,7 +179,15 @@ export const useCaisseStore = defineStore('caisse', () => {
     currentPage,
     itemsPerPage,
     totalCaisse,
-    fetchCaisse
+    fetchCaisse,
+    balanceHistory,
+    balanceHistoryLoading,
+    balanceHistoryError,
+    balanceHistoryPage,
+    balanceHistoryTotal,
+    balanceHistoryCurrentAmount,
+    balanceHistoryTotalPages,
+    fetchBalanceHistory
   }
 })
 

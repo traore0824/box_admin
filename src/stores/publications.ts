@@ -137,6 +137,36 @@ export const usePublicationsStore = defineStore('publications', () => {
         }
     }
 
+    async function republishPublication(id: string): Promise<{ reads_reset_count: number; data: Publication }> {
+        isLoading.value = true
+        error.value = null
+        try {
+            const response = await fetchWithAuth(`/box/admin/publications/${id}/republish/`, {
+                method: 'POST'
+            })
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}))
+                throw new Error(errorData.message || 'Erreur lors de la republication')
+            }
+
+            const result = await response.json()
+            // Mettre à jour localement : replacer la pub et la remonter en tête de liste
+            const updatedPub: Publication = result.data
+            const index = publications.value.findIndex(p => p.id === id)
+            if (index !== -1) {
+                publications.value.splice(index, 1)
+            }
+            publications.value.unshift(updatedPub)
+            return result
+        } catch (err: any) {
+            error.value = err.message || 'Une erreur est survenue'
+            throw err
+        } finally {
+            isLoading.value = false
+        }
+    }
+
     return {
         publications,
         isLoading,
@@ -147,6 +177,7 @@ export const usePublicationsStore = defineStore('publications', () => {
         fetchPublications,
         markAsRead,
         createPublication,
-        updatePublication
+        updatePublication,
+        republishPublication
     }
 })

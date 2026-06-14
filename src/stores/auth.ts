@@ -109,7 +109,7 @@ export const useAuthStore = defineStore('auth', () => {
       isLoading.value = true
       error.value = null
 
-      const response = await fetchWithAuth('/auth/login/', {
+      const response = await fetchWithAuth('/auth/login-v2/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -146,8 +146,8 @@ export const useAuthStore = defineStore('auth', () => {
         }
       }
 
-      // Vérifier si le 2FA est requis
-      requires2FA.value = !!data.user?.double_auth
+      // Toujours exiger le 2FA pour les admins (is_staff)
+      requires2FA.value = !!data.user?.is_staff
       
       startTokenCheck()
       return true
