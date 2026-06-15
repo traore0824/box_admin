@@ -173,7 +173,7 @@ const editor = useEditor({
 // Sync quand la valeur change depuis l'extérieur (ex: reset du form)
 watch(() => props.modelValue, (val) => {
   if (editor.value && editor.value.getHTML() !== val) {
-    editor.value.commands.setContent(val || '', false)
+    editor.value.commands.setContent(val || '', false as unknown as Parameters<typeof editor.value.commands.setContent>[1])
   }
 })
 

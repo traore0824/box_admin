@@ -32,6 +32,9 @@ interface User {
   status?: 'pending' | 'accept' | 'reject' | null
   user_cards?: string[]
   is_active: boolean
+  is_suspect?: boolean
+  suspect_reason?: string | null
+  suspect_marked_at?: string | null
 }
 
 export type UserSegmentKey =
