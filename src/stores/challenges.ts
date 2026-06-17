@@ -141,7 +141,7 @@ export const useChallengesStore = defineStore('challenges', () => {
   async function savePointsActions(items: PointsAction[]) {
     const res = await fetchWithAuth('/box/admin/points/actions', {
       method: 'PATCH',
-      body: items,
+      body: items as unknown as Record<string, unknown>,
       headers: { 'Content-Type': 'application/json' },
     })
     if (!res.ok) throw new Error('Erreur sauvegarde actions')
@@ -181,7 +181,7 @@ export const useChallengesStore = defineStore('challenges', () => {
   async function saveUserLevels(items: UserLevel[]) {
     const res = await fetchWithAuth('/box/admin/points/levels', {
       method: 'PATCH',
-      body: items,
+      body: items as unknown as Record<string, unknown>,
       headers: { 'Content-Type': 'application/json' },
     })
     if (!res.ok) throw new Error('Erreur sauvegarde niveaux')
@@ -221,7 +221,7 @@ export const useChallengesStore = defineStore('challenges', () => {
   async function savePointsInfo(payload: PointsInfo) {
     const res = await fetchWithAuth('/box/admin/points/info', {
       method: 'PATCH',
-      body: payload,
+      body: payload as unknown as Record<string, unknown>,
       headers: { 'Content-Type': 'application/json' },
     })
     if (!res.ok) throw new Error('Erreur sauvegarde info points')
