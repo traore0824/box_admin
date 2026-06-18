@@ -55,6 +55,10 @@
         </button>
       </form>
 
+      <div v-if="successMessage" class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-center text-sm">
+        {{ successMessage }}
+      </div>
+
       <div v-if="authStore.error" class="mt-4 text-red-600 text-center">
         {{ authStore.error }}
       </div>
@@ -63,16 +67,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
 const authStore = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
+
+const successMessage = computed(() => {
+  const message = route.query.message
+  return typeof message === 'string' ? message : null
+})
 
 async function handleLogin() {
   try {

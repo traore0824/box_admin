@@ -28,6 +28,7 @@ import Verify2FAView from '../views/Verify2FAView.vue'
 import WeeklySampleView from '../views/WeeklySampleView.vue'
 import ChallengesView from '../views/ChallengesView.vue'
 import PointsConfigView from '../views/PointsConfigView.vue'
+import ChangePasswordView from '../views/ChangePasswordView.vue'
 
 const routes = [
   {
@@ -179,6 +180,12 @@ const routes = [
     name: 'challenges',
     component: ChallengesView,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/change-password',
+    name: 'change-password',
+    component: ChangePasswordView,
+    meta: { requiresAuth: true, title: 'Changer le mot de passe' }
   },
   {
     path: '/points-config',

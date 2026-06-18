@@ -213,6 +213,55 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // Envoyer un OTP de déblocage de compte PIN (API publique)
+  async function changePassword(
+    oldPassword: string,
+    newPassword: string,
+    confirmPassword: string
+  ) {
+    try {
+      isLoading.value = true
+      error.value = null
+
+      const response = await fetchWithAuth('/auth/change_password/', {
+        method: 'POST',
+        body: {
+          old_password: oldPassword,
+          new_password: newPassword,
+          confirm_password: confirmPassword
+        }
+      })
+
+      const data = await response.json().catch(() => ({}))
+
+      if (!response.ok) {
+        if (data.INVALID_CURRENT_PASSWORD) {
+          throw new Error('Mot de passe actuel incorrect')
+        }
+        if (data.PASSWORD_NO_MATCH) {
+          throw new Error('Les mots de passe ne correspondent pas')
+        }
+        if (data.PASSWORD_NOT_STRONG) {
+          throw new Error('Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre')
+        }
+        if (data.CANT_USE_PHONE) {
+          throw new Error('Vous ne pouvez pas utiliser votre téléphone comme mot de passe')
+        }
+        if (data.CANT_USE_EMAIL) {
+          throw new Error('Vous ne pouvez pas utiliser votre email comme mot de passe')
+        }
+        throw new Error(data.detail || data.message || 'Erreur lors du changement de mot de passe')
+      }
+
+      clearAuth()
+      return true
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Erreur lors du changement de mot de passe'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   async function sendOtp(email: string) {
     try {
       isLoading.value = true
@@ -257,6 +306,7 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     verify2FA,
     autoLogin,
+    changePassword,
     sendOtp
   }
 })

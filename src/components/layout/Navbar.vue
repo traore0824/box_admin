@@ -106,6 +106,13 @@
         >
           <div class="py-2">
             <router-link 
+              to="/change-password"
+              class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+              @click="isSettingsOpen = false"
+            >
+              <i class="fas fa-key mr-2"></i> Changer le mot de passe
+            </router-link>
+            <router-link 
               to="/settings"
               class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
               @click="isSettingsOpen = false"
@@ -133,6 +140,13 @@
           class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-dropdown border border-gray-200 z-10"
         >
           <div class="py-2">
+            <router-link 
+              to="/change-password"
+              class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+              @click="isProfileOpen = false"
+            >
+              <i class="fas fa-key mr-2"></i> Changer le mot de passe
+            </router-link>
             <router-link 
               to="/settings"
               class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"

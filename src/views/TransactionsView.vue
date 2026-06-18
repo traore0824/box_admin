@@ -61,7 +61,7 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-2 sm:px-4 md:px-6">Référence</th>
-              <th class="px-2 sm:px-4 md:px-6 hidden md:table-cell">Date</th>
+              <th class="px-2 sm:px-4 md:px-6 hidden md:table-cell">Date et heure</th>
               <th class="px-2 sm:px-4 md:px-6">Montant</th>
               <th class="px-2 sm:px-4 md:px-6 hidden lg:table-cell">Téléphone</th>
               <th class="px-2 sm:px-4 md:px-6">Type</th>
@@ -76,10 +76,10 @@
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
                 <div class="flex flex-col">
                   <span class="font-medium text-gray-900 text-xs sm:text-sm">{{ transaction.public_reference }}</span>
-                  <span class="text-xs text-gray-500 md:hidden">{{ new Date(transaction.created_at).toLocaleDateString() }}</span>
+                  <span class="text-xs text-gray-500 md:hidden">{{ formatDateTime(transaction.created_at) }}</span>
                 </div>
               </td>
-              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden md:table-cell">{{ new Date(transaction.created_at).toLocaleDateString() }}</td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden md:table-cell">{{ formatDateTime(transaction.created_at) }}</td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm" :class="{
                 'text-success': transaction.type_trans === 'deposit',
                 'text-danger': transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation' || transaction.type_trans === 'withdrawal_request',
@@ -678,6 +678,16 @@ const closeValidationModal = () => {
 // Voir les détails de la transaction
 const viewTransactionDetails = (transactionId: number) => {
   router.push({ name: 'transaction-details', params: { id: transactionId.toString() } })
+}
+
+const formatDateTime = (date: string): string => {
+  return new Date(date).toLocaleString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 
 // Notifier l'utilisateur d'un dépôt échoué
