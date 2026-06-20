@@ -1,67 +1,153 @@
 <template>
   <div class="space-y-6">
-    <!-- Page Header + Filtres -->
-    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Liste des Caisses</h1>
+      <button class="btn btn-primary w-full sm:w-auto" @click="caisseStore.fetchCaisse(caisseStore.currentPage)">
+        <i class="fas fa-sync mr-2"></i> Rafraîchir
+      </button>
+    </div>
 
-      <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center w-full md:w-auto">
-        <!-- Champ de recherche -->
-        <input v-model="searchQuery" @input="fetchCaisse" type="text" class="input flex-1 sm:flex-initial sm:min-w-[200px]"
-          placeholder="Rechercher une caisse..." />
+    <!-- Search and Filters -->
+    <div class="space-y-3">
+      <div class="relative w-full sm:max-w-[50%]">
+        <input
+          v-model="caisseStore.searchQuery"
+          @input="caisseStore.updateSearchQuery(caisseStore.searchQuery)"
+          type="text"
+          placeholder="Rechercher par nom, email, téléphone..."
+          class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+        />
+        <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      </div>
 
-        <!-- Filtre par statut -->
-        <select v-model="selectedStatus" @change="fetchCaisse" class="input flex-1 sm:flex-initial sm:min-w-[160px]">
-          <option value="">Tous les statuts</option>
-          <option value="disabled">Non actif</option>
-          <option value="pending">En cours</option>
-          <option value="done">Terminé</option>
-          <option value="cancel">Annulé</option>
-        </select>
+      <div class="flex flex-wrap gap-3 items-end">
+        <div class="flex-1 sm:flex-initial min-w-[130px]">
+          <label class="block text-xs text-gray-500 mb-1">Du</label>
+          <input
+            v-model="caisseStore.startDate"
+            type="date"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+        <div class="flex-1 sm:flex-initial min-w-[130px]">
+          <label class="block text-xs text-gray-500 mb-1">Au</label>
+          <input
+            v-model="caisseStore.endDate"
+            type="date"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+        <div class="flex-1 sm:flex-initial min-w-[150px]">
+          <label class="block text-xs text-gray-500 mb-1">Statut</label>
+          <select
+            v-model="caisseStore.statusFilter"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="">Tous les statuts</option>
+            <option value="disabled">Non actif</option>
+            <option value="pending">En cours</option>
+            <option value="done">Terminée</option>
+            <option value="withdrawn">Retirée</option>
+            <option value="cancel">Annulée</option>
+            <option value="cancelled">Annulée (v2)</option>
+          </select>
+        </div>
+        <div class="flex-1 sm:flex-initial min-w-[150px]">
+          <label class="block text-xs text-gray-500 mb-1">Fréquence</label>
+          <select
+            v-model="caisseStore.frequenceFilter"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="">Toutes</option>
+            <option value="all_week">Semaine</option>
+            <option value="all_month">Mois</option>
+            <option value="all_days">Jour</option>
+            <option value="custom">Personnalisée</option>
+            <option value="unlimited">Illimitée</option>
+          </select>
+        </div>
+        <div class="flex-1 sm:flex-initial min-w-[130px]">
+          <label class="block text-xs text-gray-500 mb-1">Type</label>
+          <select
+            v-model="caisseStore.typeBoxFilter"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="">Tous</option>
+            <option value="free">Libre</option>
+            <option value="locked">Bloquée</option>
+          </select>
+        </div>
+        <div class="flex-1 sm:flex-initial min-w-[130px]">
+          <label class="block text-xs text-gray-500 mb-1">Mode</label>
+          <select
+            v-model="caisseStore.personalFilter"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="">Tous</option>
+            <option value="true">Personnelle</option>
+            <option value="false">Groupe</option>
+          </select>
+        </div>
+        <div class="flex-1 sm:flex-initial min-w-[140px]">
+          <label class="block text-xs text-gray-500 mb-1">Retrait</label>
+          <select
+            v-model="caisseStore.withdrawnFilter"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="">Tous</option>
+            <option value="false">Sans retrait</option>
+            <option value="true">Retirée / annulée</option>
+          </select>
+        </div>
+      </div>
 
-        <!-- Filtre par fréquence -->
-        <select v-model="selectedFrequence" @change="fetchCaisse" class="input flex-1 sm:flex-initial sm:min-w-[180px]">
-          <option value="">Toutes les fréquences</option>
-          <option value="all_week">Toutes les semaines</option>
-          <option value="all_month">Tous les mois</option>
-          <option value="all_days">Tous les jours</option>
-          <option value="custom">Fréquence personnalisée</option>
-        </select>
-
-        <!-- Bouton rafraîchir -->
-        <button class="btn btn-primary w-full sm:w-auto" @click="fetchCaisse">
-          <i class="fas fa-sync mr-2"></i> <span class="hidden sm:inline">Rafraîchir</span><span class="sm:hidden">Raf.</span>
+      <!-- Stat cards -->
+      <div v-if="caisseStore.caisseStats" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+        <button
+          v-for="card in statCards"
+          :key="card.key"
+          type="button"
+          @click="applyStatCard(card)"
+          :class="[
+            'text-left p-2 rounded-lg border text-xs transition-colors',
+            card.active
+              ? 'border-primary bg-primary/10 text-primary'
+              : 'border-gray-200 bg-white hover:border-primary/40'
+          ]"
+        >
+          <div class="font-semibold text-lg leading-tight">{{ card.count }}</div>
+          <div class="text-gray-600 mt-0.5 leading-snug">{{ card.label }}</div>
         </button>
       </div>
     </div>
 
-    <!-- Loading State -->
+    <!-- Loading -->
     <div v-if="caisseStore.isLoading" class="py-8 text-center">
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
       <p class="mt-2 text-gray-600">Chargement des caisses...</p>
     </div>
 
-    <!-- Error State -->
-    <div v-if="caisseStore.error" class="py-8 text-center">
+    <!-- Error -->
+    <div v-else-if="caisseStore.error" class="py-8 text-center">
       <p class="text-red-600">{{ caisseStore.error }}</p>
-      <button class="mt-2 btn btn-primary" @click="fetchCaisse">
+      <button class="mt-2 btn btn-primary" @click="caisseStore.fetchCaisse(caisseStore.currentPage)">
         <i class="fas fa-sync mr-2"></i> Réessayer
       </button>
     </div>
 
-    <!-- Caisse List -->
-    <div v-if="!caisseStore.isLoading && !caisseStore.error && caisseStore.caisses.length > 0"
-      class="bg-white rounded-lg shadow-sm">
+    <!-- List -->
+    <div v-else-if="caisseStore.caisses.length > 0" class="bg-white rounded-lg shadow-sm">
       <div class="w-full overflow-x-auto">
         <table class="table">
           <thead class="bg-gray-50">
             <tr>
-              <th scope="col" class="px-2 sm:px-4 md:px-6">Nom</th>
-              <th scope="col" class="px-2 sm:px-4 md:px-6">Montant</th>
-              <th scope="col" class="px-2 sm:px-4 md:px-6">Statut</th>
-              <th scope="col" class="px-2 sm:px-4 md:px-6 hidden md:table-cell">Progression</th>
-              <th scope="col" class="px-2 sm:px-4 md:px-6 hidden lg:table-cell">Date de début</th>
-              <th scope="col" class="px-2 sm:px-4 md:px-6 hidden xl:table-cell">Utilisateur</th>
-              <th scope="col" class="px-2 sm:px-4 md:px-6">Actions</th>
+              <th class="px-2 sm:px-4 md:px-6">Nom</th>
+              <th class="px-2 sm:px-4 md:px-6">Montant</th>
+              <th class="px-2 sm:px-4 md:px-6">Statut</th>
+              <th class="px-2 sm:px-4 md:px-6 hidden md:table-cell">Progression</th>
+              <th class="px-2 sm:px-4 md:px-6 hidden lg:table-cell">Date de début</th>
+              <th class="px-2 sm:px-4 md:px-6 hidden xl:table-cell">Utilisateur</th>
+              <th class="px-2 sm:px-4 md:px-6">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
@@ -69,50 +155,57 @@
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
                 <div class="flex flex-col">
                   <span class="font-medium text-gray-900 text-xs sm:text-sm">{{ caisse.name }}</span>
-                  <span class="text-xs text-gray-500 lg:hidden">{{ new Date(caisse.start_date).toLocaleDateString() }}</span>
+                  <span class="text-xs text-gray-500 lg:hidden">
+                    {{ caisse.start_date ? new Date(caisse.start_date).toLocaleDateString('fr-FR') : '-' }}
+                  </span>
                 </div>
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm">
                 <span class="font-medium">
-                  {{ caisse.amount ? parseFloat(caisse.amount).toLocaleString() : '0' }} XOF
+                  {{ formatAmount(caisse.amount_already_paid || caisse.amount || 0) }}
                 </span>
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
-                <span class="badge text-xs" :class="{
-                  'bg-green-100 text-green-800': caisse.status === 'done',
-                  'bg-yellow-100 text-yellow-800': caisse.status === 'pending',
-                  'bg-red-100 text-red-800': caisse.status === 'disabled',
-                  'bg-blue-100 text-blue-800': !['done', 'pending', 'disabled'].includes(caisse.status)
-                }">
-                  {{ caisse.status === 'done' ? 'Terminé' :
-                  caisse.status === 'pending' ? 'En cours' :
-                  caisse.status === 'disabled' ? 'Désactivé' :
-                  caisse.status.charAt(0).toUpperCase() + caisse.status.slice(1) }}
+                <span class="badge text-xs" :class="statusBadgeClass(caisse.status)">
+                  {{ statusLabel(caisse.status) }}
                 </span>
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 hidden md:table-cell">
                 <div class="flex items-center gap-2">
                   <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div class="bg-blue-500 h-2 rounded-full" :style="{ width: `${caisse.percentage_progession}%` }">
-                    </div>
+                    <div
+                      class="bg-blue-500 h-2 rounded-full"
+                      :style="{ width: `${Math.min(100, parseFloat(caisse.percentage_progession) || 0)}%` }"
+                    ></div>
                   </div>
                   <span class="text-xs sm:text-sm whitespace-nowrap">{{ caisse.percentage_progession }}%</span>
                 </div>
               </td>
-              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden lg:table-cell">{{ new Date(caisse.start_date).toLocaleDateString() }}</td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden lg:table-cell">
+                {{ caisse.start_date ? new Date(caisse.start_date).toLocaleDateString('fr-FR') : '-' }}
+              </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 hidden xl:table-cell">
-                <div class="text-xs sm:text-sm text-gray-900">{{ caisse.created_by.email }}</div>
-                <div class="text-xs text-gray-500">{{ caisse.created_by.phone }}</div>
+                <div class="text-xs sm:text-sm text-gray-900">{{ caisse.created_by?.email }}</div>
+                <div class="text-xs text-gray-500">{{ caisse.created_by?.phone }}</div>
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
-                <router-link
-                  :to="{ name: 'caisse-details', params: { id: caisse.id.toString() } }"
-                  class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                  title="Voir les détails de la caisse"
-                >
-                  <i class="fas fa-eye mr-1"></i>
-                  <span class="hidden sm:inline">Détails</span>
-                </router-link>
+                <div class="flex flex-wrap gap-2">
+                  <router-link
+                    :to="{ name: 'caisse-details', params: { id: caisse.id.toString() } }"
+                    class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    <i class="fas fa-eye mr-1"></i>
+                    <span class="hidden sm:inline">Détails</span>
+                  </router-link>
+                  <button
+                    type="button"
+                    class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-primary bg-white border border-primary/30 rounded-md hover:bg-primary/5"
+                    @click="openBalanceHistory(caisse)"
+                  >
+                    <i class="fas fa-history mr-1"></i>
+                    <span class="hidden sm:inline">Historique</span>
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -120,140 +213,177 @@
       </div>
     </div>
 
-    <!-- Pagination - Version corrigée -->
-    <div v-if="!caisseStore.isLoading && !caisseStore.error && caisseStore.caisses.length > 0"
-      class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 px-4 py-3 bg-white border rounded-lg shadow-sm">
-
-      <!-- Informations sur la pagination -->
-      <div class="text-xs sm:text-sm text-gray-700 text-center sm:text-left">
-        <span>Page {{ caisseStore.currentPage || 1 }}</span>
-        <span v-if="caisseStore.totalCaisse">
-          sur {{ Math.ceil((caisseStore.totalCaisse || 0) / (caisseStore.itemsPerPage || 10)) }}
-        </span>
-        <span v-if="caisseStore.totalCaisse" class="ml-2 hidden sm:inline">
-          ({{ caisseStore.totalCaisse }} élément{{ caisseStore.totalCaisse > 1 ? 's' : '' }} au total)
-        </span>
-      </div>
-
-      <!-- Contrôles de navigation -->
-      <div class="flex space-x-2">
-        <button class="btn btn-sm text-xs sm:text-sm" :class="{ 'opacity-50 cursor-not-allowed': (caisseStore.currentPage || 1) === 1 }"
-          :disabled="(caisseStore.currentPage || 1) === 1" @click="goToPreviousPage">
-          <i class="fas fa-chevron-left mr-1"></i> <span class="hidden sm:inline">Précédente</span><span class="sm:hidden">Préc.</span>
-        </button>
-
-        <button class="btn btn-sm text-xs sm:text-sm" :class="{ 'opacity-50 cursor-not-allowed': !hasNextPage }" :disabled="!hasNextPage"
-          @click="goToNextPage">
-          <span class="hidden sm:inline">Suivante</span><span class="sm:hidden">Suiv.</span> <i class="fas fa-chevron-right ml-1"></i>
-        </button>
-      </div>
-    </div>
-
-
-    <!-- Empty State -->
-    <div v-if="!caisseStore.isLoading && !caisseStore.error && caisseStore.caisses.length === 0"
-      class="py-8 text-center">
+    <!-- Empty -->
+    <div v-else class="py-8 text-center bg-white rounded-lg shadow-sm">
       <p class="text-gray-500">Aucune caisse trouvée.</p>
     </div>
+
+    <!-- Pagination -->
+    <div
+      v-if="!caisseStore.isLoading && !caisseStore.error && caisseStore.caisses.length > 0"
+      class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-white border rounded-lg shadow-sm"
+    >
+      <div class="text-xs sm:text-sm text-gray-700">
+        Page {{ caisseStore.currentPage }}
+        sur {{ totalPages }}
+        <span class="ml-2 hidden sm:inline">({{ caisseStore.totalCaisse }} au total)</span>
+      </div>
+      <div class="flex space-x-2">
+        <button
+          class="btn btn-sm"
+          :disabled="caisseStore.currentPage <= 1"
+          @click="goToPage(caisseStore.currentPage - 1)"
+        >
+          <i class="fas fa-chevron-left mr-1"></i> Précédente
+        </button>
+        <button class="btn btn-sm" :disabled="!hasNextPage" @click="goToPage(caisseStore.currentPage + 1)">
+          Suivante <i class="fas fa-chevron-right ml-1"></i>
+        </button>
+      </div>
+    </div>
+
+    <CaisseBalanceHistoryModal
+      v-model="showBalanceHistoryModal"
+      :caisse-id="selectedCaisseId"
+      :caisse-name="selectedCaisseName"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useCaisseStore } from '../stores/caisse'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
+import { useCaisseStore, CAISSE_STAT_LABELS, type Caisse } from '../stores/caisse'
+import { formatAmount } from '../utils/currency'
+import CaisseBalanceHistoryModal from '../components/CaisseBalanceHistoryModal.vue'
 
+const route = useRoute()
 const router = useRouter()
-
 const caisseStore = useCaisseStore()
 
-// Filtres
-const searchQuery = ref('')
-const selectedStatus = ref('')
-const selectedFrequence = ref('')
+const showBalanceHistoryModal = ref(false)
+const selectedCaisseId = ref<number | null>(null)
+const selectedCaisseName = ref('')
+const skipUrlSync = ref(false)
 
-// Page suivante disponible ? - Version corrigée
-const hasNextPage = computed(() => {
-  const currentPage = caisseStore.currentPage || 1
-  const totalCaisse = caisseStore.totalCaisse || 0
-  const itemsPerPage = caisseStore.itemsPerPage || 10
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil((caisseStore.totalCaisse || 0) / caisseStore.itemsPerPage))
+)
 
-  if (totalCaisse === 0) return false
+const hasNextPage = computed(() => caisseStore.currentPage < totalPages.value)
 
-  const totalPages = Math.ceil(totalCaisse / itemsPerPage)
-  return currentPage < totalPages
+const statCards = computed(() => {
+  const s = caisseStore.caisseStats
+  if (!s) return []
+  return [
+    { key: 'all', label: 'Total', count: s.total, active: !caisseStore.statusFilter && !caisseStore.withdrawnFilter, filter: {} },
+    { key: 'pending', label: 'En cours', count: s.pending, active: caisseStore.statusFilter === 'pending', filter: { status: 'pending' as const } },
+    { key: 'done', label: 'Terminées', count: s.done, active: caisseStore.statusFilter === 'done', filter: { status: 'done' as const } },
+    { key: 'not_withdrawn', label: 'Sans retrait', count: s.not_withdrawn, active: caisseStore.withdrawnFilter === 'false', filter: { withdrawn: 'false' as const } },
+    { key: 'withdrawn', label: 'Retirées', count: s.withdrawn, active: caisseStore.withdrawnFilter === 'true', filter: { withdrawn: 'true' as const } },
+    { key: 'disabled', label: 'Non actif', count: s.disabled, active: caisseStore.statusFilter === 'disabled', filter: { status: 'disabled' as const } },
+    { key: 'group', label: 'Groupe', count: s.group, active: caisseStore.personalFilter === 'false', filter: { personal: 'false' as const } },
+    { key: 'personal', label: 'Personnelle', count: s.personal, active: caisseStore.personalFilter === 'true', filter: { personal: 'true' as const } },
+  ]
 })
 
-const goToPreviousPage = () => {
-  const currentPage = caisseStore.currentPage || 1
-  if (currentPage > 1) {
-    caisseStore.fetchCaisse(currentPage - 1, {
-      q: searchQuery.value,
-      status: selectedStatus.value,
-      frequence: selectedFrequence.value
-    })
-  }
+const statusLabel = (status: string) => CAISSE_STAT_LABELS[status] || status
+
+const statusBadgeClass = (status: string) => ({
+  'bg-green-100 text-green-800': status === 'done' || status === 'withdrawn',
+  'bg-yellow-100 text-yellow-800': status === 'pending',
+  'bg-red-100 text-red-800': status === 'disabled' || status === 'cancel' || status === 'cancelled',
+  'bg-blue-100 text-blue-800': !['done', 'pending', 'disabled', 'withdrawn', 'cancel', 'cancelled'].includes(status),
+})
+
+const goToPage = (page: number) => {
+  caisseStore.fetchCaisse(page)
 }
 
-const goToNextPage = () => {
-  if (hasNextPage.value) {
-    const currentPage = caisseStore.currentPage || 1
-    caisseStore.fetchCaisse(currentPage + 1, {
-      q: searchQuery.value,
-      status: selectedStatus.value,
-      frequence: selectedFrequence.value
-    })
-  }
+const openBalanceHistory = (caisse: Caisse) => {
+  selectedCaisseId.value = caisse.id
+  selectedCaisseName.value = caisse.name
+  showBalanceHistoryModal.value = true
 }
 
-// Fonction qui appelle le store avec filtres
-const fetchCaisse = () => {
-  caisseStore.fetchCaisse(1, {
-    q: searchQuery.value,
-    status: selectedStatus.value,
-    frequence: selectedFrequence.value
-  })
+const applyStatCard = (card: (typeof statCards.value)[number]) => {
+  if (card.key === 'all') {
+    caisseStore.statusFilter = ''
+    caisseStore.withdrawnFilter = ''
+    caisseStore.personalFilter = ''
+  } else if ('status' in card.filter && card.filter.status) {
+    caisseStore.statusFilter = caisseStore.statusFilter === card.filter.status ? '' : card.filter.status
+    caisseStore.withdrawnFilter = ''
+    caisseStore.personalFilter = ''
+  } else if ('withdrawn' in card.filter && card.filter.withdrawn) {
+    caisseStore.withdrawnFilter = caisseStore.withdrawnFilter === card.filter.withdrawn ? '' : card.filter.withdrawn
+    caisseStore.statusFilter = ''
+    caisseStore.personalFilter = ''
+  } else if ('personal' in card.filter && card.filter.personal) {
+    caisseStore.personalFilter = caisseStore.personalFilter === card.filter.personal ? '' : card.filter.personal
+    caisseStore.statusFilter = ''
+    caisseStore.withdrawnFilter = ''
+  }
+  caisseStore.applyFilters()
 }
 
 onMounted(() => {
-  fetchCaisse()
+  skipUrlSync.value = true
+  caisseStore.initFromRouteQuery(route.query as Record<string, unknown>)
+  caisseStore.fetchCaisse(caisseStore.currentPage)
+  skipUrlSync.value = false
+})
+
+watch(
+  () => [
+    caisseStore.currentPage,
+    caisseStore.searchQuery,
+    caisseStore.statusFilter,
+    caisseStore.frequenceFilter,
+    caisseStore.typeBoxFilter,
+    caisseStore.personalFilter,
+    caisseStore.withdrawnFilter,
+    caisseStore.startDate,
+    caisseStore.endDate,
+  ],
+  ([page, q, status, frequence, typeBox, personal, withdrawn, startDate, endDate]) => {
+    if (skipUrlSync.value) return
+    const query: Record<string, string> = {}
+    if (page && page !== 1) query.page = String(page)
+    if (q) query.q = q as string
+    if (status) query.status = status as string
+    if (frequence) query.frequence = frequence as string
+    if (typeBox) query.type_box = typeBox as string
+    if (personal) query.personal = personal as string
+    if (withdrawn) query.withdrawn = withdrawn as string
+    if (startDate) query.start_date = startDate as string
+    if (endDate) query.end_date = endDate as string
+    router.replace({ query })
+  }
+)
+
+onBeforeRouteLeave(() => {
+  skipUrlSync.value = true
+  caisseStore.resetListFilters()
 })
 </script>
 
 <style scoped>
-.table-container {
-  overflow-x: auto;
-}
-
 .table {
   @apply min-w-full;
 }
-
 .badge {
   @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
 }
-
 .btn {
   @apply inline-flex items-center px-4 py-2 border border-transparent rounded-md font-medium text-sm transition-colors;
 }
-
 .btn-primary {
-  @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500;
+  @apply bg-blue-600 text-white hover:bg-blue-700;
 }
-
-.btn-outline {
-  @apply border-gray-300 text-gray-700 bg-white hover:bg-gray-50;
-}
-
 .btn-sm {
-  @apply px-3 py-1.5 text-xs;
+  @apply px-3 py-1.5 text-xs border border-gray-300 bg-white hover:bg-gray-50;
 }
-
-.input {
-  @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm;
-}
-
-/* Styles pour les boutons désactivés */
 .btn:disabled {
   @apply opacity-50 cursor-not-allowed;
 }

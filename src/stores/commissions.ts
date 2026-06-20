@@ -12,6 +12,7 @@ interface Commission {
   available_amount: number | string
   withdrawn_amount: number | string
   total_amount: number | string
+  ledger_total?: number | string
 }
 
 interface CommissionTransaction {
@@ -90,6 +91,9 @@ export const useCommissionsStore = defineStore('commissions', () => {
         }
         if (typeof commission.value.total_amount === 'number') {
           commission.value.total_amount = commission.value.total_amount.toString()
+        }
+        if (typeof commission.value.ledger_total === 'number') {
+          commission.value.ledger_total = commission.value.ledger_total.toString()
         }
       }
     } catch (err) {

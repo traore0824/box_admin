@@ -18,23 +18,25 @@
     <!-- Commission Totale -->
     <div class="bg-white rounded-lg shadow-sm p-6">
       <h2 class="text-lg font-semibold text-gray-800 mb-4">Commission Totale</h2>
+
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-blue-50 p-4 rounded-lg">
-          <p class="text-sm text-gray-600">Montant Total</p>
+          <p class="text-sm text-gray-600">Total généré</p>
+          <p class="text-xs text-gray-500 mt-0.5">Disponible + Retiré</p>
           <p class="text-2xl font-bold text-blue-600">
-            {{ formatCurrency(parseFloat(String(commissionsStore.commission?.total_amount || '0'))) }}
+            {{ formatCurrency(totalGenerated) }}
           </p>
         </div>
         <div class="bg-green-50 p-4 rounded-lg">
           <p class="text-sm text-gray-600">Disponible</p>
           <p class="text-2xl font-bold text-green-600">
-            {{ formatCurrency(parseFloat(String(commissionsStore.commission?.available_amount || '0'))) }}
+            {{ formatCurrency(availableAmount) }}
           </p>
         </div>
         <div class="bg-orange-50 p-4 rounded-lg">
-          <p class="text-sm text-gray-600">Montant Retiré</p>
+          <p class="text-sm text-gray-600">Montant retiré</p>
           <p class="text-2xl font-bold text-orange-600">
-            {{ formatCurrency(parseFloat(String(commissionsStore.commission?.withdrawn_amount || '0'))) }}
+            {{ formatCurrency(withdrawnAmount) }}
           </p>
         </div>
       </div>
@@ -300,6 +302,19 @@ onMounted(async () => {
   await commissionsStore.fetchWithdrawals()
 })
 
+const availableAmount = computed(() =>
+  parseFloat(String(commissionsStore.commission?.available_amount || '0'))
+)
+
+const withdrawnAmount = computed(() =>
+  parseFloat(String(commissionsStore.commission?.withdrawn_amount || '0'))
+)
+
+const totalGenerated = computed(() =>
+  parseFloat(String(commissionsStore.commission?.total_amount || '0'))
+    || availableAmount.value + withdrawnAmount.value
+)
+
 const formatDate = (date: string): string => {
   return new Date(date).toLocaleDateString('fr-FR', {
     day: 'numeric',
@@ -310,16 +325,13 @@ const formatDate = (date: string): string => {
   })
 }
 
-const hasAvailableCommission = computed(() => {
-  const available = parseFloat(String(commissionsStore.commission?.available_amount || '0'))
-  return available > 0
-})
+const hasAvailableCommission = computed(() => availableAmount.value > 0)
 
 const isValidWithdrawAmount = computed(() => {
   if (!withdrawAmount.value || withdrawAmount.value <= 0) {
     return false
   }
-  const available = parseFloat(String(commissionsStore.commission?.available_amount || '0'))
+  const available = availableAmount.value
   return withdrawAmount.value <= available
 })
 
@@ -347,7 +359,7 @@ const handleWithdraw = async () => {
       return
     }
     
-    const available = parseFloat(String(commissionsStore.commission?.available_amount || '0'))
+    const available = availableAmount.value
     if (withdrawAmount.value > available) {
       withdrawAmountError.value = `Le montant ne peut pas dépasser ${formatCurrency(available)}`
       return

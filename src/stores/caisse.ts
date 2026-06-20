@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { fetchWithAuth } from './fetchwithtoken'
 
 export type BalanceHistoryReason = 'deposit' | 'withdrawal' | 'cancellation' | 'adjustment' | 'unknown'
@@ -34,6 +34,17 @@ export interface BalanceHistoryResponse {
   results: BalanceHistoryEntry[]
 }
 
+export interface CaisseStats {
+  total: number
+  pending: number
+  done: number
+  disabled: number
+  cancelled: number
+  withdrawn: number
+  not_withdrawn: number
+  group: number
+  personal: number
+}
 
 export interface Caisse {
   id: number
@@ -86,6 +97,22 @@ export interface CaisseResponse {
   next: string | null
   previous: string | null
   results: Caisse[]
+  caisse_stats?: CaisseStats
+}
+
+export type CaisseStatusFilter = '' | 'disabled' | 'pending' | 'done' | 'withdrawn' | 'cancel' | 'cancelled'
+export type CaisseFrequenceFilter = '' | 'all_week' | 'all_month' | 'all_days' | 'custom' | 'unlimited'
+export type CaisseTypeBoxFilter = '' | 'free' | 'locked'
+export type CaissePersonalFilter = '' | 'true' | 'false'
+export type CaisseWithdrawnFilter = '' | 'true' | 'false'
+
+export const CAISSE_STAT_LABELS: Record<string, string> = {
+  pending: 'En cours',
+  done: 'Terminée',
+  disabled: 'Non actif',
+  withdrawn: 'Retirée',
+  cancel: 'Annulée',
+  cancelled: 'Annulée',
 }
 
 export const useCaisseStore = defineStore('caisse', () => {
@@ -95,24 +122,101 @@ export const useCaisseStore = defineStore('caisse', () => {
   const currentPage = ref(1)
   const itemsPerPage = 10
   const totalCaisse = ref(0)
+  const caisseStats = ref<CaisseStats | null>(null)
 
-  async function fetchCaisse(
-    page = 1,
-    filters: { q?: string; status?: string; frequence?: string } = {}
-  ) {
+  const searchQuery = ref('')
+  const statusFilter = ref<CaisseStatusFilter>('')
+  const frequenceFilter = ref<CaisseFrequenceFilter>('')
+  const typeBoxFilter = ref<CaisseTypeBoxFilter>('')
+  const personalFilter = ref<CaissePersonalFilter>('')
+  const withdrawnFilter = ref<CaisseWithdrawnFilter>('')
+  const startDate = ref('')
+  const endDate = ref('')
+
+  let isHydratingFromRoute = false
+
+  function resetListFilters() {
+    searchQuery.value = ''
+    statusFilter.value = ''
+    frequenceFilter.value = ''
+    typeBoxFilter.value = ''
+    personalFilter.value = ''
+    withdrawnFilter.value = ''
+    startDate.value = ''
+    endDate.value = ''
+    currentPage.value = 1
+  }
+
+  function initFromRouteQuery(query: Record<string, unknown>) {
+    isHydratingFromRoute = true
+    resetListFilters()
+
+    const str = (key: string) => {
+      const v = query[key]
+      return typeof v === 'string' ? v : ''
+    }
+
+    if (str('q')) searchQuery.value = str('q')
+    if (str('status')) statusFilter.value = str('status') as CaisseStatusFilter
+    if (str('frequence')) frequenceFilter.value = str('frequence') as CaisseFrequenceFilter
+    if (str('type_box')) typeBoxFilter.value = str('type_box') as CaisseTypeBoxFilter
+    if (str('personal')) personalFilter.value = str('personal') as CaissePersonalFilter
+    if (str('withdrawn')) withdrawnFilter.value = str('withdrawn') as CaisseWithdrawnFilter
+    if (str('start_date')) startDate.value = str('start_date')
+    if (str('end_date')) endDate.value = str('end_date')
+
+    const page = parseInt(str('page'), 10)
+    currentPage.value = Number.isFinite(page) && page > 0 ? page : 1
+    isHydratingFromRoute = false
+  }
+
+  function buildQueryParams(page: number): Record<string, string> {
+    const queryParams: Record<string, string> = { page: page.toString() }
+    if (searchQuery.value.trim()) queryParams.q = searchQuery.value.trim()
+    if (statusFilter.value) queryParams.status = statusFilter.value
+    if (frequenceFilter.value) queryParams.frequence = frequenceFilter.value
+    if (typeBoxFilter.value) queryParams.type_box = typeBoxFilter.value
+    if (personalFilter.value) queryParams.personal = personalFilter.value
+    if (withdrawnFilter.value) queryParams.withdrawn = withdrawnFilter.value
+    if (startDate.value) queryParams.start_date = startDate.value
+    if (endDate.value) queryParams.end_date = endDate.value
+    return queryParams
+  }
+
+  function applyFilters() {
+    currentPage.value = 1
+    fetchCaisse(1)
+  }
+
+  function updateSearchQuery(query: string) {
+    searchQuery.value = query
+    currentPage.value = 1
+    fetchCaisse(1)
+  }
+
+  watch([statusFilter, frequenceFilter, typeBoxFilter, personalFilter, withdrawnFilter, startDate, endDate], () => {
+    if (isHydratingFromRoute) return
+    applyFilters()
+  })
+
+  async function fetchCaisse(page = 1, legacyFilters?: {
+    q?: string
+    status?: string
+    frequence?: string
+  }) {
     try {
       isLoading.value = true
       error.value = null
 
-      const queryParams: Record<string, string> = { page: page.toString() }
-
-      if (filters.q?.trim()) queryParams.q = filters.q.trim()
-      if (filters.status?.trim()) queryParams.status = filters.status.trim()
-      if (filters.frequence?.trim()) queryParams.frequence = filters.frequence.trim()
+      if (legacyFilters) {
+        if (legacyFilters.q !== undefined) searchQuery.value = legacyFilters.q
+        if (legacyFilters.status !== undefined) statusFilter.value = legacyFilters.status as CaisseStatusFilter
+        if (legacyFilters.frequence !== undefined) frequenceFilter.value = legacyFilters.frequence as CaisseFrequenceFilter
+      }
 
       const response = await fetchWithAuth('/box/caisse', {
         method: 'GET',
-        queryParams
+        queryParams: buildQueryParams(page)
       })
 
       if (!response.ok) {
@@ -123,6 +227,7 @@ export const useCaisseStore = defineStore('caisse', () => {
       const data: CaisseResponse = await response.json()
       caisses.value = data.results
       totalCaisse.value = data.count
+      caisseStats.value = data.caisse_stats ?? null
       currentPage.value = page
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erreur lors de la récupération des caisses'
@@ -132,21 +237,31 @@ export const useCaisseStore = defineStore('caisse', () => {
     }
   }
 
-  // ── Balance history ──────────────────────────────────────────────
   const balanceHistory = ref<BalanceHistoryEntry[]>([])
   const balanceHistoryLoading = ref(false)
   const balanceHistoryError = ref<string | null>(null)
   const balanceHistoryPage = ref(1)
   const balanceHistoryTotal = ref(0)
   const balanceHistoryCurrentAmount = ref<number>(0)
+  const balanceHistoryCaisseId = ref<number | null>(null)
   const PAGE_SIZE = 20
 
   const balanceHistoryTotalPages = (): number => Math.ceil(balanceHistoryTotal.value / PAGE_SIZE)
+
+  function resetBalanceHistory() {
+    balanceHistory.value = []
+    balanceHistoryError.value = null
+    balanceHistoryPage.value = 1
+    balanceHistoryTotal.value = 0
+    balanceHistoryCurrentAmount.value = 0
+    balanceHistoryCaisseId.value = null
+  }
 
   async function fetchBalanceHistory(caisseId: number, page = 1) {
     try {
       balanceHistoryLoading.value = true
       balanceHistoryError.value = null
+      balanceHistoryCaisseId.value = caisseId
 
       const response = await fetchWithAuth(`/box/caisse/balance-history/${caisseId}/`, {
         method: 'GET',
@@ -179,6 +294,19 @@ export const useCaisseStore = defineStore('caisse', () => {
     currentPage,
     itemsPerPage,
     totalCaisse,
+    caisseStats,
+    searchQuery,
+    statusFilter,
+    frequenceFilter,
+    typeBoxFilter,
+    personalFilter,
+    withdrawnFilter,
+    startDate,
+    endDate,
+    resetListFilters,
+    initFromRouteQuery,
+    applyFilters,
+    updateSearchQuery,
     fetchCaisse,
     balanceHistory,
     balanceHistoryLoading,
@@ -186,7 +314,9 @@ export const useCaisseStore = defineStore('caisse', () => {
     balanceHistoryPage,
     balanceHistoryTotal,
     balanceHistoryCurrentAmount,
+    balanceHistoryCaisseId,
     balanceHistoryTotalPages,
+    resetBalanceHistory,
     fetchBalanceHistory
   }
 })

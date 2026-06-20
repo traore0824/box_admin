@@ -565,6 +565,7 @@
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Argent atteint</th>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prochaine date de payment</th>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Membres</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -609,12 +610,35 @@
                   </div>
                   <span v-else class="text-gray-400">-</span>
                 </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm">
+                  <div class="flex flex-wrap gap-2">
+                    <router-link
+                      :to="{ name: 'caisse-details', params: { id: caisse.id.toString() } }"
+                      class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                    >
+                      <i class="fas fa-eye mr-1"></i> Détails
+                    </router-link>
+                    <button
+                      type="button"
+                      class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-primary bg-white border border-primary/30 rounded-md hover:bg-primary/5"
+                      @click="openCaisseBalanceHistory(caisse)"
+                    >
+                      <i class="fas fa-history mr-1"></i> Historique
+                    </button>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
+
+    <CaisseBalanceHistoryModal
+      v-model="showCaisseBalanceHistoryModal"
+      :caisse-id="selectedCaisseHistoryId"
+      :caisse-name="selectedCaisseHistoryName"
+    />
 
     <!-- Historique des blocages -->
     <div class="bg-white rounded-lg shadow p-6">
@@ -1169,6 +1193,7 @@ import { useWalletsStore } from '../stores/wallets'
 import { useUploadStore } from '../stores/upload'
 import { useBlockHistoryStore } from '../stores/blockHistory'
 import ConfirmationModal from '../components/ConfirmationModal.vue'
+import CaisseBalanceHistoryModal from '../components/CaisseBalanceHistoryModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -1198,6 +1223,16 @@ const isModalOpen = ref(false)
 const modalTitle = ref('')
 const modalMessage = ref('')
 const pendingAction = ref<(() => Promise<void>) | null>(null)
+
+const showCaisseBalanceHistoryModal = ref(false)
+const selectedCaisseHistoryId = ref<number | null>(null)
+const selectedCaisseHistoryName = ref('')
+
+const openCaisseBalanceHistory = (caisse: { id: number; name?: string }) => {
+  selectedCaisseHistoryId.value = caisse.id
+  selectedCaisseHistoryName.value = caisse.name || `Caisse #${caisse.id}`
+  showCaisseBalanceHistoryModal.value = true
+}
 
 // KYC Modal State
 const showKycModal = ref(false)

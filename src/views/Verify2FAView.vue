@@ -16,14 +16,18 @@
           </label>
           <input
             id="code"
-            v-model="code"
+            :value="code"
             type="text"
             inputmode="numeric"
+            pattern="[0-9]*"
             maxlength="6"
-            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-gray-50 text-center text-2xl tracking-widest font-mono"
+            autocomplete="one-time-code"
+            :disabled="isLoading"
+            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-gray-50 text-center text-2xl tracking-widest font-mono disabled:opacity-60"
             placeholder="000000"
             required
             autofocus
+            @input="onCodeInput"
           />
         </div>
 
@@ -64,8 +68,17 @@ const code = ref('')
 const isLoading = ref(false)
 const error = ref('')
 
+function onCodeInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  code.value = target.value.replace(/\D/g, '').slice(0, 6)
+
+  if (code.value.length === 6 && !isLoading.value) {
+    handleVerify()
+  }
+}
+
 async function handleVerify() {
-  if (code.value.length !== 6) return
+  if (isLoading.value || code.value.length !== 6) return
 
   try {
     isLoading.value = true
