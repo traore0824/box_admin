@@ -17,6 +17,9 @@ export interface Setting {
   cancel_block_commission: string
   operation_fee: string
   minimum_commission_withdrawal: string
+  partial_withdrawal_enabled: boolean
+  minimum_partial_withdrawal: number
+  minimum_remaining_balance: number
   // Rappels quotidiens (tableaux de messages)
   reminreminder_day_morning: string[]
   reminreminder_day_afternoon: string[]
@@ -79,6 +82,9 @@ export const useSettingsStore = defineStore('settings', () => {
       cancel_block_commission: data.cancel_block_commission || '0.00',
       operation_fee: data.operation_fee || '0.00',
       minimum_commission_withdrawal: data.minimum_commission_withdrawal || '0.00',
+      partial_withdrawal_enabled: data.partial_withdrawal_enabled ?? true,
+      minimum_partial_withdrawal: Number(data.minimum_partial_withdrawal ?? 500),
+      minimum_remaining_balance: Number(data.minimum_remaining_balance ?? 0),
       // Rappels quotidiens
       reminreminder_day_morning: Array.isArray(data.reminreminder_day_morning) ? data.reminreminder_day_morning : [],
       reminreminder_day_afternoon: Array.isArray(data.reminreminder_day_afternoon) ? data.reminreminder_day_afternoon : [],
