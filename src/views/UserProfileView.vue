@@ -59,6 +59,20 @@
               ]">
                 {{ user.agent_client ? 'Agent' : 'Client' }}
               </span>
+              <span :class="[
+                'px-3 py-1 inline-flex items-center text-sm leading-5 font-semibold rounded-full',
+                isAccountVerified ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+              ]">
+                <i :class="['fas mr-1', isAccountVerified ? 'fa-user-check' : 'fa-user-clock']"></i>
+                {{ isAccountVerified ? 'Compte Vérifié' : 'Compte Non Vérifié' }}
+              </span>
+              <span :class="[
+                'px-3 py-1 inline-flex items-center text-sm leading-5 font-semibold rounded-full',
+                kycBadgeClass
+              ]">
+                <i :class="['fas mr-1', kycBadgeIcon]"></i>
+                {{ kycBadgeLabel }}
+              </span>
               <span v-if="user.is_suspect"
                 class="px-3 py-1 inline-flex items-center text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-300">
                 <i class="fas fa-exclamation-triangle mr-1"></i>
@@ -139,6 +153,13 @@
             class="flex items-center justify-center px-4 py-3 border border-teal-300 bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
             <i class="fas fa-wallet mr-2"></i>
             Voir Wallet
+          </button>
+
+          <!-- Attribuer un bonus -->
+          <button @click="showGrantBonusModal = true" :disabled="actionLoading"
+            class="flex items-center justify-center px-4 py-3 border border-amber-300 bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fas fa-award mr-2"></i>
+            Attribuer un bonus
           </button>
 
           <!-- Voir Photos KYC — uniquement si KYC approuvé et photos disponibles -->
@@ -638,6 +659,14 @@
       v-model="showCaisseBalanceHistoryModal"
       :caisse-id="selectedCaisseHistoryId"
       :caisse-name="selectedCaisseHistoryName"
+    />
+
+    <GrantBonusModal
+      :show="showGrantBonusModal"
+      :preset-emails="user ? [user.email] : []"
+      hide-emails
+      @close="showGrantBonusModal = false"
+      @success="loadUserInfo"
     />
 
     <!-- Historique des blocages -->
@@ -1183,7 +1212,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchWithAuth } from '../stores/fetchwithtoken'
 import { formatCurrency, formatAmount } from '../utils/currency'
@@ -1194,6 +1223,7 @@ import { useUploadStore } from '../stores/upload'
 import { useBlockHistoryStore } from '../stores/blockHistory'
 import ConfirmationModal from '../components/ConfirmationModal.vue'
 import CaisseBalanceHistoryModal from '../components/CaisseBalanceHistoryModal.vue'
+import GrantBonusModal from '../components/GrantBonusModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -1225,6 +1255,7 @@ const modalMessage = ref('')
 const pendingAction = ref<(() => Promise<void>) | null>(null)
 
 const showCaisseBalanceHistoryModal = ref(false)
+const showGrantBonusModal = ref(false)
 const selectedCaisseHistoryId = ref<number | null>(null)
 const selectedCaisseHistoryName = ref('')
 
@@ -1347,6 +1378,43 @@ interface KycStatusV2 {
 }
 const kycStatus2FA = ref<KycStatusV2 | null>(null)
 const kycHistoryLoading = ref(false)
+
+const isLegacyKycAccepted = computed(() => user.value?.status === 'accept')
+
+const isKycV2Verified = computed(() => {
+  if (isLegacyKycAccepted.value) return true
+  const kyc = kycStatus2FA.value
+  if (!kyc) return false
+  if (kyc.status === 'accept' || kyc.status === 'verified') return true
+  return kyc.history.some((req) => req.status === 'verified')
+})
+
+const isAccountVerified = computed(() => isLegacyKycAccepted.value || isKycV2Verified.value)
+
+const kycBadgeLabel = computed(() => {
+  if (isKycV2Verified.value) return 'KYC Vérifié'
+  if (user.value?.status === 'pending' || kycStatus2FA.value?.status === 'pending') return 'KYC En attente'
+  if (user.value?.status === 'reject' || kycStatus2FA.value?.status === 'reject') return 'KYC Rejeté'
+  return 'KYC Non Vérifié'
+})
+
+const kycBadgeClass = computed(() => {
+  if (isKycV2Verified.value) return 'bg-green-100 text-green-800'
+  if (user.value?.status === 'pending' || kycStatus2FA.value?.status === 'pending') {
+    return 'bg-yellow-100 text-yellow-800'
+  }
+  if (user.value?.status === 'reject' || kycStatus2FA.value?.status === 'reject') {
+    return 'bg-red-100 text-red-800'
+  }
+  return 'bg-gray-100 text-gray-600'
+})
+
+const kycBadgeIcon = computed(() => {
+  if (isKycV2Verified.value) return 'fa-id-card'
+  if (user.value?.status === 'pending' || kycStatus2FA.value?.status === 'pending') return 'fa-clock'
+  if (user.value?.status === 'reject' || kycStatus2FA.value?.status === 'reject') return 'fa-times-circle'
+  return 'fa-id-card'
+})
 
 const kycDocTypeLabel = (type: string): string => {
   const labels: Record<string, string> = {

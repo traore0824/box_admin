@@ -14,6 +14,7 @@ export interface ChallengeAdmin {
   registration_deadline: string
   min_participants: number
   max_participants?: number | null
+  participant_count?: number
   is_public: boolean
   invite_code?: string | null
   smart_link?: string | null
@@ -42,6 +43,7 @@ export interface UserLevel {
   code: string
   label: string
   min_points: number
+  bonus_amount: number
   sort_order: number
   is_active: boolean
 }
@@ -128,7 +130,7 @@ export const useChallengesStore = defineStore('challenges', () => {
       fetchWithAuth('/box/admin/points/info'),
     ])
     if (!actionsRes.ok || !levelsRes.ok || !infoRes.ok) {
-      throw new Error('Erreur chargement config points')
+      throw new Error('Erreur chargement config pièces BOX')
     }
     const actionsData = await actionsRes.json()
     const levelsData = await levelsRes.json()
@@ -224,7 +226,7 @@ export const useChallengesStore = defineStore('challenges', () => {
       body: payload as unknown as Record<string, unknown>,
       headers: { 'Content-Type': 'application/json' },
     })
-    if (!res.ok) throw new Error('Erreur sauvegarde info points')
+    if (!res.ok) throw new Error('Erreur sauvegarde info pièces BOX')
     const data = await res.json()
     pointsInfo.value = data.data ?? payload
     return data

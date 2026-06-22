@@ -52,6 +52,37 @@
           <div>
             <label class="text-sm font-medium text-gray-500">Type</label>
             <p class="text-gray-900">{{ caisse.type_box === 'locked' ? 'Verrouillée' : 'Libre' }}</p>
+            <p class="text-xs text-gray-400 mt-1">
+              Choix utilisateur à la création : retrait possible avec pénalité si verrouillée.
+            </p>
+          </div>
+          <div class="md:col-span-2">
+            <label class="text-sm font-medium text-gray-500">Blocage définitif (admin)</label>
+            <div class="mt-2 flex flex-wrap items-center gap-3">
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  v-model="defineBlockEnabled"
+                  :disabled="savingDefineBlock"
+                  class="w-4 h-4"
+                  @change="saveDefineBlock"
+                />
+                <span class="text-sm text-gray-800">
+                  Retrait impossible tant que la caisse n'est pas terminée
+                </span>
+              </label>
+              <span
+                class="text-xs px-2 py-1 rounded-full"
+                :class="defineBlockEnabled ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'"
+              >
+                {{ defineBlockEnabled ? 'Bloquée' : 'Non bloquée' }}
+              </span>
+              <i v-if="savingDefineBlock" class="fas fa-spinner fa-spin text-gray-400 text-sm"></i>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">
+              Champ <code class="text-xs">define_block</code> — réservé à l'administration. Sur mobile, le bouton
+              « Retirer » est masqué tant que le statut n'est pas « Terminé ».
+            </p>
           </div>
           <div>
             <label class="text-sm font-medium text-gray-500">Personnelle</label>
@@ -454,6 +485,8 @@ const notification = useNotification()
 const caisseStore = useCaisseStore()
 
 const caisse = ref<Caisse | null>(null)
+const defineBlockEnabled = ref(false)
+const savingDefineBlock = ref(false)
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 const transactions = ref<Transaction[]>([])
@@ -524,6 +557,31 @@ const truncateRef = (ref: string): string => {
   return ref.length > 18 ? ref.slice(0, 15) + '…' : ref
 }
 
+const saveDefineBlock = async () => {
+  if (!caisse.value) return
+  const nextValue = defineBlockEnabled.value
+  const previousValue = caisse.value.define_block === true
+  if (nextValue === previousValue) return
+
+  try {
+    savingDefineBlock.value = true
+    const updated = await caisseStore.updateCaisseDefineBlock(caisse.value.id, nextValue)
+    caisse.value = { ...caisse.value, ...updated, define_block: nextValue }
+    notification.addNotification(
+      nextValue ? 'Caisse bloquée définitivement' : 'Blocage définitif désactivé',
+      'success',
+    )
+  } catch (err) {
+    defineBlockEnabled.value = previousValue
+    notification.addNotification(
+      err instanceof Error ? err.message : 'Erreur lors de la mise à jour',
+      'error',
+    )
+  } finally {
+    savingDefineBlock.value = false
+  }
+}
+
 const loadCaisse = async () => {
   const caisseId = route.params.id as string
   if (!caisseId) {
@@ -546,6 +604,7 @@ const loadCaisse = async () => {
     }
 
     caisse.value = await response.json()
+    defineBlockEnabled.value = caisse.value?.define_block === true
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
     notification.addNotification(error.value, 'error')

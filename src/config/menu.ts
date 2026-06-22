@@ -44,6 +44,11 @@ export const menuItems: MenuItem[] = [
     icon: 'fas fa-gift'
   },
   {
+    path: '/user-bonuses',
+    name: 'Bonus utilisateurs',
+    icon: 'fas fa-award'
+  },
+  {
     path: '/user-commission-withdrawals',
     name: 'Retraits Commission Utilisateur',
     icon: 'fas fa-hand-holding-usd'
@@ -111,7 +116,7 @@ export const menuItems: MenuItem[] = [
   },
   {
     path: '/points-config',
-    name: 'Points BOX',
+    name: 'Pièces BOX',
     icon: 'fas fa-star',
     staffOnly: true
   },

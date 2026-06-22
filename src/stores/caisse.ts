@@ -77,6 +77,7 @@ export interface Caisse {
   cancel_date: string | null
   transaction_delay: number
   type_box?: 'locked' | 'free'
+  define_block?: boolean
   personal?: boolean
   members?: Array<{
     id: number
@@ -257,6 +258,19 @@ export const useCaisseStore = defineStore('caisse', () => {
     balanceHistoryCaisseId.value = null
   }
 
+  async function updateCaisseDefineBlock(caisseId: number, defineBlock: boolean) {
+    const response = await fetchWithAuth(`/box/caisse/${caisseId}`, {
+      method: 'PATCH',
+      body: { define_block: defineBlock },
+      headers: { 'Content-Type': 'application/json' },
+    })
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}))
+      throw new Error(data.message || data.detail || 'Erreur mise à jour du blocage')
+    }
+    return response.json()
+  }
+
   async function fetchBalanceHistory(caisseId: number, page = 1) {
     try {
       balanceHistoryLoading.value = true
@@ -317,7 +331,8 @@ export const useCaisseStore = defineStore('caisse', () => {
     balanceHistoryCaisseId,
     balanceHistoryTotalPages,
     resetBalanceHistory,
-    fetchBalanceHistory
+    fetchBalanceHistory,
+    updateCaisseDefineBlock,
   }
 })
 

@@ -147,6 +147,47 @@
           </div>
         </div>
 
+        <!-- Retraits partiels -->
+        <div v-if="isStaff" class="p-3 sm:p-4 md:p-6">
+          <h2 class="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-2 sm:mb-3 md:mb-4">Retraits partiels</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Autoriser les retraits partiels</label>
+              <div class="mt-1">
+                <label class="inline-flex items-center">
+                  <input
+                    v-model="settings.partial_withdrawal_enabled"
+                    type="checkbox"
+                    class="form-checkbox h-5 w-5 text-blue-600 rounded"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">Activé</span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Montant minimum retrait partiel (XOF)</label>
+              <input
+                v-model.number="settings.minimum_partial_withdrawal"
+                type="number"
+                step="1"
+                min="0"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Solde minimum restant (XOF)</label>
+              <p class="text-xs text-gray-500 mb-1">0 = aucune contrainte (hors retrait complet).</p>
+              <input
+                v-model.number="settings.minimum_remaining_balance"
+                type="number"
+                step="1"
+                min="0"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+        </div>
+
         <!-- Other Settings -->
         <div v-if="isStaff" class="p-3 sm:p-4 md:p-6">
           <h2 class="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-2 sm:mb-3 md:mb-4">Autres paramètres</h2>
@@ -174,6 +215,38 @@
                     class="form-checkbox h-5 w-5 text-blue-600 rounded"
                   />
                   <span class="ml-2 text-sm text-gray-700">Activé</span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Distribution des pièces BOX</label>
+              <p class="text-xs text-gray-500 mb-2">
+                Désactive l'attribution automatique (gains, pénalités et notifications).
+              </p>
+              <div class="mt-1">
+                <label class="inline-flex items-center">
+                  <input
+                    v-model="settings.box_coins_distribution_enabled"
+                    type="checkbox"
+                    class="form-checkbox h-5 w-5 text-blue-600 rounded"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">Activée</span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Notifications nouveau challenge</label>
+              <p class="text-xs text-gray-500 mb-2">
+                Push/in-app à tous les users quand un challenge est publié.
+              </p>
+              <div class="mt-1">
+                <label class="inline-flex items-center">
+                  <input
+                    v-model="settings.challenge_publish_notifications_enabled"
+                    type="checkbox"
+                    class="form-checkbox h-5 w-5 text-blue-600 rounded"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">Activées</span>
                 </label>
               </div>
             </div>

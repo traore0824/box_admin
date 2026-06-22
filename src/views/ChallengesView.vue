@@ -20,6 +20,30 @@
       </div>
     </div>
 
+    <div class="bg-white rounded-lg shadow p-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-semibold">Notifications à la publication</h2>
+          <p class="text-sm text-gray-500 mt-1">
+            Quand activée, tous les utilisateurs reçoivent une notification push/in-app
+            dès qu'un challenge passe au statut « publié » pour la première fois.
+          </p>
+        </div>
+        <label class="inline-flex items-center gap-2 shrink-0">
+          <span class="text-sm text-gray-700">
+            {{ publishNotificationsEnabled ? 'Activées' : 'Désactivées' }}
+          </span>
+          <input
+            type="checkbox"
+            v-model="publishNotificationsEnabled"
+            :disabled="savingNotifications"
+            class="w-5 h-5"
+            @change="togglePublishNotifications"
+          />
+        </label>
+      </div>
+    </div>
+
     <div v-if="store.error" class="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
       {{ store.error }}
     </div>
@@ -38,6 +62,7 @@
           <tr>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Participants</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Début</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fin</th>
             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
@@ -50,6 +75,9 @@
               <span class="px-2 py-1 rounded-full text-xs" :class="statusClass(c.admin_status)">
                 {{ c.admin_status }}
               </span>
+            </td>
+            <td class="px-4 py-3 text-sm text-gray-600">
+              {{ formatParticipants(c) }}
             </td>
             <td class="px-4 py-3 text-sm text-gray-600">{{ formatDate(c.start_date) }}</td>
             <td class="px-4 py-3 text-sm text-gray-600">{{ formatDate(c.end_date) }}</td>
@@ -116,6 +144,27 @@
                 <option value="suspended">Suspendu</option>
                 <option value="cancelled">Annulé</option>
               </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Participants minimum</label>
+              <input
+                v-model.number="form.min_participants"
+                type="number"
+                min="1"
+                required
+                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Participants maximum</label>
+              <input
+                v-model="maxParticipantsInput"
+                type="number"
+                min="1"
+                placeholder="Illimité"
+                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+              />
+              <p class="text-xs text-gray-500 mt-1">Laisser vide = pas de limite</p>
             </div>
             <div class="sm:col-span-2">
               <label class="block text-sm font-medium text-gray-700 mb-1">Règles (texte affiché)</label>
@@ -184,7 +233,7 @@
               <h3 class="text-sm font-semibold text-gray-800 mb-3">Conditions d'inscription (optionnel)</h3>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Points BOX minimum</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Pièces BOX minimum</label>
                   <input v-model.number="entryRules.min_points" type="number" min="0" placeholder="Aucun" class="w-full border rounded-md px-3 py-2 text-sm" />
                 </div>
                 <div class="flex flex-col gap-2 pt-1">
@@ -236,13 +285,19 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useChallengesStore, type ChallengeAdmin } from '../stores/challenges'
+import { useSettingsStore } from '../stores/settings'
+import { useNotification } from '../services/notification'
 
 const store = useChallengesStore()
+const settingsStore = useSettingsStore()
+const notification = useNotification()
 const showModal = ref(false)
 const editing = ref<ChallengeAdmin | null>(null)
 const saving = ref(false)
+const savingNotifications = ref(false)
+const publishNotificationsEnabled = ref(true)
 const smartLink = ref('')
 const copyingLink = ref(false)
 
@@ -357,7 +412,29 @@ const form = reactive({
   is_public: true,
   ranking_type: 'amount_saved',
   min_participants: 1,
+  max_participants: null as number | null,
 })
+
+const maxParticipantsInput = computed({
+  get: () => (form.max_participants == null ? '' : String(form.max_participants)),
+  set: (value: string) => {
+    const trimmed = value.trim()
+    if (!trimmed) {
+      form.max_participants = null
+      return
+    }
+    const parsed = Number(trimmed)
+    form.max_participants = Number.isNaN(parsed) ? null : parsed
+  },
+})
+
+function formatParticipants(c: ChallengeAdmin) {
+  const current = c.participant_count ?? 0
+  if (c.max_participants) {
+    return `${current} / ${c.max_participants}`
+  }
+  return `${current} (illimité)`
+}
 
 function toLocalInput(iso: string) {
   if (!iso) return ''
@@ -414,6 +491,7 @@ function openCreate() {
   Object.assign(form, {
     name: '', description: '', rules_text: '', rewards_text: '',
     admin_status: 'draft', start_date: '', end_date: '', registration_deadline: '',
+    min_participants: 1, max_participants: null,
   })
   resetConfigForms()
   showModal.value = true
@@ -430,6 +508,8 @@ function openEdit(c: ChallengeAdmin) {
     start_date: toLocalInput(c.start_date),
     end_date: toLocalInput(c.end_date),
     registration_deadline: toLocalInput(c.registration_deadline),
+    min_participants: c.min_participants ?? 1,
+    max_participants: c.max_participants ?? null,
   })
   loadCaisseConfigFrom(c.caisse_config)
   loadSuccessRulesFrom(c.success_rules)
@@ -439,10 +519,19 @@ function openEdit(c: ChallengeAdmin) {
 }
 
 async function save() {
+  if (
+    form.max_participants != null &&
+    form.max_participants < form.min_participants
+  ) {
+    alert('Le maximum de participants doit être supérieur ou égal au minimum.')
+    return
+  }
+
   saving.value = true
   try {
     const payload = {
       ...form,
+      max_participants: form.max_participants,
       start_date: toIso(form.start_date),
       end_date: toIso(form.end_date),
       registration_deadline: toIso(form.registration_deadline),
@@ -468,7 +557,28 @@ async function save() {
 }
 
 async function load() {
-  await store.fetchChallenges()
+  await Promise.all([store.fetchChallenges(), settingsStore.fetchSettings()])
+  publishNotificationsEnabled.value =
+    settingsStore.settings?.challenge_publish_notifications_enabled ?? true
+}
+
+async function togglePublishNotifications() {
+  savingNotifications.value = true
+  const ok = await settingsStore.updateSettings({
+    challenge_publish_notifications_enabled: publishNotificationsEnabled.value,
+  })
+  if (ok) {
+    notification.addNotification(
+      publishNotificationsEnabled.value
+        ? 'Notifications challenge activées'
+        : 'Notifications challenge désactivées',
+      'success',
+    )
+  } else {
+    publishNotificationsEnabled.value = !publishNotificationsEnabled.value
+    notification.addNotification('Erreur lors de la mise à jour', 'error')
+  }
+  savingNotifications.value = false
 }
 
 onMounted(load)

@@ -57,7 +57,17 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Référence interne</label>
-            <p class="text-gray-900 font-mono">{{ formatNullValue(transaction.reference) }}</p>
+            <div class="flex items-center gap-2">
+              <p class="text-gray-900 font-mono">{{ formatNullValue(transaction.reference) }}</p>
+              <button
+                v-if="canUpdateReference"
+                @click="openReferenceModal"
+                class="text-primary hover:text-primary-dark text-sm"
+                title="Modifier la référence Feexpay"
+              >
+                <i class="fas fa-edit"></i>
+              </button>
+            </div>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Date de création</label>
@@ -377,20 +387,64 @@
       </div>
     </div>
   </Teleport>
+
+  <!-- Modal modification référence -->
+  <Teleport to="body">
+    <div
+      v-if="showReferenceModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      @click="closeReferenceModal"
+    >
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4" @click.stop>
+        <div class="p-6">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Modifier la référence Feexpay</h3>
+          <p class="text-sm text-gray-600 mb-4">
+            Référence actuelle :
+            <span class="font-mono font-medium text-gray-900">{{ transaction?.reference || 'Non définie' }}</span>
+          </p>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nouvelle référence</label>
+          <input
+            v-model="newReferenceValue"
+            type="text"
+            class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Référence Feexpay"
+            @keyup.enter="confirmReferenceUpdate"
+          />
+          <div class="mt-6 flex justify-end gap-2">
+            <button
+              @click="closeReferenceModal"
+              class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+            >
+              Annuler
+            </button>
+            <button
+              @click="confirmReferenceUpdate"
+              :disabled="transactionsStore.isLoading || !newReferenceValue.trim()"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            >
+              Enregistrer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchWithAuth } from '../stores/fetchwithtoken'
 import { formatAmount } from '../utils/currency'
 import { useNotification } from '../services/notification'
 import { useTransactionsStore } from '../stores/transactions'
+import { useAuthStore } from '../stores/auth'
 
 const route = useRoute()
 const router = useRouter()
 const notification = useNotification()
 const transactionsStore = useTransactionsStore()
+const authStore = useAuthStore()
 
 // State
 const transaction = ref<any>(null)
@@ -399,8 +453,18 @@ const error = ref<string | null>(null)
 const actionLoading = ref(false)
 const showFeexpayModal = ref(false)
 const feexpayResult = ref<any>(null)
+const showReferenceModal = ref(false)
+const newReferenceValue = ref('')
 
 const transactionId = ref<number | null>(null)
+
+const canUpdateReference = computed(() => {
+  if (!transaction.value) return false
+  return (
+    authStore.user?.is_staff === true &&
+    (transaction.value.status === 'pending' || transaction.value.status === 'timeout')
+  )
+})
 
 // Fonction pour formater la date et l'heure
 const formatDateTime = (date: string): string => {
@@ -592,6 +656,39 @@ const handleCheckFeexpay = async () => {
 const closeFeexpayModal = () => {
   showFeexpayModal.value = false
   feexpayResult.value = null
+}
+
+function openReferenceModal() {
+  newReferenceValue.value = transaction.value?.reference || ''
+  showReferenceModal.value = true
+}
+
+function closeReferenceModal() {
+  showReferenceModal.value = false
+  newReferenceValue.value = ''
+}
+
+async function confirmReferenceUpdate() {
+  if (!transaction.value || !newReferenceValue.value.trim()) return
+
+  try {
+    actionLoading.value = true
+    const result = await transactionsStore.updateTransactionReference(
+      transaction.value.id,
+      newReferenceValue.value.trim()
+    )
+    const admin = result.updated_by?.email || 'admin'
+    notification.addNotification(`Référence mise à jour par ${admin}`, 'success')
+    closeReferenceModal()
+    await loadTransactionDetails()
+  } catch (err: any) {
+    notification.addNotification(
+      err?.message || 'Erreur lors de la mise à jour de la référence',
+      'error'
+    )
+  } finally {
+    actionLoading.value = false
+  }
 }
 
 const getFeexpayStatusClass = (status: string): string => {

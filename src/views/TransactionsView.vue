@@ -140,6 +140,18 @@
                     <span class="hidden sm:inline">Notifier</span>
                   </button>
 
+                  <!-- Bouton Modifier référence (pending / timeout) -->
+                  <button
+                    v-if="canUpdateReference(transaction)"
+                    @click="openReferenceModal(transaction)"
+                    :disabled="transactionsStore.isLoading"
+                    class="btn btn-sm btn-outline text-xs"
+                    title="Modifier la référence Feexpay"
+                  >
+                    <i class="fas fa-edit mr-1"></i>
+                    <span class="hidden sm:inline">Référence</span>
+                  </button>
+
                   <!-- Bouton Mettre à jour le statut (si status !== error && status !== accept) -->
                   <button
                     v-if="transaction.status !== 'error' && transaction.status !== 'accept'"
@@ -511,6 +523,63 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Modal modification référence -->
+    <Teleport to="body">
+      <div
+        v-if="showReferenceModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+        @click="closeReferenceModal"
+      >
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4" @click.stop>
+          <div class="p-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Modifier la référence Feexpay</h3>
+
+            <div v-if="referenceTransaction" class="space-y-3 mb-4 text-sm text-gray-600">
+              <p>
+                <span class="font-medium text-gray-800">Transaction :</span>
+                {{ referenceTransaction.public_reference }}
+              </p>
+              <p>
+                <span class="font-medium text-gray-800">Référence actuelle :</span>
+                {{ referenceTransaction.reference || 'Non définie' }}
+              </p>
+            </div>
+
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nouvelle référence</label>
+            <input
+              v-model="newReferenceValue"
+              type="text"
+              class="input w-full"
+              placeholder="Référence Feexpay"
+              @keyup.enter="confirmReferenceUpdate"
+            />
+
+            <p class="text-xs text-gray-500 mt-2">
+              Réservé aux administrateurs. Transactions pending ou timeout uniquement.
+              La référence ne doit pas exister sur une autre transaction.
+            </p>
+
+            <div class="mt-6 flex justify-end gap-2">
+              <button
+                @click="closeReferenceModal"
+                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Annuler
+              </button>
+              <button
+                @click="confirmReferenceUpdate"
+                :disabled="transactionsStore.isLoading || !newReferenceValue.trim()"
+                class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50"
+              >
+                <i v-if="transactionsStore.isLoading" class="fas fa-spinner fa-spin mr-1"></i>
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -518,12 +587,14 @@
 import { onMounted, computed, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useTransactionsStore } from '../stores/transactions'
+import { useAuthStore } from '../stores/auth'
 import { Transaction } from '../types/transaction'
 import { useNotification } from '../services/notification'
 
 const router = useRouter()
 const route = useRoute()
 const transactionsStore = useTransactionsStore()
+const authStore = useAuthStore()
 const notification = useNotification()
 
 // État du modal de validation
@@ -540,6 +611,10 @@ const showFeexpayModal = ref(false)
 const checkingFeexpayId = ref<number | null>(null)
 const feexpayStatusData = ref<any>(null)
 const feexpayError = ref<string | null>(null)
+
+const showReferenceModal = ref(false)
+const referenceTransaction = ref<Transaction | null>(null)
+const newReferenceValue = ref('')
 
 onMounted(() => {
   const page = parseInt(route.query.page as string) || 1
@@ -582,6 +657,47 @@ function canApproveTransaction(transaction: Transaction): boolean {
     (transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation' || transaction.type_trans === 'withdrawal_request') &&
     transaction.status === 'pending'
   )
+}
+
+function canUpdateReference(transaction: Transaction): boolean {
+  return (
+    authStore.user?.is_staff === true &&
+    (transaction.status === 'pending' || transaction.status === 'timeout')
+  )
+}
+
+function openReferenceModal(transaction: Transaction) {
+  referenceTransaction.value = transaction
+  newReferenceValue.value = transaction.reference || ''
+  showReferenceModal.value = true
+}
+
+function closeReferenceModal() {
+  showReferenceModal.value = false
+  referenceTransaction.value = null
+  newReferenceValue.value = ''
+}
+
+async function confirmReferenceUpdate() {
+  if (!referenceTransaction.value || !newReferenceValue.value.trim()) return
+
+  try {
+    const result = await transactionsStore.updateTransactionReference(
+      referenceTransaction.value.id,
+      newReferenceValue.value.trim()
+    )
+    const admin = result.updated_by?.email || 'admin'
+    notification.addNotification(
+      `Référence mise à jour par ${admin}`,
+      'success'
+    )
+    closeReferenceModal()
+  } catch (error) {
+    notification.addNotification(
+      error instanceof Error ? error.message : 'Erreur lors de la mise à jour',
+      'error'
+    )
+  }
 }
 
 // Mettre à jour le statut d'une transaction

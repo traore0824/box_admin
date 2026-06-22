@@ -215,6 +215,39 @@ export const useTransactionsStore = defineStore('transactions', () => {
     }
   }
 
+  // ✏️ Mettre à jour la référence Feexpay (pending / timeout)
+  async function updateTransactionReference(transactionId: number, reference: string) {
+    try {
+      isLoading.value = true
+      error.value = null
+
+      const response = await fetchWithAuth('/box/transaction/update-reference/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          transaction_id: transactionId,
+          reference: reference.trim()
+        })
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.message || 'Erreur lors de la mise à jour de la référence')
+      }
+
+      await fetchTransactions(currentPage.value)
+      return data
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
+      console.error('Error updating transaction reference:', err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   // 🔍 Vérifier le statut d'une transaction sur Feexpay
   async function checkFeexpayStatus(transactionId: number) {
     try {
@@ -265,6 +298,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     updateTransactionStatus,
     validateWithdrawal,
     approveWithdrawal,
-    checkFeexpayStatus
+    checkFeexpayStatus,
+    updateTransactionReference
   }
 })

@@ -46,6 +46,8 @@ export interface Setting {
   motivation_no_caisse_afternoon_image: string | null
   motivation_no_caisse_evening_image: string | null
   test_mode: boolean
+  box_coins_distribution_enabled: boolean
+  challenge_publish_notifications_enabled: boolean
   min_version: number
   last_version: number
   update_message: string | null
@@ -106,6 +108,9 @@ export const useSettingsStore = defineStore('settings', () => {
       motivation_no_caisse_afternoon_image: data.motivation_no_caisse_afternoon_image || null,
       motivation_no_caisse_evening_image: data.motivation_no_caisse_evening_image || null,
       test_mode: data.test_mode ?? false,
+      box_coins_distribution_enabled: data.box_coins_distribution_enabled ?? true,
+      challenge_publish_notifications_enabled:
+        data.challenge_publish_notifications_enabled ?? true,
       min_version: data.min_version || 1,
       last_version: data.last_version || 1,
       update_message: data.update_message || null,

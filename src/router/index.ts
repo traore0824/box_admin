@@ -28,6 +28,7 @@ import Verify2FAView from '../views/Verify2FAView.vue'
 import WeeklySampleView from '../views/WeeklySampleView.vue'
 import ChallengesView from '../views/ChallengesView.vue'
 import PointsConfigView from '../views/PointsConfigView.vue'
+import UserBonusesView from '../views/UserBonusesView.vue'
 import ChangePasswordView from '../views/ChangePasswordView.vue'
 
 const routes = [
@@ -89,6 +90,12 @@ const routes = [
     path: '/bonus',
     name: 'bonus',
     component: BonusView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/user-bonuses',
+    name: 'user-bonuses',
+    component: UserBonusesView,
     meta: { requiresAuth: true }
   },
   {
