@@ -272,9 +272,10 @@ export const useUsersStore = defineStore('users', () => {
         throw new Error(data.detail || data.message || "Erreur lors du changement de statut d'agent.")
       }
 
+      const data = await response.json()
       const userIndex = users.value.findIndex(u => u.id === userId)
       if (userIndex !== -1) {
-        users.value[userIndex].agent_client = !users.value[userIndex].agent_client
+        users.value[userIndex].agent_client = data.agent_client
       } else {
         await fetchUsers(currentPage.value)
       }

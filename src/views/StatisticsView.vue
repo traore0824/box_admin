@@ -58,6 +58,14 @@
           <span class="stat-label text-gray-600 text-sm">Utilisateurs inactifs</span>
           <span class="stat-value font-bold text-gray-900">{{ stats.inactive_users }}</span>
         </div>
+        <div class="stat-item flex justify-between p-3 border border-gray-100 rounded-lg">
+          <span class="stat-label text-gray-600 text-sm">Utilisateurs qui ont parrainé</span>
+          <span class="stat-value font-bold text-gray-900">{{ stats.users_who_sponsored }}</span>
+        </div>
+        <div class="stat-item flex justify-between p-3 border border-gray-100 rounded-lg">
+          <span class="stat-label text-gray-600 text-sm">Total des parrainages</span>
+          <span class="stat-value font-bold text-gray-900">{{ stats.total_referrals }}</span>
+        </div>
       </div>
     </div>
 

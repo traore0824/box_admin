@@ -7,6 +7,8 @@ interface StatisticsState {
     agent_users: number
     inactive_users: number
     active_users: number
+    users_who_sponsored: number
+    total_referrals: number
     total_caisses: number
     caisse_done: number
     caisse_cancel: number
@@ -42,6 +44,8 @@ export const useStatisticsStore = defineStore('statistics', () => {
     agent_users: 0,
     inactive_users: 0,
     active_users: 0,
+    users_who_sponsored: 0,
+    total_referrals: 0,
     total_caisses: 0,
     caisse_done: 0,
     caisse_cancel: 0,
