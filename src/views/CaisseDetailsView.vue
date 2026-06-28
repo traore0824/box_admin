@@ -135,6 +135,103 @@
         </div>
       </div>
 
+      <!-- Actions admin : retrait / annulation (caisse personnelle) -->
+      <div
+        v-if="caisse.personal"
+        class="bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-indigo-100"
+      >
+        <h2 class="text-lg font-semibold text-gray-900 mb-1">Créer une demande pour l'utilisateur</h2>
+        <p class="text-sm text-gray-500 mb-4">
+          Transaction créée au nom du propriétaire de la caisse ({{ caisse.created_by.email }}).
+          Réservé aux caisses personnelles.
+        </p>
+
+        <div
+          v-if="caisse.has_pending_withdrawal"
+          class="mb-4 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800"
+        >
+          <i class="fas fa-exclamation-triangle mr-2"></i>
+          Un retrait ou une annulation est déjà en cours sur cette caisse.
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Mode de paiement</label>
+            <select v-model="adminPaymentMode" class="input w-full" :disabled="adminActionLoading">
+              <option value="moov">MOOV</option>
+              <option value="mtn">MTN</option>
+              <option value="celtis">Celtis</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone (Mobile Money)</label>
+            <div class="flex">
+              <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-200 bg-gray-50 text-sm text-gray-600">229</span>
+              <input
+                v-model="adminPhoneLocal"
+                type="tel"
+                maxlength="10"
+                placeholder="XXXXXXXX"
+                class="input rounded-l-none w-full"
+                :disabled="adminActionLoading"
+              />
+            </div>
+          </div>
+          <div v-if="showPartialAmountField">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Montant brut (retrait partiel)</label>
+            <input
+              v-model.number="adminPartialAmount"
+              type="number"
+              min="1"
+              step="1"
+              class="input w-full"
+              :disabled="adminActionLoading"
+              placeholder="Ex: 5000"
+            />
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <button
+            v-if="canAdminWithdraw"
+            type="button"
+            class="btn btn-primary btn-sm"
+            :disabled="adminActionLoading"
+            @click="submitAdminWithdrawal"
+          >
+            <i v-if="adminActionLoading && adminActionType === 'withdrawal'" class="fas fa-spinner fa-spin mr-2"></i>
+            <i v-else class="fas fa-money-bill-wave mr-2"></i>
+            Retrait complet
+          </button>
+          <button
+            v-if="canAdminCancel"
+            type="button"
+            class="btn btn-outline btn-sm border-red-300 text-red-700 hover:bg-red-50"
+            :disabled="adminActionLoading"
+            @click="submitAdminCancellation"
+          >
+            <i v-if="adminActionLoading && adminActionType === 'cancellation'" class="fas fa-spinner fa-spin mr-2"></i>
+            <i v-else class="fas fa-ban mr-2"></i>
+            Annulation
+          </button>
+          <button
+            v-if="canAdminPartial"
+            type="button"
+            class="btn btn-outline btn-sm"
+            :disabled="adminActionLoading"
+            @click="submitAdminPartialWithdrawal"
+          >
+            <i v-if="adminActionLoading && adminActionType === 'partial'" class="fas fa-spinner fa-spin mr-2"></i>
+            <i v-else class="fas fa-percent mr-2"></i>
+            Retrait partiel
+          </button>
+        </div>
+
+        <p v-if="!canAdminWithdraw && !canAdminCancel && !canAdminPartial && !caisse.has_pending_withdrawal" class="text-sm text-gray-500 mt-3">
+          Aucune action disponible pour le statut actuel de la caisse ({{ caisse.status }}).
+        </p>
+      </div>
+
       <!-- Informations sur le créateur -->
       <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">Créateur</h2>
@@ -431,7 +528,9 @@
                   }">
                     {{ transaction.type_trans === 'deposit' ? 'Dépôt' :
                     transaction.type_trans === 'withdrawal' ? 'Retrait' :
-                    transaction.type_trans === 'cancellation' ? 'Annulation' : transaction.type_trans }}
+                    transaction.type_trans === 'cancellation' ? 'Annulation' :
+                    transaction.type_trans === 'partial_withdrawal' ? 'Retrait partiel' :
+                    transaction.type_trans }}
                   </span>
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap">
@@ -473,14 +572,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { fetchWithAuth } from '../stores/fetchwithtoken'
 import { useNotification } from '../services/notification'
 import { Transaction } from '../types/transaction'
 import { Caisse, useCaisseStore, type BalanceHistoryEntry } from '../stores/caisse'
 
 const route = useRoute()
+const router = useRouter()
 const notification = useNotification()
 const caisseStore = useCaisseStore()
 
@@ -491,6 +591,113 @@ const isLoading = ref(false)
 const error = ref<string | null>(null)
 const transactions = ref<Transaction[]>([])
 const transactionsLoading = ref(false)
+
+const adminPaymentMode = ref('moov')
+const adminPhoneLocal = ref('')
+const adminPartialAmount = ref<number | null>(null)
+const adminActionLoading = ref(false)
+const adminActionType = ref<'withdrawal' | 'cancellation' | 'partial' | null>(null)
+
+const canAdminWithdraw = computed(() => {
+  if (!caisse.value?.personal || caisse.value.has_pending_withdrawal) return false
+  return caisse.value.status === 'done'
+})
+
+const canAdminCancel = computed(() => {
+  if (!caisse.value?.personal || caisse.value.has_pending_withdrawal) return false
+  return caisse.value.status === 'pending'
+})
+
+const canAdminPartial = computed(() => {
+  if (!caisse.value?.personal || caisse.value.has_pending_withdrawal) return false
+  return caisse.value.status === 'done' || caisse.value.status === 'pending'
+})
+
+const showPartialAmountField = computed(() => canAdminPartial.value)
+
+const buildAdminPayload = () => {
+  if (!caisse.value) throw new Error('Caisse introuvable')
+  const local = adminPhoneLocal.value.replace(/\D/g, '')
+  if (local.length < 8) {
+    throw new Error('Numéro de téléphone invalide (8 chiffres minimum après 229).')
+  }
+  return {
+    caisse_id: caisse.value.id,
+    payment_mode: adminPaymentMode.value,
+    phone: `229${local}`,
+  }
+}
+
+const submitAdminWithdrawal = async () => {
+  if (!caisse.value || !confirm('Créer une demande de retrait complet pour le propriétaire de cette caisse ?')) return
+  try {
+    adminActionLoading.value = true
+    adminActionType.value = 'withdrawal'
+    const result = await caisseStore.createAdminWithdrawal(buildAdminPayload())
+    notification.addNotification(`Demande de retrait créée (#${result.id})`, 'success')
+    await Promise.all([loadCaisse(), loadTransactions()])
+    if (result.id) {
+      router.push({ name: 'transaction-details', params: { id: String(result.id) } })
+    }
+  } catch (err) {
+    notification.addNotification(err instanceof Error ? err.message : 'Erreur', 'error')
+  } finally {
+    adminActionLoading.value = false
+    adminActionType.value = null
+  }
+}
+
+const submitAdminCancellation = async () => {
+  if (!caisse.value || !confirm("Créer une demande d'annulation pour le propriétaire de cette caisse ?")) return
+  try {
+    adminActionLoading.value = true
+    adminActionType.value = 'cancellation'
+    const result = await caisseStore.createAdminCancellation(buildAdminPayload())
+    notification.addNotification(`Demande d'annulation créée (#${result.id})`, 'success')
+    await Promise.all([loadCaisse(), loadTransactions()])
+    if (result.id) {
+      router.push({ name: 'transaction-details', params: { id: String(result.id) } })
+    }
+  } catch (err) {
+    notification.addNotification(err instanceof Error ? err.message : 'Erreur', 'error')
+  } finally {
+    adminActionLoading.value = false
+    adminActionType.value = null
+  }
+}
+
+const submitAdminPartialWithdrawal = async () => {
+  if (!caisse.value) return
+  const amount = adminPartialAmount.value
+  if (!amount || amount <= 0) {
+    notification.addNotification('Indiquez un montant brut valide pour le retrait partiel.', 'error')
+    return
+  }
+  if (!confirm(`Créer un retrait partiel de ${amount.toLocaleString()} XOF pour le propriétaire ?`)) return
+  try {
+    adminActionLoading.value = true
+    adminActionType.value = 'partial'
+    const result = await caisseStore.createAdminPartialWithdrawal({
+      ...buildAdminPayload(),
+      amount,
+    })
+    notification.addNotification(`Retrait partiel créé (#${result.id})`, 'success')
+    await Promise.all([loadCaisse(), loadTransactions(), loadBalanceHistory(caisseStore.balanceHistoryPage)])
+    if (result.id) {
+      router.push({ name: 'transaction-details', params: { id: String(result.id) } })
+    }
+  } catch (err) {
+    notification.addNotification(err instanceof Error ? err.message : 'Erreur', 'error')
+  } finally {
+    adminActionLoading.value = false
+    adminActionType.value = null
+  }
+}
+
+const initAdminPhoneFromCaisse = (c: Caisse) => {
+  const raw = (c.created_by.phone || '').replace(/\D/g, '')
+  adminPhoneLocal.value = raw.startsWith('229') ? raw.slice(3) : raw
+}
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('fr-FR')
@@ -605,6 +812,7 @@ const loadCaisse = async () => {
 
     caisse.value = await response.json()
     defineBlockEnabled.value = caisse.value?.define_block === true
+    if (caisse.value) initAdminPhoneFromCaisse(caisse.value)
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
     notification.addNotification(error.value, 'error')

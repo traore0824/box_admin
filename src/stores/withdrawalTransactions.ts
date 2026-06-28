@@ -20,7 +20,7 @@ export const useWithdrawalTransactionsStore = defineStore('withdrawalTransaction
     const params: Record<string, string> = {
       page: page.toString(),
       page_size: itemsPerPage.toString(),
-      type_trans__in: 'cancellation,withdrawal' // Filtre prédéfini pour cancellation et withdrawal
+      type_trans__in: 'cancellation,withdrawal,partial_withdrawal'
     }
 
     if (searchQuery.value.trim() !== '') {
@@ -130,12 +130,17 @@ export const useWithdrawalTransactionsStore = defineStore('withdrawalTransaction
   }
 
   // 📡 Valider une transaction de retrait/annulation (sans changer le statut)
-  async function validateWithdrawal(transactionId: number) {
+  async function validateWithdrawal(transactionId: number, typeTrans?: string) {
     try {
       isLoading.value = true
       error.value = null
 
-      const response = await fetchWithAuth('/box/transaction-validate-withdrawal/', {
+      const endpoint =
+        typeTrans === 'partial_withdrawal'
+          ? '/box/partial_withdrawal/validate-admin'
+          : '/box/transaction-validate-withdrawal/v2'
+
+      const response = await fetchWithAuth(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -160,12 +165,17 @@ export const useWithdrawalTransactionsStore = defineStore('withdrawalTransaction
   }
 
   // ✅ Approuver une transaction de retrait ou d'annulation
-  async function approveWithdrawal(transactionId: number) {
+  async function approveWithdrawal(transactionId: number, typeTrans?: string) {
     try {
       isLoading.value = true
       error.value = null
 
-      const response = await fetchWithAuth('/box/transaction-approve-withdrawal', {
+      const endpoint =
+        typeTrans === 'partial_withdrawal'
+          ? '/box/partial_withdrawal/approve-admin'
+          : '/box/transaction-approve-withdrawal/v2'
+
+      const response = await fetchWithAuth(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

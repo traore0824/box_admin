@@ -17,6 +17,7 @@ export interface Setting {
   cancel_block_commission: string
   operation_fee: string
   minimum_commission_withdrawal: string
+  minimum_withdrawal: number
   partial_withdrawal_enabled: boolean
   minimum_partial_withdrawal: number
   minimum_remaining_balance: number
@@ -82,6 +83,7 @@ export const useSettingsStore = defineStore('settings', () => {
       cancel_block_commission: data.cancel_block_commission || '0.00',
       operation_fee: data.operation_fee || '0.00',
       minimum_commission_withdrawal: data.minimum_commission_withdrawal || '0.00',
+      minimum_withdrawal: Number(data.minimum_withdrawal ?? 1000),
       partial_withdrawal_enabled: data.partial_withdrawal_enabled ?? true,
       minimum_partial_withdrawal: Number(data.minimum_partial_withdrawal ?? 500),
       minimum_remaining_balance: Number(data.minimum_remaining_balance ?? 0),
@@ -230,7 +232,8 @@ export const useSettingsStore = defineStore('settings', () => {
         'done_commission',
         'cancel_block_commission',
           'operation_fee',
-          'minimum_commission_withdrawal'
+          'minimum_commission_withdrawal',
+          'minimum_withdrawal',
       ]
 
       decimalFields.forEach(field => {

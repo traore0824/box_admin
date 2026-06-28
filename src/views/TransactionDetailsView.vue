@@ -248,13 +248,13 @@
             <i class="fas fa-search mr-2"></i>
             Vérifier statut Feexpay
           </button>
-          <button v-if="transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation'" 
+          <button v-if="isWithdrawalLikeType(transaction.type_trans) && transaction.status === 'pending'" 
             @click="handleValidateWithdrawal" :disabled="actionLoading"
             class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors">
             <i class="fas fa-check-circle mr-2"></i>
             Valider
           </button>
-          <button v-if="transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation'" 
+          <button v-if="isWithdrawalLikeType(transaction.type_trans) && transaction.status === 'pending'" 
             @click="handleApproveWithdrawal" :disabled="actionLoading"
             class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors">
             <i class="fas fa-thumbs-up mr-2"></i>
@@ -439,6 +439,7 @@ import { formatAmount } from '../utils/currency'
 import { useNotification } from '../services/notification'
 import { useTransactionsStore } from '../stores/transactions'
 import { useAuthStore } from '../stores/auth'
+import { isWithdrawalLikeType } from '../utils/transactionType'
 
 const route = useRoute()
 const router = useRouter()
@@ -514,7 +515,9 @@ const getTypeLabel = (type: string): string => {
   const labels: Record<string, string> = {
     deposit: 'Dépôt',
     withdrawal: 'Retrait',
-    cancellation: 'Annulation'
+    cancellation: 'Annulation',
+    partial_withdrawal: 'Retrait partiel',
+    withdrawal_request: 'Demande de retrait',
   }
   return labels[type] || type
 }
@@ -524,7 +527,9 @@ const getTypeClass = (type: string): string => {
   const classes: Record<string, string> = {
     deposit: 'bg-green-100 text-green-800',
     withdrawal: 'bg-red-100 text-red-800',
-    cancellation: 'bg-orange-100 text-orange-800'
+    cancellation: 'bg-orange-100 text-orange-800',
+    partial_withdrawal: 'bg-blue-100 text-blue-800',
+    withdrawal_request: 'bg-yellow-100 text-yellow-800',
   }
   return classes[type] || 'bg-gray-100 text-gray-800'
 }
@@ -710,7 +715,10 @@ const handleValidateWithdrawal = async () => {
   
   try {
     actionLoading.value = true
-    const result = await transactionsStore.validateWithdrawal(transaction.value.id)
+    const result = await transactionsStore.validateWithdrawal(
+      transaction.value.id,
+      transaction.value.type_trans,
+    )
     notification.addNotification('Transaction validée avec succès', 'success')
   } catch (error: any) {
     console.error('Erreur lors de la validation:', error)
@@ -725,7 +733,10 @@ const handleApproveWithdrawal = async () => {
   
   try {
     actionLoading.value = true
-    await transactionsStore.approveWithdrawal(transaction.value.id)
+    await transactionsStore.approveWithdrawal(
+      transaction.value.id,
+      transaction.value.type_trans,
+    )
     notification.addNotification('Transaction approuvée avec succès', 'success')
     // Recharger les détails
     await loadTransactionDetails()

@@ -104,6 +104,19 @@
                 class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
               />
             </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Montant minimum retrait caisse (XOF)</label>
+              <p class="text-xs text-gray-500 mb-1">
+                Solde brut minimum (montant déjà cotisé) pour lancer un retrait ou une annulation de caisse.
+              </p>
+              <input
+                v-model.number="settings.minimum_withdrawal"
+                type="number"
+                step="1"
+                min="0"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
           </div>
         </div>
 

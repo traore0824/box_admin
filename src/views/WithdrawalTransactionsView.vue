@@ -67,18 +67,13 @@
                 </div>
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden md:table-cell">{{ new Date(transaction.created_at).toLocaleDateString() }}</td>
-              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm" :class="{
-                'text-danger': transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation'
-              }">
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm text-danger">
                 -{{ transaction.amount.toLocaleString() }} XOF
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden lg:table-cell">{{ transaction.phone }}</td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
-                <span class="badge text-xs" :class="{
-                  'bg-warning-light text-warning-dark': transaction.type_trans === 'withdrawal',
-                  'bg-red-100 text-red-800': transaction.type_trans === 'cancellation'
-                }">
-                  {{ transaction.type_trans === 'withdrawal' ? 'Retrait' : transaction.type_trans === 'cancellation' ? 'Annulation' : transaction.type_trans }}
+                <span class="badge text-xs" :class="getTransactionTypeBadgeClass(transaction.type_trans)">
+                  {{ getTransactionTypeLabel(transaction.type_trans) }}
                 </span>
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
@@ -421,6 +416,11 @@ import { useRouter, useRoute } from 'vue-router'
 import { useWithdrawalTransactionsStore } from '../stores/withdrawalTransactions'
 import { Transaction } from '../types/transaction'
 import { useNotification } from '../services/notification'
+import {
+  getTransactionTypeBadgeClass,
+  getTransactionTypeLabel,
+  isWithdrawalLikeType,
+} from '../utils/transactionType'
 
 const router = useRouter()
 const route = useRoute()
@@ -476,10 +476,7 @@ const hasNextPage = computed(() => {
 
 // Vérifier si une transaction peut être approuvée
 function canApproveTransaction(transaction: Transaction): boolean {
-  return (
-    (transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation') &&
-    transaction.status === 'pending'
-  )
+  return isWithdrawalLikeType(transaction.type_trans) && transaction.status === 'pending'
 }
 
 // Mettre à jour le statut d'une transaction
@@ -501,7 +498,13 @@ const handleUpdateStatus = async (transactionId: number) => {
 // Valider une transaction de retrait/annulation
 const handleValidate = async (transactionId: number) => {
   try {
-    const result = await withdrawalTransactionsStore.validateWithdrawal(transactionId)
+    const transaction = withdrawalTransactionsStore
+      .getFilteredTransactions()
+      .find((item) => item.id === transactionId)
+    const result = await withdrawalTransactionsStore.validateWithdrawal(
+      transactionId,
+      transaction?.type_trans,
+    )
     validationDetails.value = result
     showValidationModal.value = true
   } catch (error) {
@@ -531,7 +534,10 @@ async function confirmApprove() {
 
   try {
     approvingTransactionId.value = selectedTransaction.value.id
-    await withdrawalTransactionsStore.approveWithdrawal(selectedTransaction.value.id)
+    await withdrawalTransactionsStore.approveWithdrawal(
+      selectedTransaction.value.id,
+      selectedTransaction.value.type_trans,
+    )
     closeApproveModal()
   } catch (error) {
     // L'erreur est déjà gérée dans le store avec une notification

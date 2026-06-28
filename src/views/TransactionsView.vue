@@ -48,6 +48,7 @@
             <option value="deposit">Deposit</option>
             <option value="withdrawal">Retrait</option>
             <option value="cancellation">Annulation</option>
+            <option value="partial_withdrawal">Retrait partiel</option>
             <option value="withdrawal_request">Demande de retrait</option>
           </select>
         </div>
@@ -80,21 +81,13 @@
                 </div>
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden md:table-cell">{{ formatDateTime(transaction.created_at) }}</td>
-              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm" :class="{
-                'text-success': transaction.type_trans === 'deposit',
-                'text-danger': transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation' || transaction.type_trans === 'withdrawal_request',
-                'text-warning': transaction.type_trans === 'cancellation'
-              }">
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm" :class="getTransactionAmountClass(transaction.type_trans)">
                 {{ transaction.type_trans === 'deposit' ? '+' : '-' }}{{ transaction.amount.toLocaleString() }} XOF
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden lg:table-cell">{{ transaction.phone }}</td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
-                <span class="badge text-xs" :class="{
-                  'bg-success-light text-success-dark': transaction.type_trans === 'deposit',
-                  'bg-warning-light text-warning-dark': transaction.type_trans === 'withdrawal' || transaction.type_trans === 'withdrawal_request',
-                  'bg-red-100 text-red-800': transaction.type_trans === 'cancellation'
-                }">
-                  {{ transaction.type_trans === 'deposit' ? 'Deposit' : transaction.type_trans === 'withdrawal' ? 'Retrait' : transaction.type_trans === 'cancellation' ? 'Annulation' : transaction.type_trans === 'withdrawal_request' ? 'Demande de retrait' : transaction.type_trans }}
+                <span class="badge text-xs" :class="getTransactionTypeBadgeClass(transaction.type_trans)">
+                  {{ getTransactionTypeLabel(transaction.type_trans) }}
                 </span>
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
@@ -178,7 +171,7 @@
 
                   <!-- Bouton Vérifier la transaction (pour withdrawal/cancellation/withdrawal_request en pending) -->
                   <button
-                    v-if="(transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation' || transaction.type_trans === 'withdrawal_request') && transaction.status === 'pending'"
+                    v-if="isWithdrawalLikeType(transaction.type_trans) && transaction.status === 'pending'"
                     @click="handleValidate(transaction.id)"
                     :disabled="transactionsStore.isLoading"
                     class="btn btn-sm text-xs"
@@ -264,13 +257,13 @@
               <div>
                 <span class="text-sm text-gray-600">Type:</span>
                 <span class="ml-2 font-medium">
-                  {{ selectedTransaction.type_trans === 'withdrawal' ? 'Retrait' : selectedTransaction.type_trans === 'cancellation' ? 'Annulation' : selectedTransaction.type_trans }}
+                  {{ getTransactionTypeLabel(selectedTransaction.type_trans) }}
                 </span>
               </div>
               <div>
                 <span class="text-sm text-gray-600">Montant:</span>
                 <span class="ml-2 font-medium text-lg" :class="{
-                  'text-danger': selectedTransaction.type_trans === 'withdrawal' || selectedTransaction.type_trans === 'cancellation'
+                  'text-danger': isDebitTransactionType(selectedTransaction.type_trans)
                 }">
                   -{{ selectedTransaction.amount.toLocaleString() }} XOF
                 </span>
@@ -590,6 +583,13 @@ import { useTransactionsStore } from '../stores/transactions'
 import { useAuthStore } from '../stores/auth'
 import { Transaction } from '../types/transaction'
 import { useNotification } from '../services/notification'
+import {
+  getTransactionAmountClass,
+  getTransactionTypeBadgeClass,
+  getTransactionTypeLabel,
+  isDebitTransactionType,
+  isWithdrawalLikeType,
+} from '../utils/transactionType'
 
 const router = useRouter()
 const route = useRoute()
@@ -653,10 +653,7 @@ const hasNextPage = computed(() => {
 
 // Vérifier si une transaction peut être approuvée
 function canApproveTransaction(transaction: Transaction): boolean {
-  return (
-    (transaction.type_trans === 'withdrawal' || transaction.type_trans === 'cancellation' || transaction.type_trans === 'withdrawal_request') &&
-    transaction.status === 'pending'
-  )
+  return isWithdrawalLikeType(transaction.type_trans) && transaction.status === 'pending'
 }
 
 function canUpdateReference(transaction: Transaction): boolean {
@@ -719,7 +716,13 @@ const handleUpdateStatus = async (transactionId: number) => {
 // Valider une transaction de retrait/annulation
 const handleValidate = async (transactionId: number) => {
   try {
-    const result = await transactionsStore.validateWithdrawal(transactionId)
+    const transaction = transactionsStore
+      .getFilteredTransactions()
+      .find((item) => item.id === transactionId)
+    const result = await transactionsStore.validateWithdrawal(
+      transactionId,
+      transaction?.type_trans,
+    )
     validationDetails.value = result
     showValidationModal.value = true
   } catch (error) {
@@ -749,7 +752,10 @@ async function confirmApprove() {
 
   try {
     approvingTransactionId.value = selectedTransaction.value.id
-    await transactionsStore.approveWithdrawal(selectedTransaction.value.id)
+    await transactionsStore.approveWithdrawal(
+      selectedTransaction.value.id,
+      selectedTransaction.value.type_trans,
+    )
     closeApproveModal()
   } catch (error) {
     // L'erreur est déjà gérée dans le store avec une notification

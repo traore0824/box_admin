@@ -271,6 +271,55 @@ export const useCaisseStore = defineStore('caisse', () => {
     return response.json()
   }
 
+  async function createAdminWithdrawal(payload: {
+    caisse_id: number
+    payment_mode: string
+    phone: string
+  }) {
+    const response = await fetchWithAuth('/box/admin/transaction-withdrawal', {
+      method: 'POST',
+      body: payload,
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      throw new Error(data.details || data.message || 'Erreur lors de la création du retrait')
+    }
+    return data
+  }
+
+  async function createAdminCancellation(payload: {
+    caisse_id: number
+    payment_mode: string
+    phone: string
+  }) {
+    const response = await fetchWithAuth('/box/admin/transaction-cancellation', {
+      method: 'POST',
+      body: payload,
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      throw new Error(data.details || data.message || "Erreur lors de la création de l'annulation")
+    }
+    return data
+  }
+
+  async function createAdminPartialWithdrawal(payload: {
+    caisse_id: number
+    payment_mode: string
+    phone: string
+    amount: number
+  }) {
+    const response = await fetchWithAuth('/box/admin/partial-withdrawal', {
+      method: 'POST',
+      body: payload,
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      throw new Error(data.details || data.message || 'Erreur lors de la création du retrait partiel')
+    }
+    return data
+  }
+
   async function fetchBalanceHistory(caisseId: number, page = 1) {
     try {
       balanceHistoryLoading.value = true
@@ -333,6 +382,9 @@ export const useCaisseStore = defineStore('caisse', () => {
     resetBalanceHistory,
     fetchBalanceHistory,
     updateCaisseDefineBlock,
+    createAdminWithdrawal,
+    createAdminCancellation,
+    createAdminPartialWithdrawal,
   }
 })
 
