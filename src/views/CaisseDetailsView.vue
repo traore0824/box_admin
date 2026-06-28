@@ -197,7 +197,7 @@
             type="button"
             class="btn btn-primary btn-sm"
             :disabled="adminActionLoading"
-            @click="submitAdminWithdrawal"
+            @click="openAdminConfirmModal('withdrawal')"
           >
             <i v-if="adminActionLoading && adminActionType === 'withdrawal'" class="fas fa-spinner fa-spin mr-2"></i>
             <i v-else class="fas fa-money-bill-wave mr-2"></i>
@@ -208,7 +208,7 @@
             type="button"
             class="btn btn-outline btn-sm border-red-300 text-red-700 hover:bg-red-50"
             :disabled="adminActionLoading"
-            @click="submitAdminCancellation"
+            @click="openAdminConfirmModal('cancellation')"
           >
             <i v-if="adminActionLoading && adminActionType === 'cancellation'" class="fas fa-spinner fa-spin mr-2"></i>
             <i v-else class="fas fa-ban mr-2"></i>
@@ -219,7 +219,7 @@
             type="button"
             class="btn btn-outline btn-sm"
             :disabled="adminActionLoading"
-            @click="submitAdminPartialWithdrawal"
+            @click="openAdminConfirmModal('partial')"
           >
             <i v-if="adminActionLoading && adminActionType === 'partial'" class="fas fa-spinner fa-spin mr-2"></i>
             <i v-else class="fas fa-percent mr-2"></i>
@@ -568,6 +568,113 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal confirmation création transaction admin -->
+    <Teleport to="body">
+      <div
+        v-if="showAdminConfirmModal"
+        class="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+        @click="closeAdminConfirmModal"
+      >
+        <div
+          class="bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 overflow-hidden"
+          @click.stop
+        >
+          <div
+            class="px-6 py-4 border-b"
+            :class="adminConfirmHeaderClass"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <p class="text-xs font-medium uppercase tracking-wide opacity-80">Confirmation requise</p>
+                <h3 class="text-lg font-semibold mt-0.5">{{ adminConfirmTitle }}</h3>
+              </div>
+              <button
+                type="button"
+                class="text-gray-400 hover:text-gray-600 p-1"
+                :disabled="adminActionLoading"
+                @click="closeAdminConfirmModal"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="px-6 py-5 space-y-4">
+            <p class="text-sm text-gray-600">
+              {{ adminConfirmDescription }}
+            </p>
+
+            <div v-if="caisse" class="rounded-lg bg-gray-50 border border-gray-100 p-4 space-y-3 text-sm">
+              <div class="flex justify-between gap-4">
+                <span class="text-gray-500 shrink-0">Utilisateur</span>
+                <span class="text-right font-medium text-gray-900">
+                  {{ caisse.created_by.first_name }} {{ caisse.created_by.last_name }}
+                  <span class="block text-xs font-normal text-gray-500">{{ caisse.created_by.email }}</span>
+                </span>
+              </div>
+              <div class="flex justify-between gap-4">
+                <span class="text-gray-500 shrink-0">Caisse</span>
+                <span class="text-right font-medium text-gray-900">
+                  {{ caisse.name }}
+                  <span class="block text-xs font-normal text-gray-500">#{{ caisse.id }}</span>
+                </span>
+              </div>
+              <div class="flex justify-between gap-4">
+                <span class="text-gray-500 shrink-0">Solde épargné</span>
+                <span class="font-medium text-gray-900">{{ formatCurrency(caisse.amount_already_paid) }}</span>
+              </div>
+              <div class="flex justify-between gap-4">
+                <span class="text-gray-500 shrink-0">Mode de paiement</span>
+                <span class="font-medium text-gray-900">{{ adminPaymentModeLabel }}</span>
+              </div>
+              <div class="flex justify-between gap-4">
+                <span class="text-gray-500 shrink-0">Téléphone</span>
+                <span class="font-medium text-gray-900">229 {{ adminPhoneLocal }}</span>
+              </div>
+              <div
+                v-if="pendingAdminAction === 'partial' && adminPartialAmount"
+                class="flex justify-between gap-4 pt-2 border-t border-gray-200"
+              >
+                <span class="text-gray-500 shrink-0">Montant brut</span>
+                <span class="font-semibold text-primary">{{ formatCurrency(adminPartialAmount) }}</span>
+              </div>
+            </div>
+
+            <div
+              class="rounded-lg px-4 py-3 text-sm"
+              :class="adminConfirmNoticeClass"
+            >
+              <i class="fas fa-info-circle mr-2"></i>
+              La transaction sera créée au nom du propriétaire et passera en statut
+              <strong>En attente</strong> jusqu'à approbation.
+            </div>
+          </div>
+
+          <div class="px-6 py-4 bg-gray-50 border-t flex justify-end gap-3">
+            <button
+              type="button"
+              class="btn btn-outline btn-sm"
+              :disabled="adminActionLoading"
+              @click="closeAdminConfirmModal"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              :class="adminConfirmButtonClass"
+              :disabled="adminActionLoading"
+              @click="confirmAdminAction"
+            >
+              <i v-if="adminActionLoading" class="fas fa-spinner fa-spin mr-2"></i>
+              <i v-else class="fas fa-check mr-2"></i>
+              {{ adminConfirmButtonLabel }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -597,6 +704,90 @@ const adminPhoneLocal = ref('')
 const adminPartialAmount = ref<number | null>(null)
 const adminActionLoading = ref(false)
 const adminActionType = ref<'withdrawal' | 'cancellation' | 'partial' | null>(null)
+const showAdminConfirmModal = ref(false)
+const pendingAdminAction = ref<'withdrawal' | 'cancellation' | 'partial' | null>(null)
+
+const PAYMENT_MODE_LABELS: Record<string, string> = {
+  moov: 'MOOV',
+  mtn: 'MTN',
+  celtis: 'Celtis',
+}
+
+const adminPaymentModeLabel = computed(
+  () => PAYMENT_MODE_LABELS[adminPaymentMode.value] || adminPaymentMode.value,
+)
+
+const adminConfirmTitle = computed(() => {
+  switch (pendingAdminAction.value) {
+    case 'withdrawal':
+      return 'Confirmer le retrait complet'
+    case 'cancellation':
+      return "Confirmer l'annulation"
+    case 'partial':
+      return 'Confirmer le retrait partiel'
+    default:
+      return 'Confirmer la demande'
+  }
+})
+
+const adminConfirmDescription = computed(() => {
+  switch (pendingAdminAction.value) {
+    case 'withdrawal':
+      return 'Vous allez créer une demande de retrait complet pour le propriétaire de cette caisse.'
+    case 'cancellation':
+      return "Vous allez créer une demande d'annulation pour le propriétaire de cette caisse."
+    case 'partial':
+      return 'Vous allez créer une demande de retrait partiel pour le propriétaire de cette caisse.'
+    default:
+      return 'Confirmez la création de cette demande.'
+  }
+})
+
+const adminConfirmButtonLabel = computed(() => {
+  switch (pendingAdminAction.value) {
+    case 'withdrawal':
+      return 'Créer le retrait'
+    case 'cancellation':
+      return "Créer l'annulation"
+    case 'partial':
+      return 'Créer le retrait partiel'
+    default:
+      return 'Confirmer'
+  }
+})
+
+const adminConfirmHeaderClass = computed(() => {
+  switch (pendingAdminAction.value) {
+    case 'cancellation':
+      return 'bg-red-50 border-red-100 text-red-900'
+    case 'partial':
+      return 'bg-blue-50 border-blue-100 text-blue-900'
+    default:
+      return 'bg-indigo-50 border-indigo-100 text-indigo-900'
+  }
+})
+
+const adminConfirmNoticeClass = computed(() => {
+  switch (pendingAdminAction.value) {
+    case 'cancellation':
+      return 'bg-red-50 text-red-800 border border-red-100'
+    case 'partial':
+      return 'bg-blue-50 text-blue-800 border border-blue-100'
+    default:
+      return 'bg-amber-50 text-amber-800 border border-amber-100'
+  }
+})
+
+const adminConfirmButtonClass = computed(() => {
+  switch (pendingAdminAction.value) {
+    case 'cancellation':
+      return 'bg-red-600 hover:bg-red-700 text-white border-red-600'
+    case 'partial':
+      return 'btn-primary'
+    default:
+      return 'btn-primary'
+  }
+})
 
 const canAdminWithdraw = computed(() => {
   if (!caisse.value?.personal || caisse.value.has_pending_withdrawal) return false
@@ -628,61 +819,70 @@ const buildAdminPayload = () => {
   }
 }
 
-const submitAdminWithdrawal = async () => {
-  if (!caisse.value || !confirm('Créer une demande de retrait complet pour le propriétaire de cette caisse ?')) return
-  try {
-    adminActionLoading.value = true
-    adminActionType.value = 'withdrawal'
-    const result = await caisseStore.createAdminWithdrawal(buildAdminPayload())
-    notification.addNotification(`Demande de retrait créée (#${result.id})`, 'success')
-    await Promise.all([loadCaisse(), loadTransactions()])
-    if (result.id) {
-      router.push({ name: 'transaction-details', params: { id: String(result.id) } })
-    }
-  } catch (err) {
-    notification.addNotification(err instanceof Error ? err.message : 'Erreur', 'error')
-  } finally {
-    adminActionLoading.value = false
-    adminActionType.value = null
-  }
-}
-
-const submitAdminCancellation = async () => {
-  if (!caisse.value || !confirm("Créer une demande d'annulation pour le propriétaire de cette caisse ?")) return
-  try {
-    adminActionLoading.value = true
-    adminActionType.value = 'cancellation'
-    const result = await caisseStore.createAdminCancellation(buildAdminPayload())
-    notification.addNotification(`Demande d'annulation créée (#${result.id})`, 'success')
-    await Promise.all([loadCaisse(), loadTransactions()])
-    if (result.id) {
-      router.push({ name: 'transaction-details', params: { id: String(result.id) } })
-    }
-  } catch (err) {
-    notification.addNotification(err instanceof Error ? err.message : 'Erreur', 'error')
-  } finally {
-    adminActionLoading.value = false
-    adminActionType.value = null
-  }
-}
-
-const submitAdminPartialWithdrawal = async () => {
+const openAdminConfirmModal = (action: 'withdrawal' | 'cancellation' | 'partial') => {
   if (!caisse.value) return
-  const amount = adminPartialAmount.value
-  if (!amount || amount <= 0) {
-    notification.addNotification('Indiquez un montant brut valide pour le retrait partiel.', 'error')
+
+  try {
+    buildAdminPayload()
+  } catch (err) {
+    notification.addNotification(err instanceof Error ? err.message : 'Erreur', 'error')
     return
   }
-  if (!confirm(`Créer un retrait partiel de ${amount.toLocaleString()} XOF pour le propriétaire ?`)) return
+
+  if (action === 'partial') {
+    const amount = adminPartialAmount.value
+    if (!amount || amount <= 0) {
+      notification.addNotification('Indiquez un montant brut valide pour le retrait partiel.', 'error')
+      return
+    }
+  }
+
+  pendingAdminAction.value = action
+  showAdminConfirmModal.value = true
+}
+
+const closeAdminConfirmModal = () => {
+  if (adminActionLoading.value) return
+  showAdminConfirmModal.value = false
+  pendingAdminAction.value = null
+}
+
+const confirmAdminAction = async () => {
+  if (!caisse.value || !pendingAdminAction.value) return
+
+  const action = pendingAdminAction.value
+
   try {
     adminActionLoading.value = true
-    adminActionType.value = 'partial'
-    const result = await caisseStore.createAdminPartialWithdrawal({
-      ...buildAdminPayload(),
-      amount,
-    })
-    notification.addNotification(`Retrait partiel créé (#${result.id})`, 'success')
-    await Promise.all([loadCaisse(), loadTransactions(), loadBalanceHistory(caisseStore.balanceHistoryPage)])
+    adminActionType.value = action
+    const payload = buildAdminPayload()
+    let result: { id?: number }
+
+    if (action === 'withdrawal') {
+      result = await caisseStore.createAdminWithdrawal(payload)
+      notification.addNotification(`Demande de retrait créée (#${result.id})`, 'success')
+    } else if (action === 'cancellation') {
+      result = await caisseStore.createAdminCancellation(payload)
+      notification.addNotification(`Demande d'annulation créée (#${result.id})`, 'success')
+    } else {
+      result = await caisseStore.createAdminPartialWithdrawal({
+        ...payload,
+        amount: adminPartialAmount.value as number,
+      })
+      notification.addNotification(`Retrait partiel créé (#${result.id})`, 'success')
+    }
+
+    showAdminConfirmModal.value = false
+    pendingAdminAction.value = null
+
+    await Promise.all([
+      loadCaisse(),
+      loadTransactions(),
+      action === 'partial'
+        ? loadBalanceHistory(caisseStore.balanceHistoryPage)
+        : Promise.resolve(),
+    ])
+
     if (result.id) {
       router.push({ name: 'transaction-details', params: { id: String(result.id) } })
     }
