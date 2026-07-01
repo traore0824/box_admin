@@ -223,7 +223,7 @@
                 Copier depuis wa-admin.babilonbg.net → Sessions → Détails. Laisser vide pour utiliser OPENWA_SESSION_ID (.env).
               </p>
               <p class="text-xs text-amber-700 mt-1">
-                « Tester la session » vérifie l'ID saisi ci-dessus. Pensez à Enregistrer pour l'appliquer en production.
+                « Tester la session » vérifie l'ID saisi et l'enregistre automatiquement si le test réussit.
               </p>
             </div>
             <div>
@@ -595,9 +595,23 @@ const checkOpenwaSession = async () => {
     if (data.ok) {
       openwaStatusOk.value = true
       const st = data.status
-      const saveHint = data.tested_from_form
-        ? ' — Enregistrez les paramètres pour activer en production.'
-        : ''
+      let saveHint = ''
+
+      // Test réussi → enregistrer la session en base pour l'app mobile
+      if (sessionId) {
+        const saved = await updateSettings({ openwa_session_id: sessionId })
+        if (saved) {
+          if (settings.value) {
+            settings.value.openwa_session_id = sessionId
+          }
+          saveHint = ' — Session enregistrée en base pour l’app mobile.'
+        } else {
+          saveHint = ' — Test OK mais enregistrement échoué : cliquez « Enregistrer les paramètres ».'
+        }
+      } else if (data.tested_from_form) {
+        saveHint = ' — Enregistrez les paramètres pour activer en production.'
+      }
+
       if (st && typeof st === 'object' && st.status) {
         openwaStatusMessage.value =
           `Session OK — statut: ${st.status}` +

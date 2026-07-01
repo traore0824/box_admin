@@ -6,10 +6,11 @@
     <div class="bg-white rounded-lg shadow p-4 space-y-4">
       <h2 class="text-lg font-semibold">Attribuer un bonus</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Email(s) utilisateur</label>
-          <textarea v-model="emailsText" rows="2" placeholder="un@email.com, autre@email.com"
-            class="w-full border rounded-md px-3 py-2 text-sm" />
+        <div class="md:col-span-2">
+          <UserEmailSearchPicker
+            v-model="selectedEmails"
+            label="Utilisateur(s)"
+          />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
@@ -147,10 +148,11 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useUserBonusesStore } from '../stores/userBonuses'
 import { useNotification } from '../services/notification'
+import UserEmailSearchPicker from '../components/UserEmailSearchPicker.vue'
 
 const store = useUserBonusesStore()
 const notification = useNotification()
-const emailsText = ref('')
+const selectedEmails = ref<string[]>([])
 const searchEmail = ref('')
 const filterType = ref('')
 
@@ -188,7 +190,7 @@ async function loadList(page = store.currentPage) {
 }
 
 async function submitGrant() {
-  const emails = emailsText.value.split(/[,;\n]+/).map(e => e.trim()).filter(Boolean)
+  const emails = selectedEmails.value
   if (!emails.length || !form.label.trim()) {
     notification.addNotification('Email et titre requis', 'error')
     return
@@ -206,6 +208,7 @@ async function submitGrant() {
       object_details: form.object_details,
     })
     notification.addNotification('Bonus attribué', 'success')
+    selectedEmails.value = []
     form.label = ''
     form.description = ''
     form.amount = null

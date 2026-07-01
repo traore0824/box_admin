@@ -9,13 +9,14 @@
       </div>
 
       <div class="p-4 space-y-4">
-        <div v-if="!hideEmails">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Email(s) utilisateur</label>
-          <textarea v-model="emailsText" rows="2" placeholder="un@email.com, autre@email.com"
-            class="w-full border rounded-md px-3 py-2 text-sm" />
+        <div v-if="!hideEmails" class="md:col-span-2">
+          <UserEmailSearchPicker
+            v-model="selectedEmails"
+            label="Utilisateur(s)"
+          />
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
             <select v-model="form.bonus_type" class="w-full border rounded-md px-3 py-2 text-sm">
@@ -73,6 +74,7 @@
 import { onMounted, reactive, ref, watch } from 'vue'
 import { useUserBonusesStore } from '../stores/userBonuses'
 import { useNotification } from '../services/notification'
+import UserEmailSearchPicker from './UserEmailSearchPicker.vue'
 
 const props = withDefaults(defineProps<{
   show: boolean
@@ -92,7 +94,7 @@ const emit = defineEmits<{
 
 const store = useUserBonusesStore()
 const notification = useNotification()
-const emailsText = ref('')
+const selectedEmails = ref<string[]>([])
 
 const form = reactive({
   bonus_type: 'money',
@@ -109,7 +111,10 @@ watch(
   () => props.show,
   (visible) => {
     if (visible && props.presetEmails.length) {
-      emailsText.value = props.presetEmails.join(', ')
+      selectedEmails.value = [...props.presetEmails]
+    }
+    if (!visible) {
+      selectedEmails.value = []
     }
   },
   { immediate: true },
@@ -131,7 +136,7 @@ function resetForm() {
 async function submit() {
   const emails = props.hideEmails
     ? props.presetEmails
-    : emailsText.value.split(/[,;\n]+/).map(e => e.trim()).filter(Boolean)
+    : selectedEmails.value
 
   if (!emails.length || !form.label.trim()) {
     notification.addNotification('Email et titre requis', 'error')
