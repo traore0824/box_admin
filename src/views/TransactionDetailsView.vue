@@ -463,7 +463,9 @@ const canUpdateReference = computed(() => {
   if (!transaction.value) return false
   return (
     authStore.user?.is_staff === true &&
-    (transaction.value.status === 'pending' || transaction.value.status === 'timeout')
+    (transaction.value.status === 'pending' ||
+      transaction.value.status === 'timeout' ||
+      transaction.value.status === 'error')
   )
 })
 

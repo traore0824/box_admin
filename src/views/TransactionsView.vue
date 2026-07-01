@@ -659,7 +659,9 @@ function canApproveTransaction(transaction: Transaction): boolean {
 function canUpdateReference(transaction: Transaction): boolean {
   return (
     authStore.user?.is_staff === true &&
-    (transaction.status === 'pending' || transaction.status === 'timeout')
+    (transaction.status === 'pending' ||
+      transaction.status === 'timeout' ||
+      transaction.status === 'error')
   )
 }
 

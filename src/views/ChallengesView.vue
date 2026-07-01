@@ -158,11 +158,12 @@
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Participants maximum</label>
               <input
-                v-model="maxParticipantsInput"
+                :value="form.max_participants ?? ''"
                 type="number"
                 min="1"
                 placeholder="Illimité"
                 class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                @input="updateMaxParticipants"
               />
               <p class="text-xs text-gray-500 mt-1">Laisser vide = pas de limite</p>
             </div>
@@ -285,7 +286,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useChallengesStore, type ChallengeAdmin } from '../stores/challenges'
 import { useSettingsStore } from '../stores/settings'
 import { useNotification } from '../services/notification'
@@ -415,25 +416,43 @@ const form = reactive({
   max_participants: null as number | null,
 })
 
-const maxParticipantsInput = computed({
-  get: () => (form.max_participants == null ? '' : String(form.max_participants)),
-  set: (value: string) => {
-    const trimmed = value.trim()
-    if (!trimmed) {
-      form.max_participants = null
-      return
-    }
-    const parsed = Number(trimmed)
-    form.max_participants = Number.isNaN(parsed) ? null : parsed
-  },
-})
+function updateMaxParticipants(event: Event) {
+  const raw = (event.target as HTMLInputElement).value.trim()
+  if (!raw) {
+    form.max_participants = null
+    return
+  }
+  const parsed = Number(raw)
+  form.max_participants = Number.isNaN(parsed) ? null : parsed
+}
 
 function formatParticipants(c: ChallengeAdmin) {
   const current = c.participant_count ?? 0
-  if (c.max_participants) {
+  if (c.max_participants != null) {
     return `${current} / ${c.max_participants}`
   }
   return `${current} (illimité)`
+}
+
+function buildChallengePayload() {
+  return {
+    name: form.name,
+    description: form.description,
+    rules_text: form.rules_text,
+    rewards_text: form.rewards_text,
+    admin_status: form.admin_status,
+    is_public: form.is_public,
+    ranking_type: form.ranking_type,
+    min_participants: form.min_participants,
+    max_participants: form.max_participants,
+    start_date: toIso(form.start_date),
+    end_date: toIso(form.end_date),
+    registration_deadline: toIso(form.registration_deadline),
+    caisse_config: buildCaisseConfigPayload(),
+    success_rules: buildSuccessRulesPayload(),
+    entry_rules: buildEntryRulesPayload(),
+    rewards_config: {},
+  }
 }
 
 function toLocalInput(iso: string) {
@@ -529,17 +548,7 @@ async function save() {
 
   saving.value = true
   try {
-    const payload = {
-      ...form,
-      max_participants: form.max_participants,
-      start_date: toIso(form.start_date),
-      end_date: toIso(form.end_date),
-      registration_deadline: toIso(form.registration_deadline),
-      caisse_config: buildCaisseConfigPayload(),
-      success_rules: buildSuccessRulesPayload(),
-      entry_rules: buildEntryRulesPayload(),
-      rewards_config: {},
-    }
+    const payload = buildChallengePayload()
     if (editing.value) {
       const updated = await store.updateChallenge(editing.value.id, payload)
       smartLink.value = updated.smart_link || smartLink.value

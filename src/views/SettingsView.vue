@@ -201,12 +201,58 @@
           </div>
         </div>
 
+        <!-- WhatsApp OpenWA -->
+        <div v-if="isStaff" class="p-3 sm:p-4 md:p-6">
+          <h2 class="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-2 sm:mb-3 md:mb-4">
+            Vérification WhatsApp (OpenWA)
+          </h2>
+          <p class="text-xs text-gray-500 mb-4">
+            Session utilisée pour vérifier les numéros WhatsApp et envoyer les rappels.
+            La clé API reste configurée sur le serveur (.env).
+          </p>
+          <div class="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">ID de session OpenWA</label>
+              <input
+                v-model="settings.openwa_session_id"
+                type="text"
+                maxlength="120"
+                placeholder="ex. 55bf6c84-5e22-4b47-806a-cf99b26ff5b8"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+              />
+              <p class="text-xs text-gray-500 mt-1">
+                Laisser vide pour utiliser la valeur par défaut du serveur (OPENWA_SESSION_ID).
+              </p>
+            </div>
+            <div>
+              <button
+                type="button"
+                :disabled="openwaStatusLoading"
+                class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                @click="checkOpenwaSession"
+              >
+                {{ openwaStatusLoading ? 'Vérification…' : 'Tester la session' }}
+              </button>
+              <div
+                v-if="openwaStatusMessage"
+                class="mt-3 rounded-lg p-3 text-sm"
+                :class="openwaStatusOk ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'"
+              >
+                {{ openwaStatusMessage }}
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Other Settings -->
         <div v-if="isStaff" class="p-3 sm:p-4 md:p-6">
           <h2 class="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-2 sm:mb-3 md:mb-4">Autres paramètres</h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Seuls les agents peuvent partager</label>
+              <p class="text-xs text-gray-500 mb-2">
+                Coché = parrainage réservé aux agents. Décoché = tous les utilisateurs voient leur code et lien.
+              </p>
               <div class="mt-1">
                 <label class="inline-flex items-center">
                   <input 
@@ -497,6 +543,7 @@ import { ref, onMounted, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useSettingsStore } from '../stores/settings'
 import { useAuthStore } from '../stores/auth'
+import { fetchWithAuth } from '../stores/fetchwithtoken'
 import MessageListEditor from '../components/settings/MessageListEditor.vue'
 import ImageUploader from '../components/settings/ImageUploader.vue'
 
@@ -505,6 +552,9 @@ const authStore = useAuthStore()
 const { settings, loading, error } = storeToRefs(settingsStore)
 const { fetchSettings, updateSettings } = settingsStore
 const successMessage = ref<string | null>(null)
+const openwaStatusLoading = ref(false)
+const openwaStatusMessage = ref<string | null>(null)
+const openwaStatusOk = ref(false)
 
 // Vérifier si l'utilisateur est admin (staff) ou service client
 const isStaff = computed(() => authStore.user?.is_staff === true)
@@ -528,6 +578,38 @@ const handleSubmit = async () => {
     } catch (err) {
       console.error('Erreur lors de la soumission:', err)
     }
+  }
+}
+
+const checkOpenwaSession = async () => {
+  openwaStatusLoading.value = true
+  openwaStatusMessage.value = null
+  openwaStatusOk.value = false
+  try {
+    const response = await fetchWithAuth('/box/openwa/session-status')
+    const data = await response.json()
+    if (data.ok) {
+      openwaStatusOk.value = true
+      const statusText =
+        typeof data.status === 'object'
+          ? JSON.stringify(data.status)
+          : String(data.status ?? 'connectée')
+      openwaStatusMessage.value = `Session active (${data.session_id}) — ${statusText}`
+    } else {
+      openwaStatusMessage.value =
+        data.error === 'whatsapp_service_not_configured'
+          ? 'OpenWA non configuré (clé API ou session manquante).'
+          : data.error === 'openwa_session_id_not_configured'
+            ? 'Aucun ID de session — renseignez-le ci-dessus ou dans .env.'
+            : data.error === 'whatsapp_service_timeout'
+              ? 'OpenWA ne répond pas (timeout). Vérifiez la session sur wa.babilonbg.net.'
+              : `Erreur : ${data.error || 'inconnue'}`
+    }
+  } catch (err) {
+    openwaStatusMessage.value = 'Impossible de contacter le serveur.'
+    console.error('checkOpenwaSession:', err)
+  } finally {
+    openwaStatusLoading.value = false
   }
 }
 

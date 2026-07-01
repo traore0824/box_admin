@@ -58,6 +58,7 @@ export interface Setting {
   dowload_android_apk: string | null
   dowload_ios_apk: string | null
   dowload_apk_link: string | null
+  openwa_session_id: string
 }
 
 export const useSettingsStore = defineStore('settings', () => {
@@ -125,6 +126,7 @@ export const useSettingsStore = defineStore('settings', () => {
       dowload_android_apk: data.dowload_android_apk || null,
       dowload_ios_apk: data.dowload_ios_apk || null,
       dowload_apk_link: data.dowload_apk_link || null,
+      openwa_session_id: data.openwa_session_id || '',
     }
   }
 
