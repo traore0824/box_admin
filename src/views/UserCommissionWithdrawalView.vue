@@ -42,6 +42,9 @@
               <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Utilisateur
               </th>
+              <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+                Réseau / Tél.
+              </th>
               <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Montant
               </th>
@@ -66,6 +69,10 @@
                   <p class="text-xs sm:text-sm font-medium text-gray-900">Utilisateur #{{ withdrawal.user }}</p>
                   <p class="text-xs sm:text-sm text-gray-500">{{ withdrawal.user_email }}</p>
                 </div>
+              </td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 hidden lg:table-cell">
+                <p>{{ withdrawal.payment_mode || '-' }}</p>
+                <p class="text-gray-400">{{ withdrawal.phone || '-' }}</p>
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold text-green-600">
                 {{ formatCurrency(parseFloat(withdrawal.amount)) }}

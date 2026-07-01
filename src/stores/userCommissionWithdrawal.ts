@@ -7,6 +7,8 @@ interface UserCommissionWithdrawal {
   id: number
   user: number
   user_email: string
+  payment_mode?: string
+  phone?: string
   amount: string
   status: 'pending' | 'completed' | 'rejected' | 'cancelled'
   notes: string | null

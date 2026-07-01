@@ -10,6 +10,8 @@ interface UserBonusWithdrawal {
   withdraw_types: string[]
   status: 'pending' | 'completed' | 'rejected' | 'cancelled'
   total_money: string
+  payment_mode?: string
+  phone?: string
   object_count: number
   voucher_count: number
   items_count: number
