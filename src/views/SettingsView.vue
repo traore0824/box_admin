@@ -207,8 +207,7 @@
             Vérification WhatsApp (OpenWA)
           </h2>
           <p class="text-xs text-gray-500 mb-4">
-            Session utilisée pour vérifier les numéros WhatsApp et envoyer les rappels.
-            La clé API reste configurée sur le serveur (.env).
+            ID de session OpenWA pour la vérification WhatsApp. La clé API reste sur le serveur (.env).
           </p>
           <div class="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6">
             <div>
@@ -217,11 +216,11 @@
                 v-model="settings.openwa_session_id"
                 type="text"
                 maxlength="120"
-                placeholder="ex. 55bf6c84-5e22-4b47-806a-cf99b26ff5b8"
+                placeholder="ex. ee3c4a0f-01ed-491b-a02a-5143e8dfde83"
                 class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
               />
               <p class="text-xs text-gray-500 mt-1">
-                Laisser vide pour utiliser la valeur par défaut du serveur (OPENWA_SESSION_ID).
+                Copier depuis wa-admin.babilonbg.net → Sessions → Détails. Laisser vide pour utiliser OPENWA_SESSION_ID (.env).
               </p>
             </div>
             <div>
@@ -590,17 +589,23 @@ const checkOpenwaSession = async () => {
     const data = await response.json()
     if (data.ok) {
       openwaStatusOk.value = true
-      const statusText =
-        typeof data.status === 'object'
-          ? JSON.stringify(data.status)
-          : String(data.status ?? 'connectée')
-      openwaStatusMessage.value = `Session active (${data.session_id}) — ${statusText}`
+      const st = data.status
+      if (st && typeof st === 'object' && st.status) {
+        openwaStatusMessage.value =
+          `Session OK — statut: ${st.status}` +
+          (st.phone ? `, numéro: ${st.phone}` : '') +
+          (st.pushName ? ` (${st.pushName})` : '')
+      } else {
+        openwaStatusMessage.value = `Session active (${data.session_id})`
+      }
     } else {
       openwaStatusMessage.value =
         data.error === 'whatsapp_service_not_configured'
           ? 'OpenWA non configuré (clé API ou session manquante).'
           : data.error === 'openwa_session_id_not_configured'
             ? 'Aucun ID de session — renseignez-le ci-dessus ou dans .env.'
+            : data.error === 'openwa_session_not_found' || data.http_status === 404
+            ? `Session introuvable sur OpenWA (${data.session_id}). Copiez l'ID de la session active depuis wa.babilonbg.net, mettez-le dans ce champ, enregistrez, puis retestez.`
             : data.error === 'whatsapp_service_timeout'
               ? 'OpenWA ne répond pas (timeout). Vérifiez la session sur wa.babilonbg.net.'
               : `Erreur : ${data.error || 'inconnue'}`
