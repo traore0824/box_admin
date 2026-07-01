@@ -222,6 +222,9 @@
               <p class="text-xs text-gray-500 mt-1">
                 Copier depuis wa-admin.babilonbg.net → Sessions → Détails. Laisser vide pour utiliser OPENWA_SESSION_ID (.env).
               </p>
+              <p class="text-xs text-amber-700 mt-1">
+                « Tester la session » vérifie l'ID saisi ci-dessus. Pensez à Enregistrer pour l'appliquer en production.
+              </p>
             </div>
             <div>
               <button
@@ -585,27 +588,33 @@ const checkOpenwaSession = async () => {
   openwaStatusMessage.value = null
   openwaStatusOk.value = false
   try {
-    const response = await fetchWithAuth('/box/openwa/session-status')
+    const sessionId = settings.value?.openwa_session_id?.trim() || ''
+    const query = sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : ''
+    const response = await fetchWithAuth(`/box/openwa/session-status${query}`)
     const data = await response.json()
     if (data.ok) {
       openwaStatusOk.value = true
       const st = data.status
+      const saveHint = data.tested_from_form
+        ? ' — Enregistrez les paramètres pour activer en production.'
+        : ''
       if (st && typeof st === 'object' && st.status) {
         openwaStatusMessage.value =
           `Session OK — statut: ${st.status}` +
           (st.phone ? `, numéro: ${st.phone}` : '') +
-          (st.pushName ? ` (${st.pushName})` : '')
+          (st.pushName ? ` (${st.pushName})` : '') +
+          saveHint
       } else {
-        openwaStatusMessage.value = `Session active (${data.session_id})`
+        openwaStatusMessage.value = `Session active (${data.session_id})${saveHint}`
       }
     } else {
       openwaStatusMessage.value =
         data.error === 'whatsapp_service_not_configured'
-          ? 'OpenWA non configuré (clé API ou session manquante).'
+          ? 'OpenWA non configuré (clé API manquante sur le serveur .env).'
           : data.error === 'openwa_session_id_not_configured'
-            ? 'Aucun ID de session — renseignez-le ci-dessus ou dans .env.'
+            ? 'Aucun ID de session — saisissez-le ci-dessus ou configurez OPENWA_SESSION_ID (.env).'
             : data.error === 'openwa_session_not_found' || data.http_status === 404
-            ? `Session introuvable sur OpenWA (${data.session_id}). Copiez l'ID de la session active depuis wa.babilonbg.net, mettez-le dans ce champ, enregistrez, puis retestez.`
+            ? `Session introuvable sur OpenWA (${data.session_id}). Vérifiez l'ID copié depuis wa-admin.babilonbg.net.`
             : data.error === 'whatsapp_service_timeout'
               ? 'OpenWA ne répond pas (timeout). Vérifiez la session sur wa.babilonbg.net.'
               : `Erreur : ${data.error || 'inconnue'}`
