@@ -17,6 +17,7 @@ import SendNotificationView from '../views/SendNotificationView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import ContactBoxView from '../views/ContactBoxView.vue'
 import UserCommissionWithdrawalView from '../views/UserCommissionWithdrawalView.vue'
+import UserBonusWithdrawalView from '../views/UserBonusWithdrawalView.vue'
 import WithdrawalTransactionsView from '../views/WithdrawalTransactionsView.vue'
 import UserProfileView from '../views/UserProfileView.vue'
 import TransactionDetailsView from '../views/TransactionDetailsView.vue'
@@ -144,6 +145,12 @@ const routes = [
     path: '/user-commission-withdrawals',
     name: 'user-commission-withdrawals',
     component: UserCommissionWithdrawalView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/user-bonus-withdrawals',
+    name: 'user-bonus-withdrawals',
+    component: UserBonusWithdrawalView,
     meta: { requiresAuth: true }
   },
   {

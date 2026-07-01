@@ -54,6 +54,11 @@ export const menuItems: MenuItem[] = [
     icon: 'fas fa-hand-holding-usd'
   },
   {
+    path: '/user-bonus-withdrawals',
+    name: 'Retraits bonus utilisateur',
+    icon: 'fas fa-money-check-alt'
+  },
+  {
     path: '/wallets',
     name: 'Wallets',
     icon: 'fas fa-wallet',
