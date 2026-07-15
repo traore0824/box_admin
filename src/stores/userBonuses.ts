@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 
 export interface UserBonusItem {
   id: number
@@ -38,8 +38,9 @@ export const useUserBonusesStore = defineStore('userBonuses', () => {
 
   async function fetchMeta() {
     const res = await fetchWithAuth('/box/admin/bonuses/meta')
-    if (!res.ok) throw new Error('Erreur chargement meta bonus')
-    const data = await res.json()
+    const data = await handleApiResponse<{
+      data?: { bonus_types?: BonusMetaOption[]; reason_codes?: BonusMetaOption[] }
+    }>(res, 'Erreur chargement meta bonus')
     bonusTypes.value = data.data?.bonus_types ?? []
     reasonCodes.value = data.data?.reason_codes ?? []
   }
@@ -63,8 +64,10 @@ export const useUserBonusesStore = defineStore('userBonuses', () => {
       if (type) queryParams.type = type
 
       const res = await fetchWithAuth('/box/admin/bonuses', { queryParams })
-      if (!res.ok) throw new Error('Erreur chargement bonus')
-      const data = await res.json()
+      const data = await handleApiResponse<{
+        data?: UserBonusItem[]
+        pagination?: typeof pagination.value
+      }>(res, 'Erreur chargement bonus')
       items.value = data.data ?? []
       pagination.value = data.pagination ?? pagination.value
       currentPage.value = pagination.value.page
@@ -81,11 +84,11 @@ export const useUserBonusesStore = defineStore('userBonuses', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
-      const data = await res.json()
-      if (!res.ok) {
-        throw new Error(data?.message || data?.detail || 'Erreur attribution bonus')
-      }
-      return data.data as UserBonusItem[]
+      const data = await handleApiResponse<{ data: UserBonusItem[] }>(
+        res,
+        'Erreur attribution bonus'
+      )
+      return data.data
     } finally {
       granting.value = false
     }

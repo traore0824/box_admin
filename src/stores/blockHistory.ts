@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 
 interface PerformedBy {
   id: number
@@ -44,11 +44,10 @@ export const useBlockHistoryStore = defineStore('blockHistory', () => {
         queryParams: { user_id: userId, page, page_size: pageSize }
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération de l\'historique')
-      }
-
-      const data: BlockHistoryResponse = await response.json()
+      const data = await handleApiResponse<BlockHistoryResponse>(
+        response,
+        'Erreur lors de la récupération de l\'historique'
+      )
       history.value = data.results
       count.value = data.count
       currentPage.value = page

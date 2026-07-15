@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchWithAuth } from '../stores/fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 import { NOTIFICATION_API } from '../config/notification'
 
 interface Notification {
@@ -93,13 +93,10 @@ export const useNotificationStore = defineStore('notification', () => {
         body: JSON.stringify(payload)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || errorData.message || 'Erreur lors de l\'envoi de la notification')
-      }
-
-      const result = await response.json()
-      return result
+      return await handleApiResponse(
+        response,
+        'Erreur lors de l\'envoi de la notification'
+      )
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erreur lors de l\'envoi de la notification'
       throw err
@@ -129,13 +126,7 @@ export const useNotificationStore = defineStore('notification', () => {
         body: JSON.stringify(data)
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        throw new Error(data.detail || data.message || 'Erreur lors de l\'envoi de l\'email')
-      }
-
-      const result = await response.json()
-      return result
+      return await handleApiResponse(response, 'Erreur lors de l\'envoi de l\'email')
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erreur lors de l\'envoi de l\'email'
       throw err
@@ -155,12 +146,10 @@ export const useNotificationStore = defineStore('notification', () => {
         }
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Erreur lors de la récupération des notifications')
-      }
-
-      const data: NotificationResponse = await response.json()
+      const data = await handleApiResponse<NotificationResponse>(
+        response,
+        'Erreur lors de la récupération des notifications'
+      )
       notifications.value = data.results
       currentPage.value = page
       return data
@@ -195,13 +184,10 @@ export const useNotificationStore = defineStore('notification', () => {
         body: JSON.stringify(data)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || errorData.message || 'Erreur lors de l\'envoi de l\'email marketing')
-      }
-
-      const result = await response.json()
-      return result
+      return await handleApiResponse(
+        response,
+        'Erreur lors de l\'envoi de l\'email marketing'
+      )
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erreur lors de l\'envoi de l\'email marketing'
       throw err

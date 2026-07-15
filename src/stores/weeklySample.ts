@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 import { useNotification } from '../services/notification'
 
 interface GeneratedBy {
@@ -64,8 +64,10 @@ export const useWeeklySampleStore = defineStore('weeklySample', () => {
       isLoading.value = true
       error.value = null
       const response = await fetchWithAuth('/box/marketing/weekly-sample/current')
-      if (!response.ok) throw new Error('Erreur lors du chargement de la sélection')
-      current.value = await response.json()
+      current.value = await handleApiResponse<WeeklySample>(
+        response,
+        'Erreur lors du chargement de la sélection'
+      )
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
     } finally {
@@ -79,8 +81,10 @@ export const useWeeklySampleStore = defineStore('weeklySample', () => {
       error.value = null
       const notification = useNotification()
       const response = await fetchWithAuth('/box/marketing/weekly-sample/generate', { method: 'POST' })
-      if (!response.ok) throw new Error('Erreur lors de la génération')
-      const data = await response.json()
+      const data = await handleApiResponse<WeeklySample & { skipped?: boolean; week?: number }>(
+        response,
+        'Erreur lors de la génération'
+      )
       if (data.skipped) {
         notification.addNotification(`Sélection déjà générée pour la semaine ${data.week}`, 'info')
       } else {
@@ -103,8 +107,10 @@ export const useWeeklySampleStore = defineStore('weeklySample', () => {
       isLoading.value = true
       error.value = null
       const response = await fetchWithAuth('/box/marketing/weekly-sample/history')
-      if (!response.ok) throw new Error('Erreur lors du chargement de l\'historique')
-      history.value = await response.json()
+      history.value = await handleApiResponse<WeeklySample[]>(
+        response,
+        'Erreur lors du chargement de l\'historique'
+      )
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
     } finally {
@@ -119,8 +125,10 @@ export const useWeeklySampleStore = defineStore('weeklySample', () => {
         method: 'PATCH',
         body: { notes }
       })
-      if (!response.ok) throw new Error('Erreur lors de la mise à jour')
-      const updated = await response.json()
+      const updated = await handleApiResponse<SampleEntry>(
+        response,
+        'Erreur lors de la mise à jour'
+      )
       notification.addNotification('Utilisateur marqué comme appelé', 'success')
 
       // Mettre à jour dans current

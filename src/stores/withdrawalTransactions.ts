@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
 import { Transaction } from '../types/transaction'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 import { useNotification } from '../services/notification'
 
 export const useWithdrawalTransactionsStore = defineStore('withdrawalTransactions', () => {
@@ -44,9 +44,10 @@ export const useWithdrawalTransactionsStore = defineStore('withdrawalTransaction
         queryParams: buildQueryParams(page)
       })
 
-      if (!response.ok) throw new Error('Erreur récupération transactions')
-
-      const data = await response.json()
+      const data = await handleApiResponse<{ results: Transaction[]; count: number }>(
+        response,
+        'Erreur récupération transactions'
+      )
       transactions.value = data.results
       totalTransactions.value = data.count
       currentPage.value = page
@@ -109,12 +110,10 @@ export const useWithdrawalTransactionsStore = defineStore('withdrawalTransaction
         body: JSON.stringify({ transaction_id: transactionId })
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.message || 'Erreur lors de la mise à jour du statut')
-      }
-
-      const result = await response.json()
+      const result = await handleApiResponse(
+        response,
+        'Erreur lors de la mise à jour du statut'
+      )
 
       // Rafraîchir la liste des transactions
       await fetchTransactions(currentPage.value)
@@ -148,13 +147,7 @@ export const useWithdrawalTransactionsStore = defineStore('withdrawalTransaction
         body: JSON.stringify({ transaction_id: transactionId })
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.message || 'Erreur lors de la validation')
-      }
-
-      const result = await response.json()
-      return result
+      return await handleApiResponse(response, 'Erreur lors de la validation')
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
       console.error('Error validating withdrawal:', err)
@@ -183,13 +176,10 @@ export const useWithdrawalTransactionsStore = defineStore('withdrawalTransaction
         body: JSON.stringify({ transaction_id: transactionId })
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        const errorMessage = data.message || data.detail || 'Erreur lors de l\'approbation de la transaction'
-        throw new Error(errorMessage)
-      }
-
-      const result = await response.json()
+      const result = await handleApiResponse<{ success?: boolean; message?: string }>(
+        response,
+        'Erreur lors de l\'approbation de la transaction'
+      )
       const notification = useNotification()
 
       if (result.success) {
@@ -226,14 +216,10 @@ export const useWithdrawalTransactionsStore = defineStore('withdrawalTransaction
         body: JSON.stringify({ transaction_id: transactionId })
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        const errorMessage = data.message || data.detail || 'Erreur lors de la vérification du statut Feexpay'
-        throw new Error(errorMessage)
-      }
-
-      const result = await response.json()
-      return result
+      return await handleApiResponse(
+        response,
+        'Erreur lors de la vérification du statut Feexpay'
+      )
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Une erreur est survenue lors de la vérification'
       console.error('Erreur lors de la vérification du statut Feexpay:', err)

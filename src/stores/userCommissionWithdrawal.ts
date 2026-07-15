@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 import { useNotification } from '../services/notification'
 
 interface UserCommissionWithdrawal {
@@ -47,11 +47,10 @@ export const useUserCommissionWithdrawalStore = defineStore('userCommissionWithd
         queryParams: params
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des demandes de retrait')
-      }
-
-      const data = await response.json()
+      const data = await handleApiResponse<{ results: UserCommissionWithdrawal[]; count: number }>(
+        response,
+        'Erreur lors de la récupération des demandes de retrait'
+      )
       withdrawals.value = data.results
       totalWithdrawals.value = data.count
       currentPage.value = page
@@ -75,11 +74,10 @@ export const useUserCommissionWithdrawalStore = defineStore('userCommissionWithd
         method: 'GET'
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des détails')
-      }
-
-      return await response.json()
+      return await handleApiResponse(
+        response,
+        'Erreur lors de la récupération des détails'
+      )
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
       console.error('Error fetching withdrawal details:', err)
@@ -106,12 +104,10 @@ export const useUserCommissionWithdrawalStore = defineStore('userCommissionWithd
         body
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.detail || data.message || 'Erreur lors du traitement de la demande')
-      }
-
-      const result = await response.json()
+      const result = await handleApiResponse(
+        response,
+        'Erreur lors du traitement de la demande'
+      )
       const notification = useNotification()
       
       if (status === 'completed') {

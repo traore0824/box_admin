@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 
 interface WalletTransaction {
   id: number
@@ -106,11 +106,10 @@ export const useWalletsStore = defineStore('wallets', () => {
         queryParams: params
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des transactions wallet')
-      }
-
-      const data: WalletTransactionsResponse = await response.json()
+      const data = await handleApiResponse<WalletTransactionsResponse>(
+        response,
+        'Erreur lors de la récupération des transactions wallet'
+      )
       transactions.value = data.data
       summary.value = data.summary
       if (data.user) selectedUser.value = data.user
@@ -147,11 +146,10 @@ export const useWalletsStore = defineStore('wallets', () => {
         queryParams: params
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération de la liste des wallets')
-      }
-
-      const data = await response.json()
+      const data = await handleApiResponse<Wallet[] | { results?: Wallet[]; count?: number }>(
+        response,
+        'Erreur lors de la récupération de la liste des wallets'
+      )
       
       // Log pour debug (uniquement en dev)
       if (import.meta.env.DEV) {

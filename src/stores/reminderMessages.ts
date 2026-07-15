@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { ApiRequestError } from '../utils/apiError'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 import { useNotification } from '../services/notification'
 
 export interface ReminderMessage {
@@ -59,11 +60,10 @@ export const useReminderMessagesStore = defineStore('reminderMessages', () => {
         queryParams: buildQueryParams(page)
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des messages de rappel')
-      }
-
-      const data: ReminderMessageResponse = await response.json()
+      const data = await handleApiResponse<ReminderMessageResponse>(
+        response,
+        'Erreur lors de la récupération des messages de rappel'
+      )
       messages.value = data.results
       totalMessages.value = data.count
       currentPage.value = page
@@ -83,15 +83,17 @@ export const useReminderMessagesStore = defineStore('reminderMessages', () => {
 
       const response = await fetchWithAuth(`/box/marketing/reminder-messages/${id}`)
 
-      if (!response.ok) {
-        if (response.status === 404) {
+      try {
+        return await handleApiResponse<ReminderMessage>(
+          response,
+          'Erreur lors de la récupération du message de rappel'
+        )
+      } catch (err) {
+        if (err instanceof ApiRequestError && err.status === 404) {
           throw new Error('Message de rappel non trouvé')
         }
-        throw new Error('Erreur lors de la récupération du message de rappel')
+        throw err
       }
-
-      const data: ReminderMessage = await response.json()
-      return data
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
       console.error('Error fetching reminder message:', err)
@@ -127,13 +129,10 @@ export const useReminderMessagesStore = defineStore('reminderMessages', () => {
         })
       })
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        const errorMessage = errorData.detail || errorData.message || 'Erreur lors de la création du message de rappel'
-        throw new Error(errorMessage)
-      }
-
-      const result: ReminderMessage = await response.json()
+      const result = await handleApiResponse<ReminderMessage>(
+        response,
+        'Erreur lors de la création du message de rappel'
+      )
       notification.addNotification('Message de rappel créé avec succès', 'success')
       await fetchMessages(currentPage.value)
       return result
@@ -170,13 +169,10 @@ export const useReminderMessagesStore = defineStore('reminderMessages', () => {
         body: JSON.stringify(data)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        const errorMessage = errorData.detail || errorData.message || 'Erreur lors de la mise à jour du message de rappel'
-        throw new Error(errorMessage)
-      }
-
-      const result: ReminderMessage = await response.json()
+      const result = await handleApiResponse<ReminderMessage>(
+        response,
+        'Erreur lors de la mise à jour du message de rappel'
+      )
       notification.addNotification('Message de rappel mis à jour avec succès', 'success')
       await fetchMessages(currentPage.value)
       return result
@@ -199,11 +195,13 @@ export const useReminderMessagesStore = defineStore('reminderMessages', () => {
         method: 'DELETE'
       })
 
-      if (!response.ok) {
-        if (response.status === 404) {
+      try {
+        await handleApiResponse(response, 'Erreur lors de la suppression du message de rappel')
+      } catch (err) {
+        if (err instanceof ApiRequestError && err.status === 404) {
           throw new Error('Message de rappel non trouvé')
         }
-        throw new Error('Erreur lors de la suppression du message de rappel')
+        throw err
       }
 
       notification.addNotification('Message de rappel supprimé avec succès', 'success')

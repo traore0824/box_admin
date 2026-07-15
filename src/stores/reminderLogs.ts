@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 import { useNotification } from '../services/notification'
 
 export interface ReminderLog {
@@ -80,11 +80,10 @@ export const useReminderLogsStore = defineStore('reminderLogs', () => {
         queryParams: buildQueryParams(page)
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des logs de rappel')
-      }
-
-      const data: ReminderLogResponse = await response.json()
+      const data = await handleApiResponse<ReminderLogResponse>(
+        response,
+        'Erreur lors de la récupération des logs de rappel'
+      )
       logs.value = data.results
       totalLogs.value = data.count
       currentPage.value = page
@@ -116,13 +115,10 @@ export const useReminderLogsStore = defineStore('reminderLogs', () => {
         body: JSON.stringify(data)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        const errorMessage = errorData.detail || errorData.message || 'Erreur lors de la mise à jour du log'
-        throw new Error(errorMessage)
-      }
-
-      const result: ReminderLog = await response.json()
+      const result = await handleApiResponse<ReminderLog>(
+        response,
+        'Erreur lors de la mise à jour du log'
+      )
       notification.addNotification('Log de rappel mis à jour avec succès', 'success')
       await fetchLogs(currentPage.value)
       return result

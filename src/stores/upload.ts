@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 import { useNotification } from '../services/notification'
 
 interface UploadResponse {
@@ -46,12 +46,10 @@ export const useUploadStore = defineStore('upload', () => {
         // Note: Ne pas mettre Content-Type, le navigateur le fait automatiquement pour FormData
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.detail || data.message || 'Erreur lors de l\'upload du fichier')
-      }
-
-      const result: UploadResponse = await response.json()
+      const result = await handleApiResponse<UploadResponse>(
+        response,
+        'Erreur lors de l\'upload du fichier'
+      )
       const url = type === 'image' ? result.image : result.file
 
       if (!url) {

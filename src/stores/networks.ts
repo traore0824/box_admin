@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 import { useNotification } from '../services/notification'
 
 interface Network {
@@ -40,11 +40,10 @@ export const useNetworksStore = defineStore('networks', () => {
         queryParams: params
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des réseaux')
-      }
-
-      networks.value = await response.json()
+      networks.value = await handleApiResponse<Network[]>(
+        response,
+        'Erreur lors de la récupération des réseaux'
+      )
       isActiveFilter.value = isActive ?? null
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
@@ -66,12 +65,10 @@ export const useNetworksStore = defineStore('networks', () => {
         body: networkData
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.detail || data.message || 'Erreur lors de la création du réseau')
-      }
-
-      const result = await response.json()
+      const result = await handleApiResponse(
+        response,
+        'Erreur lors de la création du réseau'
+      )
       const notification = useNotification()
       notification.addNotification('Réseau créé avec succès', 'success')
 
@@ -100,12 +97,10 @@ export const useNetworksStore = defineStore('networks', () => {
         body: networkData
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.detail || data.message || 'Erreur lors de la mise à jour du réseau')
-      }
-
-      const result = await response.json()
+      const result = await handleApiResponse(
+        response,
+        'Erreur lors de la mise à jour du réseau'
+      )
       const notification = useNotification()
       notification.addNotification('Réseau mis à jour avec succès', 'success')
 
@@ -133,10 +128,7 @@ export const useNetworksStore = defineStore('networks', () => {
         method: 'DELETE'
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.detail || data.message || 'Erreur lors de la suppression du réseau')
-      }
+      await handleApiResponse(response, 'Erreur lors de la suppression du réseau')
 
       const notification = useNotification()
       notification.addNotification('Réseau supprimé avec succès', 'success')

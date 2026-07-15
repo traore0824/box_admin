@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
 import { Transaction } from '../types/transaction'
 // import { useAuthStore } from './auth' // Non utilisé pour l'instant
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 import { useNotification } from '../services/notification'
 
 export const useTransactionsStore = defineStore('transactions', () => {
@@ -51,9 +51,10 @@ export const useTransactionsStore = defineStore('transactions', () => {
         queryParams: buildQueryParams(page)
       })
 
-      if (!response.ok) throw new Error('Erreur récupération transactions')
-
-      const data = await response.json()
+      const data = await handleApiResponse<{ results: Transaction[]; count: number }>(
+        response,
+        'Erreur récupération transactions'
+      )
       transactions.value = data.results
       totalTransactions.value = data.count
       currentPage.value = page
@@ -122,13 +123,11 @@ export const useTransactionsStore = defineStore('transactions', () => {
         body: JSON.stringify({ transaction_id: transactionId })
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.message || 'Erreur lors de la mise à jour du statut')
-      }
+      const result = await handleApiResponse(
+        response,
+        'Erreur lors de la mise à jour du statut'
+      )
 
-      const result = await response.json()
-      
       // Rafraîchir la liste des transactions
       await fetchTransactions(currentPage.value)
       
@@ -161,13 +160,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
         body: JSON.stringify({ transaction_id: transactionId })
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.message || 'Erreur lors de la validation')
-      }
-
-      const result = await response.json()
-      return result
+      return await handleApiResponse(response, 'Erreur lors de la validation')
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
       console.error('Error validating withdrawal:', err)
@@ -196,13 +189,10 @@ export const useTransactionsStore = defineStore('transactions', () => {
         body: JSON.stringify({ transaction_id: transactionId })
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        const errorMessage = data.message || data.detail || 'Erreur lors de l\'approbation de la transaction'
-        throw new Error(errorMessage)
-      }
-
-      const result = await response.json()
+      const result = await handleApiResponse<{ success?: boolean; message?: string }>(
+        response,
+        'Erreur lors de l\'approbation de la transaction'
+      )
       const notification = useNotification()
       
       if (result.success) {
@@ -242,10 +232,10 @@ export const useTransactionsStore = defineStore('transactions', () => {
         })
       })
 
-      const data = await response.json()
-      if (!response.ok) {
-        throw new Error(data.message || 'Erreur lors de la mise à jour de la référence')
-      }
+      const data = await handleApiResponse(
+        response,
+        'Erreur lors de la mise à jour de la référence'
+      )
 
       await fetchTransactions(currentPage.value)
       return data
@@ -272,14 +262,10 @@ export const useTransactionsStore = defineStore('transactions', () => {
         body: JSON.stringify({ transaction_id: transactionId })
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        const errorMessage = data.message || data.detail || 'Erreur lors de la vérification du statut Feexpay'
-        throw new Error(errorMessage)
-      }
-
-      const result = await response.json()
-      return result
+      return await handleApiResponse(
+        response,
+        'Erreur lors de la vérification du statut Feexpay'
+      )
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Une erreur est survenue lors de la vérification'
       console.error('Erreur lors de la vérification du statut Feexpay:', err)

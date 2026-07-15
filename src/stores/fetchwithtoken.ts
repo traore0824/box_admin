@@ -99,6 +99,26 @@ export async function fetchWithAuth(
   return response
 }
 
+export {
+  ApiRequestError,
+  handleApiResponse,
+  parseApiErrorBody,
+  parseResponseJson,
+  readApiError,
+} from '../utils/apiError'
+
+/**
+ * Requête authentifiée + parse JSON + erreur backend affichée telle quelle.
+ */
+export async function fetchJsonWithAuth<T = unknown>(
+  endpoint: string,
+  options: FetchWithAuthOptions = {},
+  errorFallback = 'Une erreur est survenue'
+): Promise<T> {
+  const response = await fetchWithAuth(endpoint, options)
+  return handleApiResponse<T>(response, errorFallback)
+}
+
 /**
  * Fonction pour refresher le token d'accès
  */

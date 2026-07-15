@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed, readonly } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 
 interface NetworkStats {
   count: number
@@ -193,11 +193,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
         queryParams
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors du chargement des statistiques')
-      }
-
-      const data = await response.json()
+      const data = await handleApiResponse<DashboardStats>(
+        response,
+        'Erreur lors du chargement des statistiques'
+      )
       if (!data.evolution) {
         data.evolution = {
           all_users: 0,
@@ -263,12 +262,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
         method: 'GET'
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors du chargement du solde Feexpay')
-      }
-
-      const data = await response.json()
-      feexpayStats.value = data
+      feexpayStats.value = await handleApiResponse<FeexpayBalance>(
+        response,
+        'Erreur lors du chargement du solde Feexpay'
+      )
     } catch (err) {
       console.error('Erreur API Feexpay:', err)
     }
@@ -280,12 +277,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
         method: 'GET'
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors du chargement de la réconciliation')
-      }
-
-      const data = await response.json()
-      reconciliationStats.value = data
+      reconciliationStats.value = await handleApiResponse<ReconciliationStats>(
+        response,
+        'Erreur lors du chargement de la réconciliation'
+      )
     } catch (err) {
       console.error('Erreur API Réconciliation:', err)
     }

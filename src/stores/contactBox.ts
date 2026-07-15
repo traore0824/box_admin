@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 
 interface ContactMessage {
   id: number
@@ -47,11 +47,10 @@ export const useContactBoxStore = defineStore('contactBox', () => {
         queryParams: params
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des messages')
-      }
-
-      const data: ContactResponse = await response.json()
+      const data = await handleApiResponse<ContactResponse>(
+        response,
+        'Erreur lors de la récupération des messages'
+      )
       messages.value = data.results
       totalMessages.value = data.count
       currentPage.value = page

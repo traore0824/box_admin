@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 
 export interface Publication {
     id: string
@@ -34,11 +34,10 @@ export const usePublicationsStore = defineStore('publications', () => {
                 method: 'GET'
             })
 
-            if (!response.ok) {
-                throw new Error('Erreur lors du chargement des publications')
-            }
-
-            const dataContent = await response.json()
+            const dataContent = await handleApiResponse<Publication[] | { results?: Publication[]; count?: number }>(
+                response,
+                'Erreur lors du chargement des publications'
+            )
             // The documentation says Response (200 OK): [ {...} ] (an array directly)
             // But previous code assumed { results: [...] }. 
             // I'll handle both or stick to the documentation.
@@ -67,9 +66,7 @@ export const usePublicationsStore = defineStore('publications', () => {
                 body: { publication_id: id }
             })
 
-            if (!response.ok) {
-                throw new Error('Erreur lors du marquage comme lu')
-            }
+            await handleApiResponse(response, 'Erreur lors du marquage comme lu')
 
             // Update local state
             const pub = publications.value.find(p => p.id === id)
@@ -93,12 +90,10 @@ export const usePublicationsStore = defineStore('publications', () => {
                 body: data
             })
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}))
-                throw new Error(errorData.message || 'Erreur lors de la création de la publication')
-            }
-
-            const newPub: Publication = await response.json()
+            const newPub = await handleApiResponse<Publication>(
+                response,
+                'Erreur lors de la création de la publication'
+            )
             publications.value.unshift(newPub)
             return newPub
         } catch (err: any) {
@@ -118,12 +113,10 @@ export const usePublicationsStore = defineStore('publications', () => {
                 body: data
             })
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}))
-                throw new Error(errorData.message || 'Erreur lors de la modification de la publication')
-            }
-
-            const updatedPub: Publication = await response.json()
+            const updatedPub = await handleApiResponse<Publication>(
+                response,
+                'Erreur lors de la modification de la publication'
+            )
             const index = publications.value.findIndex(p => p.id === id)
             if (index !== -1) {
                 publications.value[index] = updatedPub
@@ -145,12 +138,10 @@ export const usePublicationsStore = defineStore('publications', () => {
                 method: 'POST'
             })
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}))
-                throw new Error(errorData.message || 'Erreur lors de la republication')
-            }
-
-            const result = await response.json()
+            const result = await handleApiResponse<{ reads_reset_count: number; data: Publication }>(
+                response,
+                'Erreur lors de la republication'
+            )
             // Mettre à jour localement : replacer la pub et la remonter en tête de liste
             const updatedPub: Publication = result.data
             const index = publications.value.findIndex(p => p.id === id)

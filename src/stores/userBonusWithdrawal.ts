@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 import { useNotification } from '../services/notification'
 
 interface UserBonusWithdrawal {
@@ -50,11 +50,10 @@ export const useUserBonusWithdrawalStore = defineStore('userBonusWithdrawal', ()
         queryParams: params
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des demandes de retrait')
-      }
-
-      const body = await response.json()
+      const body = await handleApiResponse<{
+        data?: UserBonusWithdrawal[]
+        pagination?: { total?: number }
+      }>(response, 'Erreur lors de la récupération des demandes de retrait')
       withdrawals.value = body.data ?? []
       totalWithdrawals.value = body.pagination?.total ?? withdrawals.value.length
       currentPage.value = page
@@ -91,12 +90,10 @@ export const useUserBonusWithdrawalStore = defineStore('userBonusWithdrawal', ()
         }
       )
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(
-          data.detail || data.message || 'Erreur lors du traitement de la demande'
-        )
-      }
+      await handleApiResponse(
+        response,
+        'Erreur lors du traitement de la demande'
+      )
 
       const notification = useNotification()
 

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, onUnmounted } from 'vue'
-import { fetchWithAuth, getUserDetails } from './fetchwithtoken'
+import { ApiRequestError } from '../utils/apiError'
+import { fetchWithAuth, getUserDetails, handleApiResponse } from './fetchwithtoken'
 
 interface User {
   id: number
@@ -117,20 +118,24 @@ export const useAuthStore = defineStore('auth', () => {
         body: JSON.stringify({ email, password })
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        
-        if (response.status === 400) {
-          if (data.message === "INCORRECT_EMAIL_OR_PASSWORD") {
-            throw new Error("Email ou mot de passe incorrect")
-          } else if (data.message === "USER_ACCOUNT_BLOCKED") {
-            throw new Error(data.details || "Votre compte a été bloqué. Veuillez contacter l'équipe Box.")
+      let data: LoginResponse
+      try {
+        data = await handleApiResponse<LoginResponse>(response, 'Erreur de connexion')
+      } catch (err) {
+        if (err instanceof ApiRequestError && err.status === 400) {
+          const body = err.body as Record<string, unknown>
+          if (body.message === 'INCORRECT_EMAIL_OR_PASSWORD') {
+            throw new Error('Email ou mot de passe incorrect')
+          }
+          if (body.message === 'USER_ACCOUNT_BLOCKED') {
+            throw new Error(
+              (body.details as string) ||
+                "Votre compte a été bloqué. Veuillez contacter l'équipe Box."
+            )
           }
         }
-        throw new Error('Erreur de connexion')
+        throw err
       }
-
-      const data: LoginResponse = await response.json()
       setTokens({ access: data.access, refresh: data.refresh })
       
       // Utiliser les données utilisateur de la réponse de login si disponibles
@@ -173,15 +178,22 @@ export const useAuthStore = defineStore('auth', () => {
         body: { code }
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        const messages: Record<string, string> = {
-          CODE_REQUIRED: 'Le code est requis',
-          INVALID_CODE: 'Code incorrect, veuillez réessayer',
-          '2FA_NOT_CONFIGURED': 'Le 2FA n\'est pas configuré sur ce compte',
-          NOT_ADMIN: 'Accès non autorisé'
+      try {
+        await handleApiResponse(response, 'Erreur de vérification')
+      } catch (err) {
+        if (err instanceof ApiRequestError) {
+          const body = err.body as Record<string, unknown>
+          const messages: Record<string, string> = {
+            CODE_REQUIRED: 'Le code est requis',
+            INVALID_CODE: 'Code incorrect, veuillez réessayer',
+            '2FA_NOT_CONFIGURED': 'Le 2FA n\'est pas configuré sur ce compte',
+            NOT_ADMIN: 'Accès non autorisé'
+          }
+          throw new Error(
+            messages[body.code as string] || (body.message as string) || 'Erreur de vérification'
+          )
         }
-        throw new Error(messages[data.code] || data.message || 'Erreur de vérification')
+        throw err
       }
 
       requires2FA.value = false
@@ -231,25 +243,30 @@ export const useAuthStore = defineStore('auth', () => {
         }
       })
 
-      const data = await response.json().catch(() => ({}))
-
-      if (!response.ok) {
-        if (data.INVALID_CURRENT_PASSWORD) {
-          throw new Error('Mot de passe actuel incorrect')
+      try {
+        await handleApiResponse(response, 'Erreur lors du changement de mot de passe')
+      } catch (err) {
+        if (err instanceof ApiRequestError) {
+          const data = err.body as Record<string, unknown>
+          if (data.INVALID_CURRENT_PASSWORD) {
+            throw new Error('Mot de passe actuel incorrect')
+          }
+          if (data.PASSWORD_NO_MATCH) {
+            throw new Error('Les mots de passe ne correspondent pas')
+          }
+          if (data.PASSWORD_NOT_STRONG) {
+            throw new Error(
+              'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre'
+            )
+          }
+          if (data.CANT_USE_PHONE) {
+            throw new Error('Vous ne pouvez pas utiliser votre téléphone comme mot de passe')
+          }
+          if (data.CANT_USE_EMAIL) {
+            throw new Error('Vous ne pouvez pas utiliser votre email comme mot de passe')
+          }
         }
-        if (data.PASSWORD_NO_MATCH) {
-          throw new Error('Les mots de passe ne correspondent pas')
-        }
-        if (data.PASSWORD_NOT_STRONG) {
-          throw new Error('Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre')
-        }
-        if (data.CANT_USE_PHONE) {
-          throw new Error('Vous ne pouvez pas utiliser votre téléphone comme mot de passe')
-        }
-        if (data.CANT_USE_EMAIL) {
-          throw new Error('Vous ne pouvez pas utiliser votre email comme mot de passe')
-        }
-        throw new Error(data.detail || data.message || 'Erreur lors du changement de mot de passe')
+        throw err
       }
 
       clearAuth()
@@ -276,13 +293,7 @@ export const useAuthStore = defineStore('auth', () => {
         body: JSON.stringify({ email })
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        throw new Error(data.detail || data.message || 'Erreur lors de l\'envoi de l\'OTP')
-      }
-
-      const result = await response.json()
-      return result
+      return await handleApiResponse(response, 'Erreur lors de l\'envoi de l\'OTP')
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erreur lors de l\'envoi de l\'OTP'
       throw err

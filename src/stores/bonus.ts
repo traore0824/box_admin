@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 import { useNotification } from '../services/notification'
 
 interface BonusWithdrawal {
@@ -67,11 +67,10 @@ export const useBonusStore = defineStore('bonus', () => {
         queryParams: params
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des demandes de retrait')
-      }
-
-      const data = await response.json()
+      const data = await handleApiResponse<{ results: BonusWithdrawal[]; count: number }>(
+        response,
+        'Erreur lors de la récupération des demandes de retrait'
+      )
       withdrawals.value = data.results
       totalWithdrawals.value = data.count
       currentPage.value = page
@@ -95,11 +94,10 @@ export const useBonusStore = defineStore('bonus', () => {
         method: 'GET'
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des détails')
-      }
-
-      return await response.json()
+      return await handleApiResponse(
+        response,
+        'Erreur lors de la récupération des détails'
+      )
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
       console.error('Error fetching withdrawal details:', err)
@@ -126,12 +124,10 @@ export const useBonusStore = defineStore('bonus', () => {
         body
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.detail || data.message || 'Erreur lors du traitement de la demande')
-      }
-
-      const result = await response.json()
+      const result = await handleApiResponse(
+        response,
+        'Erreur lors du traitement de la demande'
+      )
       const notification = useNotification()
       
       if (status === 'completed') {
@@ -174,11 +170,10 @@ export const useBonusStore = defineStore('bonus', () => {
         queryParams: params
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des attributions de bonus')
-      }
-
-      const data = await response.json()
+      const data = await handleApiResponse<unknown[] | { results?: unknown[]; count?: number }>(
+        response,
+        'Erreur lors de la récupération des attributions de bonus'
+      )
       
       // Gérer différents formats de réponse et mapper les données
       let rawResults: any[] = []

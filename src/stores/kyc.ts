@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 import { useNotification } from '../services/notification'
 
 export interface KYCUser {
@@ -95,11 +95,10 @@ export const useKYCStore = defineStore('kyc', () => {
         queryParams: params
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des demandes KYC')
-      }
-
-      const data: KYCResponse = await response.json()
+      const data = await handleApiResponse<KYCResponse>(
+        response,
+        'Erreur lors de la récupération des demandes KYC'
+      )
       pendingUsers.value = data.results
       totalPending.value = data.count
       currentPage.value = page
@@ -132,12 +131,10 @@ export const useKYCStore = defineStore('kyc', () => {
         body
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        throw new Error(data.detail || data.message || 'Erreur lors de la mise à jour du statut KYC')
-      }
-
-      const result = await response.json()
+      const result = await handleApiResponse(
+        response,
+        'Erreur lors de la mise à jour du statut KYC'
+      )
       const notification = useNotification()
 
       const messages: Record<string, string> = {
@@ -190,12 +187,10 @@ export const useKYCStore = defineStore('kyc', () => {
         body: payload
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        throw new Error(data.detail || data.message || 'Erreur lors de la vérification manuelle')
-      }
-
-      const result = await response.json()
+      const result = await handleApiResponse(
+        response,
+        'Erreur lors de la vérification manuelle'
+      )
       const notification = useNotification()
       notification.addNotification('Utilisateur vérifié manuellement avec succès', 'success')
 

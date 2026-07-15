@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 interface StatisticsState {
   stats: {
     all_users: number
@@ -88,11 +88,10 @@ export const useStatisticsStore = defineStore('statistics', () => {
         queryParams
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des statistiques')
-      }
-
-      const data = await response.json()
+      const data = await handleApiResponse<StatisticsState['stats']>(
+        response,
+        'Erreur lors de la récupération des statistiques'
+      )
       stats.value = data
     } catch (error) {
       console.error('Erreur lors de la récupération des statistiques:', error)

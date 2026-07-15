@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 
 export interface ChallengeAdmin {
   id: number
@@ -70,8 +70,10 @@ export const useChallengesStore = defineStore('challenges', () => {
     error.value = null
     try {
       const res = await fetchWithAuth('/box/admin/challenges')
-      if (!res.ok) throw new Error('Erreur chargement challenges')
-      const data = await res.json()
+      const data = await handleApiResponse<ChallengeAdmin[] | { results?: ChallengeAdmin[] }>(
+        res,
+        'Erreur chargement challenges'
+      )
       challenges.value = Array.isArray(data) ? data : data.results ?? []
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Erreur'
@@ -87,11 +89,7 @@ export const useChallengesStore = defineStore('challenges', () => {
       body: payload,
       headers: { 'Content-Type': 'application/json' },
     })
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}))
-      throw new Error(data.detail || data.message || 'Erreur création')
-    }
-    return res.json()
+    return handleApiResponse(res, 'Erreur création')
   }
 
   async function updateChallenge(id: number, payload: Partial<ChallengeAdmin>) {
@@ -100,30 +98,28 @@ export const useChallengesStore = defineStore('challenges', () => {
       body: payload,
       headers: { 'Content-Type': 'application/json' },
     })
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}))
-      throw new Error(data.detail || data.message || 'Erreur mise à jour')
-    }
-    return res.json()
+    return handleApiResponse(res, 'Erreur mise à jour')
   }
 
   async function deleteChallenge(id: number) {
     const res = await fetchWithAuth(`/box/admin/challenges/${id}`, { method: 'DELETE' })
-    if (!res.ok) throw new Error('Erreur suppression')
+    await handleApiResponse(res, 'Erreur suppression')
   }
 
   async function fetchChallengeSmartLink(id: number, refresh = false) {
     const adminQs = refresh ? '?refresh=1' : ''
     const adminRes = await fetchWithAuth(`/box/admin/challenges/${id}/smart-link${adminQs}`)
     if (adminRes.ok) {
-      const data = await adminRes.json()
+      const data = await handleApiResponse<{ data?: { smart_link?: string } }>(adminRes, 'Erreur génération du lien')
       const link = (data.data?.smart_link as string) || ''
       if (link) return link
     }
 
     const publicRes = await fetchWithAuth(`/box/challenge-link?challenge_id=${id}`)
-    if (!publicRes.ok) throw new Error('Erreur génération du lien')
-    const publicData = await publicRes.json()
+    const publicData = await handleApiResponse<{ smart_link?: string; link?: string }>(
+      publicRes,
+      'Erreur génération du lien'
+    )
     return (publicData.smart_link as string) || (publicData.link as string) || ''
   }
 
@@ -133,12 +129,18 @@ export const useChallengesStore = defineStore('challenges', () => {
       fetchWithAuth('/box/admin/points/levels'),
       fetchWithAuth('/box/admin/points/info'),
     ])
-    if (!actionsRes.ok || !levelsRes.ok || !infoRes.ok) {
-      throw new Error('Erreur chargement config pièces BOX')
-    }
-    const actionsData = await actionsRes.json()
-    const levelsData = await levelsRes.json()
-    const infoData = await infoRes.json()
+    const actionsData = await handleApiResponse<{ data?: PointsAction[] }>(
+      actionsRes,
+      'Erreur chargement config pièces BOX'
+    )
+    const levelsData = await handleApiResponse<{ data?: UserLevel[] }>(
+      levelsRes,
+      'Erreur chargement config pièces BOX'
+    )
+    const infoData = await handleApiResponse<{ data?: PointsInfo }>(
+      infoRes,
+      'Erreur chargement config pièces BOX'
+    )
     pointsActions.value = actionsData.data ?? []
     userLevels.value = levelsData.data ?? []
     pointsInfo.value = infoData.data ?? { info_point: '' }
@@ -150,8 +152,7 @@ export const useChallengesStore = defineStore('challenges', () => {
       body: items as unknown as Record<string, unknown>,
       headers: { 'Content-Type': 'application/json' },
     })
-    if (!res.ok) throw new Error('Erreur sauvegarde actions')
-    return res.json()
+    return handleApiResponse(res, 'Erreur sauvegarde actions')
   }
 
   async function createAction(item: Omit<PointsAction, 'id'>) {
@@ -160,15 +161,16 @@ export const useChallengesStore = defineStore('challenges', () => {
       body: item,
       headers: { 'Content-Type': 'application/json' },
     })
-    if (!res.ok) throw new Error('Erreur création action')
-    const data = await res.json()
+    const data = await handleApiResponse<{ data: PointsAction }>(res, 'Erreur création action')
     pointsActions.value.push(data.data)
     return data.data
   }
 
   async function deleteAction(id: number) {
     const res = await fetchWithAuth(`/box/admin/points/actions/${id}`, { method: 'DELETE' })
-    if (!res.ok && res.status !== 204) throw new Error('Erreur suppression action')
+    if (res.status !== 204) {
+      await handleApiResponse(res, 'Erreur suppression action')
+    }
     pointsActions.value = pointsActions.value.filter(a => a.id !== id)
   }
 
@@ -178,8 +180,7 @@ export const useChallengesStore = defineStore('challenges', () => {
       body: { seed: true },
       headers: { 'Content-Type': 'application/json' },
     })
-    if (!res.ok) throw new Error('Erreur initialisation actions')
-    const data = await res.json()
+    const data = await handleApiResponse<{ data: PointsAction[] }>(res, 'Erreur initialisation actions')
     pointsActions.value = data.data
     return data.data
   }
@@ -190,8 +191,7 @@ export const useChallengesStore = defineStore('challenges', () => {
       body: items as unknown as Record<string, unknown>,
       headers: { 'Content-Type': 'application/json' },
     })
-    if (!res.ok) throw new Error('Erreur sauvegarde niveaux')
-    return res.json()
+    return handleApiResponse(res, 'Erreur sauvegarde niveaux')
   }
 
   async function createLevel(item: Omit<UserLevel, 'id'>) {
@@ -200,15 +200,16 @@ export const useChallengesStore = defineStore('challenges', () => {
       body: item,
       headers: { 'Content-Type': 'application/json' },
     })
-    if (!res.ok) throw new Error('Erreur création niveau')
-    const data = await res.json()
+    const data = await handleApiResponse<{ data: UserLevel }>(res, 'Erreur création niveau')
     userLevels.value.push(data.data)
     return data.data
   }
 
   async function deleteLevel(id: number) {
     const res = await fetchWithAuth(`/box/admin/points/levels/${id}`, { method: 'DELETE' })
-    if (!res.ok && res.status !== 204) throw new Error('Erreur suppression niveau')
+    if (res.status !== 204) {
+      await handleApiResponse(res, 'Erreur suppression niveau')
+    }
     userLevels.value = userLevels.value.filter(l => l.id !== id)
   }
 
@@ -218,8 +219,7 @@ export const useChallengesStore = defineStore('challenges', () => {
       body: { seed: true },
       headers: { 'Content-Type': 'application/json' },
     })
-    if (!res.ok) throw new Error('Erreur initialisation niveaux')
-    const data = await res.json()
+    const data = await handleApiResponse<{ data: UserLevel[] }>(res, 'Erreur initialisation niveaux')
     userLevels.value = data.data
     return data.data
   }
@@ -230,8 +230,7 @@ export const useChallengesStore = defineStore('challenges', () => {
       body: payload as unknown as Record<string, unknown>,
       headers: { 'Content-Type': 'application/json' },
     })
-    if (!res.ok) throw new Error('Erreur sauvegarde info pièces BOX')
-    const data = await res.json()
+    const data = await handleApiResponse<{ data?: PointsInfo }>(res, 'Erreur sauvegarde info pièces BOX')
     pointsInfo.value = data.data ?? payload
     return data
   }

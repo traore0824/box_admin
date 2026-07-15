@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 import { useNotification } from '../services/notification'
 
 interface Commission {
@@ -73,11 +73,10 @@ export const useCommissionsStore = defineStore('commissions', () => {
         method: 'GET'
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération de la commission')
-      }
-
-      const data = await response.json()
+      const data = await handleApiResponse<Commission | Commission[]>(
+        response,
+        'Erreur lors de la récupération de la commission'
+      )
       // Si la réponse est un tableau, prendre le premier élément
       commission.value = Array.isArray(data) ? data[0] : data
       
@@ -125,11 +124,10 @@ export const useCommissionsStore = defineStore('commissions', () => {
         queryParams: params
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des transactions de commission')
-      }
-
-      const data = await response.json()
+      const data = await handleApiResponse<{ results: CommissionTransaction[]; count: number }>(
+        response,
+        'Erreur lors de la récupération des transactions de commission'
+      )
       commissionTransactions.value = data.results
       totalTransactions.value = data.count
       currentPage.value = page
@@ -157,16 +155,10 @@ export const useCommissionsStore = defineStore('commissions', () => {
         }
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        // Gérer les erreurs de validation
-        if (data.amount && Array.isArray(data.amount)) {
-          throw new Error(data.amount[0])
-        }
-        throw new Error(data.detail || data.message || 'Erreur lors du retrait des commissions')
-      }
-
-      const result = await response.json()
+      const result = await handleApiResponse(
+        response,
+        'Erreur lors du retrait des commissions'
+      )
       const notification = useNotification()
       notification.addNotification('Retrait de commissions effectué avec succès', 'success')
       
@@ -206,11 +198,10 @@ export const useCommissionsStore = defineStore('commissions', () => {
         queryParams: params
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des retraits')
-      }
-
-      const data = await response.json()
+      const data = await handleApiResponse<{ results: CommissionWithdrawal[]; count: number }>(
+        response,
+        'Erreur lors de la récupération des retraits'
+      )
       withdrawals.value = data.results
       totalWithdrawals.value = data.count
     } catch (err) {
@@ -232,11 +223,10 @@ export const useCommissionsStore = defineStore('commissions', () => {
         method: 'POST'
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de la réconciliation')
-      }
-
-      const result: ReconcileResponse = await response.json()
+      const result = await handleApiResponse<ReconcileResponse>(
+        response,
+        'Erreur lors de la réconciliation'
+      )
       const notification = useNotification()
       
       if (result.is_consistent) {

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { ApiRequestError } from '../utils/apiError'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 import { useNotification } from '../services/notification'
 
 interface User {
@@ -181,33 +182,25 @@ export const useUsersStore = defineStore('users', () => {
         queryParams
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-
-        if (response.status === 401) {
-          throw new Error('Non autorisé. Veuillez vous reconnecter.')
-        }
-
-        if (data.message?.includes('ERR_NGROK')) {
-          const notification = useNotification()
-          notification.addNotification(
-            'Erreur de connexion au serveur. Veuillez vérifier votre connexion internet et réessayer.',
-            'error'
-          )
-          throw new Error('Erreur de connexion au serveur.')
-        }
-
-        const notification = useNotification()
-        notification.addNotification('Erreur lors de la récupération des utilisateurs', 'error')
-        throw new Error('Erreur lors de la récupération des utilisateurs')
-      }
-
-      const data: UsersResponse = await response.json()
+      const data = await handleApiResponse<UsersResponse>(
+        response,
+        'Erreur lors de la récupération des utilisateurs'
+      )
       users.value = data.results
       totalUsers.value = data.count
       userSegments.value = data.user_segments ?? {}
       currentPage.value = page
     } catch (err) {
+      if (err instanceof ApiRequestError) {
+        const body = err.body as { message?: string } | null
+        if (body?.message?.includes('ERR_NGROK')) {
+          const notification = useNotification()
+          notification.addNotification(
+            'Erreur de connexion au serveur. Veuillez vérifier votre connexion internet et réessayer.',
+            'error'
+          )
+        }
+      }
       error.value = err instanceof Error ? err.message : 'Erreur lors de la récupération des utilisateurs'
       console.error('Error fetching users:', err)
       throw err
@@ -232,13 +225,10 @@ export const useUsersStore = defineStore('users', () => {
         headers: { 'Content-Type': 'application/json' }
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        if (response.status === 401) {
-          throw new Error('Non autorisé. Veuillez vous reconnecter.')
-        }
-        throw new Error(data.detail || data.message || 'Erreur lors du changement de statut de blocage.')
-      }
+      await handleApiResponse(
+        response,
+        'Erreur lors du changement de statut de blocage.'
+      )
 
       const userIndex = users.value.findIndex(u => u.id === userId)
       if (userIndex !== -1) {
@@ -264,15 +254,10 @@ export const useUsersStore = defineStore('users', () => {
         headers: { 'Content-Type': 'application/json' }
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        if (response.status === 401) {
-          throw new Error('Non autorisé. Veuillez vous reconnecter.')
-        }
-        throw new Error(data.detail || data.message || "Erreur lors du changement de statut d'agent.")
-      }
-
-      const data = await response.json()
+      const data = await handleApiResponse<{ agent_client?: boolean }>(
+        response,
+        "Erreur lors du changement de statut d'agent."
+      )
       const userIndex = users.value.findIndex(u => u.id === userId)
       if (userIndex !== -1) {
         users.value[userIndex].agent_client = data.agent_client
@@ -297,15 +282,10 @@ export const useUsersStore = defineStore('users', () => {
         headers: { 'Content-Type': 'application/json' }
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        if (response.status === 401) {
-          throw new Error('Non autorisé. Veuillez vous reconnecter.')
-        }
-        throw new Error(data.detail || data.message || 'Erreur lors de la réinitialisation du PIN.')
-      }
-
-      const result = await response.json()
+      const result = await handleApiResponse(
+        response,
+        'Erreur lors de la réinitialisation du PIN.'
+      )
 
       // Mettre à jour l'utilisateur dans la liste
       const userIndex = users.value.findIndex(u => u.id === userId)
@@ -335,16 +315,10 @@ export const useUsersStore = defineStore('users', () => {
         headers: { 'Content-Type': 'application/json' }
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        if (response.status === 401) {
-          throw new Error('Non autorisé. Veuillez vous reconnecter.')
-        }
-        throw new Error(data.detail || data.message || 'Erreur lors de l\'envoi de l\'OTP.')
-      }
-
-      const result = await response.json()
-      return result
+      return await handleApiResponse(
+        response,
+        "Erreur lors de l'envoi de l'OTP."
+      )
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
       console.error('Error sending PIN verification OTP:', err)
@@ -375,15 +349,10 @@ export const useUsersStore = defineStore('users', () => {
         body
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        if (response.status === 401) {
-          throw new Error('Non autorisé. Veuillez vous reconnecter.')
-        }
-        throw new Error(data.detail || data.message || 'Erreur lors de la mise à jour du statut KYC.')
-      }
-
-      const result = await response.json()
+      const result = await handleApiResponse(
+        response,
+        'Erreur lors de la mise à jour du statut KYC.'
+      )
 
       // Rafraîchir la liste pour avoir les données à jour
       await fetchUsers(currentPage.value)
@@ -414,12 +383,10 @@ export const useUsersStore = defineStore('users', () => {
         headers: { 'Content-Type': 'application/json' }
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        throw new Error(data.detail || data.message || 'Erreur lors de la mise à jour de l\'utilisateur.')
-      }
-
-      return await response.json()
+      return await handleApiResponse(
+        response,
+        "Erreur lors de la mise à jour de l'utilisateur."
+      )
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erreur lors de la mise à jour'
       console.error('Error in adminUpdateUser:', err)
@@ -445,12 +412,10 @@ export const useUsersStore = defineStore('users', () => {
         headers: { 'Content-Type': 'application/json' }
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        throw new Error(data.detail || data.message || 'Erreur lors de la vérification KYC.')
-      }
-
-      return await response.json()
+      return await handleApiResponse(
+        response,
+        'Erreur lors de la vérification KYC.'
+      )
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erreur lors de la vérification KYC'
       console.error('Error in adminKycVerify:', err)
@@ -468,12 +433,10 @@ export const useUsersStore = defineStore('users', () => {
         headers: { 'Content-Type': 'application/json' }
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        throw new Error(data.detail || data.message || 'Erreur lors de l\'activation de l\'utilisateur.')
-      }
-
-      return await response.json()
+      return await handleApiResponse(
+        response,
+        "Erreur lors de l'activation de l'utilisateur."
+      )
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erreur lors de l\'activation'
       console.error('Error in adminActivateUser:', err)

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 
 interface Notification {
   id: number
@@ -60,11 +60,10 @@ export const useNotificationsStore = defineStore('notifications', () => {
         queryParams
       })
 
-      if (!response.ok) {
-        throw new Error('Erreur lors du chargement des notifications')
-      }
-
-      const data: NotificationsResponse = await response.json()
+      const data = await handleApiResponse<NotificationsResponse>(
+        response,
+        'Erreur lors du chargement des notifications'
+      )
 
       notifications.value = data?.results || []
       totalCount.value = data.count

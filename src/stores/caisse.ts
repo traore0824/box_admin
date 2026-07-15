@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 
 export type BalanceHistoryReason = 'deposit' | 'withdrawal' | 'cancellation' | 'adjustment' | 'unknown'
 
@@ -220,12 +220,10 @@ export const useCaisseStore = defineStore('caisse', () => {
         queryParams: buildQueryParams(page)
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.detail || 'Erreur lors de la récupération des caisses')
-      }
-
-      const data: CaisseResponse = await response.json()
+      const data = await handleApiResponse<CaisseResponse>(
+        response,
+        'Erreur lors de la récupération des caisses'
+      )
       caisses.value = data.results
       totalCaisse.value = data.count
       caisseStats.value = data.caisse_stats ?? null
@@ -264,11 +262,7 @@ export const useCaisseStore = defineStore('caisse', () => {
       body: { define_block: defineBlock },
       headers: { 'Content-Type': 'application/json' },
     })
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}))
-      throw new Error(data.message || data.detail || 'Erreur mise à jour du blocage')
-    }
-    return response.json()
+    return handleApiResponse(response, 'Erreur mise à jour du blocage')
   }
 
   async function createAdminWithdrawal(payload: {
@@ -280,11 +274,7 @@ export const useCaisseStore = defineStore('caisse', () => {
       method: 'POST',
       body: payload,
     })
-    const data = await response.json().catch(() => ({}))
-    if (!response.ok) {
-      throw new Error(data.details || data.message || 'Erreur lors de la création du retrait')
-    }
-    return data
+    return handleApiResponse(response, 'Erreur lors de la création du retrait')
   }
 
   async function createAdminCancellation(payload: {
@@ -296,11 +286,7 @@ export const useCaisseStore = defineStore('caisse', () => {
       method: 'POST',
       body: payload,
     })
-    const data = await response.json().catch(() => ({}))
-    if (!response.ok) {
-      throw new Error(data.details || data.message || "Erreur lors de la création de l'annulation")
-    }
-    return data
+    return handleApiResponse(response, "Erreur lors de la création de l'annulation")
   }
 
   async function createAdminPartialWithdrawal(payload: {
@@ -313,11 +299,7 @@ export const useCaisseStore = defineStore('caisse', () => {
       method: 'POST',
       body: payload,
     })
-    const data = await response.json().catch(() => ({}))
-    if (!response.ok) {
-      throw new Error(data.details || data.message || 'Erreur lors de la création du retrait partiel')
-    }
-    return data
+    return handleApiResponse(response, 'Erreur lors de la création du retrait partiel')
   }
 
   async function fetchBalanceHistory(caisseId: number, page = 1) {
@@ -331,12 +313,10 @@ export const useCaisseStore = defineStore('caisse', () => {
         queryParams: { page: page.toString(), page_size: PAGE_SIZE.toString() }
       })
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        throw new Error(data.detail || data.message || "Erreur lors de la récupération de l'historique")
-      }
-
-      const data: BalanceHistoryResponse = await response.json()
+      const data = await handleApiResponse<BalanceHistoryResponse>(
+        response,
+        "Erreur lors de la récupération de l'historique"
+      )
       balanceHistory.value = data.results
       balanceHistoryTotal.value = data.count
       balanceHistoryPage.value = page

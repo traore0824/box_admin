@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useAuthStore } from './auth'
-import { fetchWithAuth } from './fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from './fetchwithtoken'
 
 export interface Setting {
   id: number
@@ -138,11 +138,10 @@ export const useSettingsStore = defineStore('settings', () => {
 
       const response = await fetchWithAuth('/box/setting')
 
-      if (!response.ok) {
-        throw new Error('Erreur lors du chargement des paramètres')
-      }
-
-      const result = await response.json()
+      const result = await handleApiResponse<{ data?: unknown } | Setting>(
+        response,
+        'Erreur lors du chargement des paramètres'
+      )
       // L'API peut retourner directement les données ou dans un objet data
       const data = result.data || result
       settings.value = normalizeSettings(data)
@@ -310,12 +309,10 @@ export const useSettingsStore = defineStore('settings', () => {
         url: response.url
       })
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.detail || errorData.message || 'Erreur lors de la mise à jour des paramètres')
-      }
-
-      const result = await response.json()
+      const result = await handleApiResponse<{ data?: Partial<Setting> }>(
+        response,
+        'Erreur lors de la mise à jour des paramètres'
+      )
       if (result.data) {
         // Si service client, fusionner les données mises à jour avec les settings existants
         if (isCustomerService) {
