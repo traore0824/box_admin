@@ -102,34 +102,77 @@
 
       <div v-else>
         <p class="text-sm text-gray-500 mb-3">
-          Définissez le seuil de pièces BOX et le bonus argent (FCFA) crédité une fois
-          quand un utilisateur atteint le niveau. Distribué uniquement si la distribution
-          des pièces BOX est activée.
+          Définissez le seuil de pièces BOX, le bonus argent (FCFA) crédité sur le wallet,
+          et optionnellement un bonus objet (via UserBonus) à l'atteinte du niveau.
+          Le dialogue de félicitations s'affiche à partir du 2e niveau (pas Bronze).
+          Clés disponibles : <code class="text-xs bg-gray-100 px-1 rounded">{level_label}</code>,
+          <code class="text-xs bg-gray-100 px-1 rounded">{money_bonus}</code>,
+          <code class="text-xs bg-gray-100 px-1 rounded">{object_bonus}</code>,
+          <code class="text-xs bg-gray-100 px-1 rounded">{total_points}</code>,
+          <code class="text-xs bg-gray-100 px-1 rounded">{next_level_label}</code>.
           <span v-if="missingOfficialLevels.length" class="text-amber-600">
             Niveaux officiels manquants : {{ missingOfficialLevels.join(', ') }}.
           </span>
         </p>
         <div class="divide-y">
-          <div v-for="l in activeUserLevels" :key="l.id"
-            class="flex flex-wrap items-center justify-between py-3 gap-4">
-            <div class="flex-1 min-w-[140px]">
-              <p class="font-medium text-gray-800">{{ l.label }}</p>
-              <p class="text-xs text-gray-400 font-mono">{{ l.code }}</p>
-            </div>
-            <div class="flex flex-wrap items-center gap-3">
-              <label class="flex items-center gap-1.5 text-sm text-gray-600">
-                <input type="checkbox" v-model="l.is_active" class="w-4 h-4" />
-                Actif
-              </label>
-              <div class="flex items-center gap-1">
-                <input v-model.number="l.min_points" type="number" min="0"
-                  class="w-24 border rounded px-2 py-1.5 text-sm text-center font-semibold" />
-                <span class="text-xs text-gray-400">pièces min</span>
+          <div v-for="l in activeUserLevels" :key="l.id" class="py-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+              <div class="flex-1 min-w-[140px]">
+                <p class="font-medium text-gray-800">{{ l.label }}</p>
+                <p class="text-xs text-gray-400 font-mono">{{ l.code }}</p>
+                <p v-if="l.sort_order <= 1" class="text-xs text-amber-600 mt-1">
+                  Pas de dialogue (premier palier)
+                </p>
               </div>
-              <div class="flex items-center gap-1">
-                <input v-model.number="l.bonus_amount" type="number" min="0" step="1"
-                  class="w-28 border rounded px-2 py-1.5 text-sm text-center font-semibold" />
-                <span class="text-xs text-gray-400">FCFA bonus</span>
+              <div class="flex flex-wrap items-center gap-3">
+                <label class="flex items-center gap-1.5 text-sm text-gray-600">
+                  <input type="checkbox" v-model="l.is_active" class="w-4 h-4" />
+                  Actif
+                </label>
+                <div class="flex items-center gap-1">
+                  <input v-model.number="l.min_points" type="number" min="0"
+                    class="w-24 border rounded px-2 py-1.5 text-sm text-center font-semibold" />
+                  <span class="text-xs text-gray-400">pièces min</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <input v-model.number="l.bonus_amount" type="number" min="0" step="1"
+                    class="w-28 border rounded px-2 py-1.5 text-sm text-center font-semibold" />
+                  <span class="text-xs text-gray-400">FCFA wallet</span>
+                </div>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pl-0 md:pl-2">
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">
+                  Bonus objet (libellé)
+                </label>
+                <input v-model="l.object_bonus_label" type="text"
+                  placeholder="Ex. T-shirt BOX"
+                  class="w-full border rounded px-2 py-1.5 text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">
+                  Détails bonus objet
+                </label>
+                <input v-model="l.object_bonus_details" type="text"
+                  placeholder="Instructions ou description"
+                  class="w-full border rounded px-2 py-1.5 text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">
+                  Titre dialogue félicitations
+                </label>
+                <input v-model="l.congrats_title" type="text"
+                  placeholder="Niveau {level_label} atteint ! 🎉"
+                  class="w-full border rounded px-2 py-1.5 text-sm" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-medium text-gray-600 mb-1">
+                  Message dialogue félicitations
+                </label>
+                <textarea v-model="l.congrats_message" rows="3"
+                  placeholder="Message personnalisé (vide = texte par défaut avec bonus et prochain niveau)"
+                  class="w-full border rounded px-2 py-1.5 text-sm" />
               </div>
             </div>
           </div>

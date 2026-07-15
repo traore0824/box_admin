@@ -44,6 +44,10 @@ export interface UserLevel {
   label: string
   min_points: number
   bonus_amount: number
+  object_bonus_label: string
+  object_bonus_details: string
+  congrats_title: string
+  congrats_message: string
   sort_order: number
   is_active: boolean
 }
