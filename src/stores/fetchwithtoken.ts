@@ -1,5 +1,12 @@
 import { useAuthStore } from '../stores/auth'
 import { API_BASE_URL } from '../config/api'
+import {
+  ApiRequestError,
+  handleApiResponse,
+  parseApiErrorBody,
+  parseResponseJson,
+  readApiError,
+} from '../utils/apiError'
 
 interface FetchWithAuthOptions extends Omit<RequestInit, 'body'> {
   queryParams?: Record<string, string | number | boolean>
@@ -105,7 +112,7 @@ export {
   parseApiErrorBody,
   parseResponseJson,
   readApiError,
-} from '../utils/apiError'
+}
 
 /**
  * Requête authentifiée + parse JSON + erreur backend affichée telle quelle.

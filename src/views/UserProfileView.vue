@@ -198,6 +198,10 @@
             <p class="text-gray-900">{{ user.created_at ? new Date(user.created_at).toLocaleDateString('fr-FR') : 'Non défini' }}</p>
           </div>
           <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Dernière connexion</label>
+            <p class="text-gray-900">{{ user.last_login ? formatDateTime(user.last_login) : 'Jamais' }}</p>
+          </div>
+          <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Date de naissance</label>
             <p class="text-gray-900">{{ user.birthday ? new Date(user.birthday).toLocaleDateString('fr-FR') : 'Non défini' }}</p>
           </div>
@@ -1214,7 +1218,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchWithAuth } from '../stores/fetchwithtoken'
+import { ApiRequestError, fetchWithAuth, handleApiResponse } from '../stores/fetchwithtoken'
 import { formatCurrency, formatAmount } from '../utils/currency'
 import { useNotification } from '../services/notification'
 import { useUsersStore } from '../stores/users'
@@ -1328,11 +1332,10 @@ async function handleToggleSuspect() {
       method: 'POST',
       body
     })
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}))
-      throw new Error(data.detail || 'Erreur lors de la mise à jour')
-    }
-    const data = await response.json()
+    const data = await handleApiResponse<{ user: typeof user.value }>(
+      response,
+      'Erreur lors de la mise à jour'
+    )
     user.value = data.user
     showSuspectModal.value = false
   } catch (err) {
@@ -1472,11 +1475,13 @@ const loadKycHistory = async () => {
       method: 'GET',
       queryParams: { user_id: userId.value.toString() }
     })
-    if (!response.ok) {
-      kycStatus2FA.value = null
-      return
-    }
-    const data = await response.json()
+    const data = await handleApiResponse<{
+      status?: string | null
+      card_id?: string | null
+      rejection_reason?: string | null
+      documents?: KycDocument[]
+      history?: KycRequest[]
+    }>(response, 'Erreur lors du chargement de l\'historique KYC')
     kycStatus2FA.value = {
       status: data.status ?? null,
       card_id: data.card_id ?? null,
@@ -1640,11 +1645,10 @@ const loadUserInfo = async () => {
       queryParams: { user_id: userId.value.toString() }
     })
 
-    if (!response.ok) {
-      throw new Error(`Utilisateur avec l'ID ${userId.value} non trouvé`)
-    }
-
-    user.value = await response.json()
+    user.value = await handleApiResponse(
+      response,
+      `Utilisateur avec l'ID ${userId.value} non trouvé`
+    )
 
     // Charger toutes les données en parallèle
     await Promise.all([
@@ -1673,19 +1677,18 @@ const loadWalletBalance = async () => {
       queryParams: { user_id: userId.value.toString() }
     })
 
-    if (!response.ok) {
-      if (response.status === 404) {
-        walletBalance.value = null
-        return
-      }
-      throw new Error('Erreur lors de la récupération du solde wallet')
-    }
-
-    const data = await response.json()
+    const data = await handleApiResponse<{ success?: boolean; data?: typeof walletBalance.value }>(
+      response,
+      'Erreur lors de la récupération du solde wallet'
+    )
     if (data.success && data.data) {
       walletBalance.value = data.data
     }
   } catch (err) {
+    if (err instanceof ApiRequestError && err.status === 404) {
+      walletBalance.value = null
+      return
+    }
     console.error('Error loading wallet balance:', err)
   }
 }
@@ -1700,11 +1703,10 @@ const loadTransactions = async () => {
       queryParams: { user_id: userId.value.toString(), page_size: '20' }
     })
 
-    if (!response.ok) {
-      throw new Error('Erreur lors de la récupération des transactions')
-    }
-
-    const data = await response.json()
+    const data = await handleApiResponse<{ results?: typeof transactions.value }>(
+      response,
+      'Erreur lors de la récupération des transactions'
+    )
     transactions.value = data.results || []
   } catch (err) {
     console.error('Error loading transactions:', err)
@@ -1723,21 +1725,20 @@ const loadWalletTransactions = async () => {
       queryParams: { user_id: userId.value.toString(), page_size: '20' }
     })
 
-    if (!response.ok) {
-      if (response.status === 404) {
-        walletTransactions.value = []
-        return
-      }
-      throw new Error('Erreur lors de la récupération des transactions wallet')
-    }
-
-    const data = await response.json()
+    const data = await handleApiResponse<{ success?: boolean; data?: typeof walletTransactions.value }>(
+      response,
+      'Erreur lors de la récupération des transactions wallet'
+    )
     if (data.success && data.data) {
       walletTransactions.value = data.data
     } else {
       walletTransactions.value = []
     }
   } catch (err) {
+    if (err instanceof ApiRequestError && err.status === 404) {
+      walletTransactions.value = []
+      return
+    }
     console.error('Error loading wallet transactions:', err)
   } finally {
     walletTransactionsLoading.value = false
@@ -1754,13 +1755,12 @@ const loadCaisses = async () => {
       queryParams: { user_id: userId.value.toString() }
     })
 
-    if (!response.ok) {
-      throw new Error('Erreur lors de la récupération des caisses')
-    }
-
-    const data = await response.json()
+    const data = await handleApiResponse<{ results?: typeof caisses.value } | typeof caisses.value>(
+      response,
+      'Erreur lors de la récupération des caisses'
+    )
     // Gérer le format de réponse avec { count, next, previous, results: [...] }
-    if (data.results && Array.isArray(data.results)) {
+    if (data && typeof data === 'object' && 'results' in data && Array.isArray(data.results)) {
       caisses.value = data.results
     } else if (Array.isArray(data)) {
       caisses.value = data

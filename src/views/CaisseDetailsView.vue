@@ -681,7 +681,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchWithAuth } from '../stores/fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from '../stores/fetchwithtoken'
 import { useNotification } from '../services/notification'
 import { Transaction } from '../types/transaction'
 import { Caisse, useCaisseStore, type BalanceHistoryEntry } from '../stores/caisse'
@@ -1003,14 +1003,10 @@ const loadCaisse = async () => {
     // Récupérer la caisse via son point de terminaison de détail direct
     const response = await fetchWithAuth(`/box/caisse/${caisseId}`)
     
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error(`Caisse avec l'ID ${caisseId} non trouvée`)
-      }
-      throw new Error('Erreur lors de la récupération de la caisse')
-    }
-
-    caisse.value = await response.json()
+    caisse.value = await handleApiResponse(
+      response,
+      'Erreur lors de la récupération de la caisse'
+    )
     defineBlockEnabled.value = caisse.value?.define_block === true
     if (caisse.value) initAdminPhoneFromCaisse(caisse.value)
   } catch (err) {
@@ -1033,11 +1029,10 @@ const loadTransactions = async () => {
       }
     })
 
-    if (!response.ok) {
-      throw new Error('Erreur lors de la récupération des transactions')
-    }
-
-    const data = await response.json()
+    const data = await handleApiResponse<{ results?: typeof transactions.value }>(
+      response,
+      'Erreur lors de la récupération des transactions'
+    )
     transactions.value = data.results || []
   } catch (err) {
     notification.addNotification(

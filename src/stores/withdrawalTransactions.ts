@@ -110,7 +110,7 @@ export const useWithdrawalTransactionsStore = defineStore('withdrawalTransaction
         body: JSON.stringify({ transaction_id: transactionId })
       })
 
-      const result = await handleApiResponse(
+      const result = await handleApiResponse<{ message?: string }>(
         response,
         'Erreur lors de la mise à jour du statut'
       )
@@ -147,7 +147,10 @@ export const useWithdrawalTransactionsStore = defineStore('withdrawalTransaction
         body: JSON.stringify({ transaction_id: transactionId })
       })
 
-      return await handleApiResponse(response, 'Erreur lors de la validation')
+      return await handleApiResponse<{ message?: string; success?: boolean }>(
+        response,
+        'Erreur lors de la validation'
+      )
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
       console.error('Error validating withdrawal:', err)
@@ -216,7 +219,7 @@ export const useWithdrawalTransactionsStore = defineStore('withdrawalTransaction
         body: JSON.stringify({ transaction_id: transactionId })
       })
 
-      return await handleApiResponse(
+      return await handleApiResponse<Record<string, unknown>>(
         response,
         'Erreur lors de la vérification du statut Feexpay'
       )

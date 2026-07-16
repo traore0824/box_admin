@@ -434,7 +434,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchWithAuth } from '../stores/fetchwithtoken'
+import { fetchWithAuth, handleApiResponse } from '../stores/fetchwithtoken'
 import { formatAmount } from '../utils/currency'
 import { useNotification } from '../services/notification'
 import { useTransactionsStore } from '../stores/transactions'
@@ -606,14 +606,10 @@ const loadTransactionDetails = async () => {
     // Charger la transaction directement via son ID
     const response = await fetchWithAuth(`/box/transaction/${transactionId.value}`)
 
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error('Transaction non trouvée')
-      }
-      throw new Error('Erreur lors de la récupération des détails de la transaction')
-    }
-
-    transaction.value = await response.json()
+    transaction.value = await handleApiResponse(
+      response,
+      'Erreur lors de la récupération des détails de la transaction'
+    )
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
     console.error('Error loading transaction details:', err)

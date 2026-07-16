@@ -11,6 +11,7 @@ interface User {
   email: string
   phone: string
   created_at: string
+  last_login: string | null
   referral_code: string | null
   birthday: string | null
   user_referral_code: string | null

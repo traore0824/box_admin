@@ -138,12 +138,11 @@ export const useSettingsStore = defineStore('settings', () => {
 
       const response = await fetchWithAuth('/box/setting')
 
-      const result = await handleApiResponse<{ data?: unknown } | Setting>(
+      const result = await handleApiResponse<{ data?: unknown } & Record<string, unknown>>(
         response,
         'Erreur lors du chargement des paramètres'
       )
-      // L'API peut retourner directement les données ou dans un objet data
-      const data = result.data || result
+      const data = result.data ?? result
       settings.value = normalizeSettings(data)
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erreur lors du chargement des paramètres'

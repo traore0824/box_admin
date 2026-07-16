@@ -89,7 +89,7 @@ export const useChallengesStore = defineStore('challenges', () => {
       body: payload,
       headers: { 'Content-Type': 'application/json' },
     })
-    return handleApiResponse(res, 'Erreur création')
+    return handleApiResponse<ChallengeAdmin>(res, 'Erreur création')
   }
 
   async function updateChallenge(id: number, payload: Partial<ChallengeAdmin>) {
@@ -98,7 +98,7 @@ export const useChallengesStore = defineStore('challenges', () => {
       body: payload,
       headers: { 'Content-Type': 'application/json' },
     })
-    return handleApiResponse(res, 'Erreur mise à jour')
+    return handleApiResponse<ChallengeAdmin>(res, 'Erreur mise à jour')
   }
 
   async function deleteChallenge(id: number) {

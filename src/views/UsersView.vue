@@ -90,6 +90,9 @@
                 Date de création
               </th>
               <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Dernière connexion
+              </th>
+              <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Solde
               </th>
               <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -127,6 +130,9 @@
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm">
                 {{ new Date(user.created_at).toLocaleDateString() }}
+              </td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm">
+                {{ user.last_login ? formatDateTime(user.last_login) : 'Jamais' }}
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm">
                 {{ formatAmount(user.total_funds) }}

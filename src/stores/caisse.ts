@@ -262,7 +262,7 @@ export const useCaisseStore = defineStore('caisse', () => {
       body: { define_block: defineBlock },
       headers: { 'Content-Type': 'application/json' },
     })
-    return handleApiResponse(response, 'Erreur mise à jour du blocage')
+    return handleApiResponse<Record<string, unknown>>(response, 'Erreur mise à jour du blocage')
   }
 
   async function createAdminWithdrawal(payload: {
@@ -274,7 +274,7 @@ export const useCaisseStore = defineStore('caisse', () => {
       method: 'POST',
       body: payload,
     })
-    return handleApiResponse(response, 'Erreur lors de la création du retrait')
+    return handleApiResponse<{ id?: number }>(response, 'Erreur lors de la création du retrait')
   }
 
   async function createAdminCancellation(payload: {
@@ -286,7 +286,7 @@ export const useCaisseStore = defineStore('caisse', () => {
       method: 'POST',
       body: payload,
     })
-    return handleApiResponse(response, "Erreur lors de la création de l'annulation")
+    return handleApiResponse<{ id?: number }>(response, "Erreur lors de la création de l'annulation")
   }
 
   async function createAdminPartialWithdrawal(payload: {
@@ -299,7 +299,7 @@ export const useCaisseStore = defineStore('caisse', () => {
       method: 'POST',
       body: payload,
     })
-    return handleApiResponse(response, 'Erreur lors de la création du retrait partiel')
+    return handleApiResponse<{ id?: number }>(response, 'Erreur lors de la création du retrait partiel')
   }
 
   async function fetchBalanceHistory(caisseId: number, page = 1) {
