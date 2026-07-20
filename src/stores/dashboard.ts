@@ -30,6 +30,9 @@ interface DashboardStats {
   caisse_free_not_pending: number
   caisse_locked_pending: number
   caisse_locked_not_pending: number
+  sum_amount_obj_pending?: number
+  sum_amount_obj_free_pending?: number
+  sum_amount_obj_locked_pending?: number
   all_week_caisse: number
   custom_caisse: number
   all_month_caisse: number
@@ -214,6 +217,9 @@ export const useDashboardStore = defineStore('dashboard', () => {
         caisse_free_not_pending: data.caisse_free_not_pending ?? 0,
         caisse_locked_pending: data.caisse_locked_pending ?? 0,
         caisse_locked_not_pending: data.caisse_locked_not_pending ?? 0,
+        sum_amount_obj_pending: data.sum_amount_obj_pending ?? 0,
+        sum_amount_obj_free_pending: data.sum_amount_obj_free_pending ?? 0,
+        sum_amount_obj_locked_pending: data.sum_amount_obj_locked_pending ?? 0,
         total_wallets: data.total_wallets ?? 0,
         active_wallets: data.active_wallets ?? 0,
         total_wallets_balance: data.total_wallets_balance ?? 0,

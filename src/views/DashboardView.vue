@@ -131,6 +131,9 @@
               <MetricItem :value="stats.caisse_free_pending" label="Libres en Cours" color="info" border />
               <MetricItem :value="stats.caisse_free_not_pending" label="Libres Terminées/Annulées" color="secondary" border />
             </MetricGrid>
+            <div class="amounts-section mt-3">
+              <AmountDisplay :value="stats.sum_amount_obj_free_pending || 0" label="Objectifs caisses libres en cours" />
+            </div>
           </div>
 
           <div class="frequency-section">
@@ -139,6 +142,13 @@
               <MetricItem :value="stats.caisse_locked_pending" label="Bloquées en Cours" color="danger" border />
               <MetricItem :value="stats.caisse_locked_not_pending" label="Bloquées Terminées/Annulées" color="secondary" border />
             </MetricGrid>
+            <div class="amounts-section mt-3">
+              <AmountDisplay :value="stats.sum_amount_obj_locked_pending || 0" label="Objectifs caisses bloquées en cours" />
+            </div>
+          </div>
+
+          <div class="amounts-section">
+            <AmountDisplay :value="stats.sum_amount_obj_pending || 0" label="Total objectifs caisses en cours" />
           </div>
 
           <div class="frequency-section">
@@ -183,8 +193,8 @@
               color="success" />
           </MetricGrid>
           <div class="amounts-section">
-            <AmountDisplay :value="stats.total_commissions_generated || 0" label="Commissions Générées (Période)" />
-            <AmountDisplay :value="stats.total_commissions_withdrawn || 0" label="Commissions Retirées (Période)" />
+            <AmountDisplay :value="stats.total_commissions_generated || 0" label="Commissions Générées (Total)" />
+            <AmountDisplay :value="stats.commission_withdrawn_all_time || 0" label="Commissions Retirées (Total)" />
           </div>
         </DashboardSection>
 

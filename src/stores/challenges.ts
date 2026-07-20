@@ -52,6 +52,29 @@ export interface UserLevel {
   is_active: boolean
 }
 
+export interface ChallengeParticipant {
+  id: number
+  user_id: number
+  user_email: string
+  user_name: string
+  caisse_id: number | null
+  caisse_name: string | null
+  status: string
+  joined_at: string
+  failure_reason: string
+  finished_at: string | null
+  points_earned: number
+  amount_deposited: number
+  delays: number
+  can_remove: boolean
+}
+
+export interface ChallengeParticipantsSummary {
+  count: number
+  total_deposited: number
+  active_count: number
+}
+
 export interface PointsInfo {
   info_point: string
   updated_at?: string
@@ -235,6 +258,30 @@ export const useChallengesStore = defineStore('challenges', () => {
     return data
   }
 
+  async function fetchChallengeParticipants(challengeId: number) {
+    const res = await fetchWithAuth(`/box/admin/challenges/${challengeId}/participants`)
+    return handleApiResponse<{
+      data: ChallengeParticipant[]
+      summary: ChallengeParticipantsSummary
+    }>(res, 'Erreur chargement participants')
+  }
+
+  async function removeChallengeParticipant(
+    challengeId: number,
+    participationId: number,
+    reason: string,
+  ) {
+    const res = await fetchWithAuth(
+      `/box/admin/challenges/${challengeId}/participants/${participationId}/remove`,
+      {
+        method: 'POST',
+        body: { reason },
+        headers: { 'Content-Type': 'application/json' },
+      },
+    )
+    return handleApiResponse(res, 'Erreur retrait participant')
+  }
+
   return {
     challenges,
     pointsActions,
@@ -247,6 +294,8 @@ export const useChallengesStore = defineStore('challenges', () => {
     updateChallenge,
     deleteChallenge,
     fetchChallengeSmartLink,
+    fetchChallengeParticipants,
+    removeChallengeParticipant,
     fetchPointsConfig,
     savePointsActions,
     createAction,

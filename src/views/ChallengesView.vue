@@ -85,6 +85,15 @@
               <div class="inline-flex items-center gap-2">
                 <button
                   type="button"
+                  @click="openParticipants(c)"
+                  title="Voir les participants"
+                  class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg border border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors"
+                >
+                  <i class="fas fa-users text-[10px]"></i>
+                  Participants
+                </button>
+                <button
+                  type="button"
                   @click="copySmartLink(c)"
                   title="Copier le smart link"
                   class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 transition-colors"
@@ -282,12 +291,123 @@
         </form>
       </div>
     </div>
+
+    <!-- Modal participants -->
+    <div v-if="showParticipantsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div class="flex items-center justify-between p-4 border-b">
+          <div>
+            <h2 class="text-lg font-bold text-gray-900">
+              Participants — {{ selectedChallenge?.name }}
+            </h2>
+            <p v-if="participantsSummary" class="text-sm text-gray-500 mt-1">
+              {{ participantsSummary.count }} participant(s) ·
+              Total déposé : {{ formatAmount(participantsSummary.total_deposited) }} ·
+              Actifs : {{ participantsSummary.active_count }}
+            </p>
+          </div>
+          <button @click="closeParticipants" class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="p-4 overflow-y-auto flex-1">
+          <div v-if="loadingParticipants" class="flex justify-center py-10">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+          <div v-else-if="!participants.length" class="text-center text-gray-500 py-10">
+            Aucun participant pour ce challenge.
+          </div>
+          <div v-else class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-sm">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Utilisateur</th>
+                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Déposé</th>
+                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Retards</th>
+                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Inscrit le</th>
+                  <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr v-for="p in participants" :key="p.id" class="hover:bg-gray-50">
+                  <td class="px-3 py-2">
+                    <div class="font-medium text-gray-900">{{ p.user_name }}</div>
+                    <div class="text-xs text-gray-500">{{ p.user_email }}</div>
+                  </td>
+                  <td class="px-3 py-2">
+                    <span class="px-2 py-0.5 rounded-full text-xs" :class="participationStatusClass(p.status)">
+                      {{ p.status }}
+                    </span>
+                    <div v-if="p.failure_reason" class="text-xs text-red-600 mt-1 max-w-xs truncate" :title="p.failure_reason">
+                      {{ p.failure_reason }}
+                    </div>
+                  </td>
+                  <td class="px-3 py-2 font-medium">{{ formatAmount(p.amount_deposited) }}</td>
+                  <td class="px-3 py-2">{{ p.delays }}</td>
+                  <td class="px-3 py-2 text-gray-600">{{ formatDate(p.joined_at) }}</td>
+                  <td class="px-3 py-2 text-right">
+                    <button
+                      v-if="p.can_remove"
+                      type="button"
+                      @click="askRemoveParticipant(p)"
+                      class="px-2.5 py-1.5 text-xs font-semibold rounded-md border border-red-200 text-red-700 bg-red-50 hover:bg-red-100"
+                    >
+                      Retirer
+                    </button>
+                    <span v-else class="text-xs text-gray-400">—</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal raison retrait -->
+    <div v-if="removeTarget" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-5 space-y-4">
+        <h3 class="text-lg font-semibold text-gray-900">Retirer du challenge</h3>
+        <p class="text-sm text-gray-600">
+          {{ removeTarget.user_name }} ({{ removeTarget.user_email }})
+        </p>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Raison</label>
+          <textarea
+            v-model="removeReason"
+            rows="3"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+            placeholder="Indiquez la raison du retrait…"
+          />
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" @click="removeTarget = null" class="px-4 py-2 border rounded-md text-sm">
+            Annuler
+          </button>
+          <button
+            type="button"
+            :disabled="removing || !removeReason.trim()"
+            @click="confirmRemoveParticipant"
+            class="px-4 py-2 bg-red-600 text-white rounded-md text-sm disabled:opacity-50"
+          >
+            {{ removing ? 'Retrait…' : 'Confirmer le retrait' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
-import { useChallengesStore, type ChallengeAdmin } from '../stores/challenges'
+import {
+  useChallengesStore,
+  type ChallengeAdmin,
+  type ChallengeParticipant,
+  type ChallengeParticipantsSummary,
+} from '../stores/challenges'
 import { useSettingsStore } from '../stores/settings'
 import { useNotification } from '../services/notification'
 
@@ -301,6 +421,15 @@ const savingNotifications = ref(false)
 const publishNotificationsEnabled = ref(true)
 const smartLink = ref('')
 const copyingLink = ref(false)
+
+const showParticipantsModal = ref(false)
+const selectedChallenge = ref<ChallengeAdmin | null>(null)
+const participants = ref<ChallengeParticipant[]>([])
+const participantsSummary = ref<ChallengeParticipantsSummary | null>(null)
+const loadingParticipants = ref(false)
+const removeTarget = ref<ChallengeParticipant | null>(null)
+const removeReason = ref('')
+const removing = ref(false)
 
 const defaultCaisseConfig = () => ({
   amount: 5000,
@@ -468,6 +597,76 @@ function toIso(local: string) {
 
 function formatDate(iso: string) {
   return iso ? new Date(iso).toLocaleString('fr-FR') : '—'
+}
+
+function formatAmount(value: number) {
+  return `${Number(value || 0).toLocaleString('fr-FR')} F CFA`
+}
+
+function participationStatusClass(s: string) {
+  if (s === 'EN_COURS' || s === 'EN_ATTENTE') return 'bg-blue-100 text-blue-800'
+  if (s === 'REUSSI') return 'bg-green-100 text-green-800'
+  return 'bg-red-100 text-red-800'
+}
+
+async function openParticipants(c: ChallengeAdmin) {
+  selectedChallenge.value = c
+  showParticipantsModal.value = true
+  loadingParticipants.value = true
+  participants.value = []
+  participantsSummary.value = null
+  try {
+    const data = await store.fetchChallengeParticipants(c.id)
+    participants.value = data.data ?? []
+    participantsSummary.value = data.summary ?? null
+  } catch (e) {
+    notification.addNotification(
+      e instanceof Error ? e.message : 'Erreur chargement participants',
+      'error',
+    )
+  } finally {
+    loadingParticipants.value = false
+  }
+}
+
+function closeParticipants() {
+  showParticipantsModal.value = false
+  selectedChallenge.value = null
+  participants.value = []
+  participantsSummary.value = null
+  removeTarget.value = null
+  removeReason.value = ''
+}
+
+function askRemoveParticipant(p: ChallengeParticipant) {
+  removeTarget.value = p
+  removeReason.value = ''
+}
+
+async function confirmRemoveParticipant() {
+  if (!selectedChallenge.value || !removeTarget.value || !removeReason.value.trim()) return
+  removing.value = true
+  try {
+    await store.removeChallengeParticipant(
+      selectedChallenge.value.id,
+      removeTarget.value.id,
+      removeReason.value.trim(),
+    )
+    notification.addNotification('Participant retiré', 'success')
+    removeTarget.value = null
+    removeReason.value = ''
+    const data = await store.fetchChallengeParticipants(selectedChallenge.value.id)
+    participants.value = data.data ?? []
+    participantsSummary.value = data.summary ?? null
+    await store.fetchChallenges()
+  } catch (e) {
+    notification.addNotification(
+      e instanceof Error ? e.message : 'Erreur retrait',
+      'error',
+    )
+  } finally {
+    removing.value = false
+  }
 }
 
 function statusClass(s: string) {
