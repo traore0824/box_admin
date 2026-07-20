@@ -65,7 +65,7 @@
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Participants</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Début</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fin</th>
-            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase sticky right-0 bg-gray-50">Actions</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
@@ -81,35 +81,33 @@
             </td>
             <td class="px-4 py-3 text-sm text-gray-600">{{ formatDate(c.start_date) }}</td>
             <td class="px-4 py-3 text-sm text-gray-600">{{ formatDate(c.end_date) }}</td>
-            <td class="px-4 py-3 text-sm text-right">
-              <div class="inline-flex items-center gap-2">
+            <td class="px-4 py-3 text-sm text-right sticky right-0 bg-white">
+              <div class="inline-flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5">
                 <button
                   type="button"
                   @click="openParticipants(c)"
                   title="Voir les participants"
-                  class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg border border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors"
+                  class="inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-md border border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100"
                 >
-                  <i class="fas fa-users text-[10px]"></i>
+                  <i class="fas fa-users"></i>
                   Participants
                 </button>
                 <button
                   type="button"
                   @click="copySmartLink(c)"
                   title="Copier le smart link"
-                  class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                  class="inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-md border border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
                 >
-                  <i class="fas fa-link text-[10px]"></i>
-                  Copier lien
+                  <i class="fas fa-link"></i>
+                  Lien
                 </button>
                 <button
                   type="button"
                   @click="openEdit(c)"
                   title="Modifier ce challenge"
-                  class="group inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg border border-primary/25 text-primary bg-primary/5 shadow-sm hover:bg-primary hover:text-white hover:border-primary hover:shadow transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-1"
+                  class="inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-md border border-amber-300 text-amber-800 bg-amber-50 hover:bg-amber-100"
                 >
-                  <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 group-hover:bg-white/20 transition-colors">
-                    <i class="fas fa-pen-to-square text-[10px]"></i>
-                  </span>
+                  <i class="fas fa-pen"></i>
                   Modifier
                 </button>
               </div>
@@ -347,16 +345,18 @@
                   <td class="px-3 py-2 font-medium">{{ formatAmount(p.amount_deposited) }}</td>
                   <td class="px-3 py-2">{{ p.delays }}</td>
                   <td class="px-3 py-2 text-gray-600">{{ formatDate(p.joined_at) }}</td>
-                  <td class="px-3 py-2 text-right">
+                  <td class="px-3 py-2 text-right whitespace-nowrap">
                     <button
-                      v-if="p.can_remove"
+                      v-if="canRemoveParticipant(p)"
                       type="button"
                       @click="askRemoveParticipant(p)"
                       class="px-2.5 py-1.5 text-xs font-semibold rounded-md border border-red-200 text-red-700 bg-red-50 hover:bg-red-100"
                     >
                       Retirer
                     </button>
-                    <span v-else class="text-xs text-gray-400">—</span>
+                    <span v-else class="text-xs text-gray-400" title="Participation déjà terminée">
+                      Non retirable
+                    </span>
                   </td>
                 </tr>
               </tbody>
@@ -607,6 +607,12 @@ function participationStatusClass(s: string) {
   if (s === 'EN_COURS' || s === 'EN_ATTENTE') return 'bg-blue-100 text-blue-800'
   if (s === 'REUSSI') return 'bg-green-100 text-green-800'
   return 'bg-red-100 text-red-800'
+}
+
+function canRemoveParticipant(p: ChallengeParticipant) {
+  if (p.can_remove === true) return true
+  // Fallback si l'API ne renvoie pas encore can_remove
+  return p.status === 'EN_ATTENTE' || p.status === 'EN_COURS'
 }
 
 async function openParticipants(c: ChallengeAdmin) {

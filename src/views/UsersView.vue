@@ -173,7 +173,7 @@
                 <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium">
                 <!-- Dropdown Component -->
                 <div class="relative inline-block text-left">
-                  <button @click="toggleDropdown(user.id)" type="button"
+                  <button @click.stop="toggleDropdown(user.id)" type="button"
                     class="inline-flex justify-center items-center rounded-md border border-gray-300 shadow-sm px-3 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 min-w-[80px]"
                     :class="{ 'ring-2 ring-indigo-500': activeDropdown === user.id }" :disabled="actionLoading[user.id]"
                     :data-dropdown-id="user.id">
@@ -792,13 +792,14 @@ function updateDropdownPosition(userId: number) {
   }
 }
 
-// Toggle dropdown avec gestion améliorée
+// Toggle dropdown : positionner AVANT d'afficher (évite menu invisible en 0,0)
 function toggleDropdown(userId: number) {
   if (actionLoading[userId]) return
   
   if (activeDropdown.value === userId) {
     closeAllDropdowns()
   } else {
+    updateDropdownPosition(userId)
     activeDropdown.value = userId
     dropdownAnimation.value = 'opacity-100 scale-100'
     nextTick(() => {
