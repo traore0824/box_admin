@@ -207,8 +207,39 @@
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Contenu</label>
-                <RichTextEditor v-model="newPub.content" placeholder="Contenu détaillé..." />
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-sm font-medium text-gray-700">Contenu</label>
+                  <div class="inline-flex rounded-md border border-gray-300 overflow-hidden text-xs font-medium">
+                    <button
+                      type="button"
+                      @click="contentMode = 'rich'"
+                      :class="contentMode === 'rich' ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                      class="px-3 py-1.5"
+                    >
+                      Texte enrichi
+                    </button>
+                    <button
+                      type="button"
+                      @click="contentMode = 'plain'"
+                      :class="contentMode === 'plain' ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                      class="px-3 py-1.5 border-l border-gray-300"
+                    >
+                      Texte simple
+                    </button>
+                  </div>
+                </div>
+                <RichTextEditor
+                  v-if="contentMode === 'rich'"
+                  v-model="newPub.content"
+                  placeholder="Contenu détaillé..."
+                />
+                <textarea
+                  v-else
+                  v-model="newPub.content"
+                  rows="6"
+                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm px-3 py-2"
+                  placeholder="Contenu détaillé (texte simple, sans mise en forme)"
+                ></textarea>
               </div>
 
               <div>
@@ -333,6 +364,9 @@ const newPub = reactive({
   images: [] as string[],
   is_active: true
 })
+
+// Mode de saisie du contenu : éditeur riche ou texte simple
+const contentMode = ref<'rich' | 'plain'>('rich')
 
 const isEditing = ref(false)
 const editingId = ref<string | null>(null)

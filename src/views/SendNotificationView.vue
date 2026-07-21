@@ -22,10 +22,42 @@
 
       <!-- Content -->
       <div class="mb-6">
-        <label for="content" class="block text-sm font-medium text-gray-700 mb-2">
-          Contenu de la notification
-        </label>
-        <RichTextEditor v-model="notification.content" placeholder="Entrez le contenu de la notification" />
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+          <label for="content" class="block text-sm font-medium text-gray-700">
+            Contenu de la notification
+          </label>
+          <div class="inline-flex rounded-md border border-gray-300 overflow-hidden text-xs font-medium">
+            <button
+              type="button"
+              @click="contentMode = 'rich'"
+              :class="contentMode === 'rich' ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+              class="px-3 py-1.5"
+            >
+              Texte enrichi
+            </button>
+            <button
+              type="button"
+              @click="contentMode = 'plain'"
+              :class="contentMode === 'plain' ? 'bg-primary text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+              class="px-3 py-1.5 border-l border-gray-300"
+            >
+              Texte simple
+            </button>
+          </div>
+        </div>
+        <RichTextEditor
+          v-if="contentMode === 'rich'"
+          v-model="notification.content"
+          placeholder="Entrez le contenu de la notification"
+        />
+        <textarea
+          v-else
+          id="content"
+          v-model="notification.content"
+          rows="6"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm"
+          placeholder="Entrez le contenu de la notification (texte simple, sans mise en forme)"
+        ></textarea>
       </div>
 
       <!-- Canal de communication -->
@@ -306,6 +338,9 @@ const notification = ref({
   content: '',
   image_url: '' as string | undefined
 })
+
+// Mode de saisie du contenu : éditeur riche ou texte simple
+const contentMode = ref<'rich' | 'plain'>('rich')
 
 // Type: 'all' ou 'single'
 const type = ref<'all' | 'single'>('all')

@@ -52,6 +52,7 @@ export interface Setting {
   test_mode: boolean
   box_coins_distribution_enabled: boolean
   challenge_publish_notifications_enabled: boolean
+  whatsapp_prompt_enabled: boolean
   min_version: number
   last_version: number
   update_message: string | null
@@ -120,6 +121,7 @@ export const useSettingsStore = defineStore('settings', () => {
       box_coins_distribution_enabled: data.box_coins_distribution_enabled ?? true,
       challenge_publish_notifications_enabled:
         data.challenge_publish_notifications_enabled ?? true,
+      whatsapp_prompt_enabled: data.whatsapp_prompt_enabled ?? true,
       min_version: data.min_version || 1,
       last_version: data.last_version || 1,
       update_message: data.update_message || null,

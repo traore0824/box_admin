@@ -311,6 +311,23 @@
                 </label>
               </div>
             </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Popup numéro WhatsApp (mobile)</label>
+              <p class="text-xs text-gray-500 mb-2">
+                Demande du numéro WhatsApp après un dépôt accepté.
+                Désactivée : la popup n'apparaît plus dans l'app, sans mise à jour mobile.
+              </p>
+              <div class="mt-1">
+                <label class="inline-flex items-center">
+                  <input
+                    v-model="settings.whatsapp_prompt_enabled"
+                    type="checkbox"
+                    class="form-checkbox h-5 w-5 text-blue-600 rounded"
+                  />
+                  <span class="ml-2 text-sm text-gray-700">Activée</span>
+                </label>
+              </div>
+            </div>
           </div>
         </div>
 
