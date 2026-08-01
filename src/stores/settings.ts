@@ -63,6 +63,8 @@ export interface Setting {
   connect_pro_base_url: string
   connect_pro_api_key: string
   connect_pro_api_secret: string
+  connect_pro_api_key_set?: boolean
+  connect_pro_api_secret_set?: boolean
   public_base_url: string
 }
 
@@ -134,8 +136,10 @@ export const useSettingsStore = defineStore('settings', () => {
       dowload_apk_link: data.dowload_apk_link || null,
       openwa_session_id: data.openwa_session_id || '',
       connect_pro_base_url: data.connect_pro_base_url || 'https://connect.cenof.finance',
-      connect_pro_api_key: data.connect_pro_api_key || '',
-      connect_pro_api_secret: data.connect_pro_api_secret || '',
+      connect_pro_api_key: '',
+      connect_pro_api_secret: '',
+      connect_pro_api_key_set: !!data.connect_pro_api_key_set,
+      connect_pro_api_secret_set: !!data.connect_pro_api_secret_set,
       public_base_url: data.public_base_url || '',
     }
   }
@@ -251,6 +255,16 @@ export const useSettingsStore = defineStore('settings', () => {
           payload[field] = String(payload[field])
         }
       })
+
+        // Ne pas renvoyer les secrets vides (write-only) pour ne pas écraser
+        ;(['connect_pro_api_key', 'connect_pro_api_secret'] as const).forEach((field) => {
+          const value = payload[field]
+          if (value === undefined || value === null || String(value).trim() === '') {
+            delete payload[field]
+          }
+        })
+        delete payload.connect_pro_api_key_set
+        delete payload.connect_pro_api_secret_set
       } else {
         // SERVICE CLIENT (par défaut) - endpoint déjà défini au début
         console.log('✅ [updateSettings] BRANCHE SERVICE CLIENT ACTIVÉE')

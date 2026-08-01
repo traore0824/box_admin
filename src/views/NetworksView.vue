@@ -207,10 +207,12 @@
                   required
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="feexpay">FeexPay</option>
                   <option value="connect">Connect Pro</option>
+                  <option value="feexpay">FeexPay (pas de payout API — manuel)</option>
                 </select>
-                <p class="mt-1 text-xs text-gray-500">S’applique aussi aux annulations et retraits partiels</p>
+                <p class="mt-1 text-xs text-gray-500">
+                  Annulations / retraits partiels inclus. FeexPay = approve wallet seulement (pas d’envoi MM).
+                </p>
               </div>
             </div>
 

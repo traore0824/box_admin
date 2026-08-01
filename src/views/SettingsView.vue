@@ -265,20 +265,28 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                API Key
+                <span v-if="settings.connect_pro_api_key_set" class="ml-2 text-xs text-green-600 font-normal">déjà configurée</span>
+              </label>
               <input
                 v-model="settings.connect_pro_api_key"
-                type="text"
-                autocomplete="off"
+                type="password"
+                autocomplete="new-password"
+                :placeholder="settings.connect_pro_api_key_set ? 'Laisser vide pour ne pas changer' : 'Coller la clé'"
                 class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">API Secret</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                API Secret
+                <span v-if="settings.connect_pro_api_secret_set" class="ml-2 text-xs text-green-600 font-normal">déjà configuré</span>
+              </label>
               <input
                 v-model="settings.connect_pro_api_secret"
                 type="password"
                 autocomplete="new-password"
+                :placeholder="settings.connect_pro_api_secret_set ? 'Laisser vide pour ne pas changer' : 'Coller le secret'"
                 class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
               />
             </div>
