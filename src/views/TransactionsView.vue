@@ -108,8 +108,8 @@
                   </span>
                 </div>
               </td>
-              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ transaction.caisse.created_by.email }}</td>
-              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ transaction.caisse.name }}</td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ getTransactionUserEmail(transaction) }}</td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ transaction.caisse?.name || '—' }}</td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
                 <div class="flex flex-col sm:flex-row gap-1 sm:gap-2">
                   <!-- Bouton Voir détails -->
@@ -270,7 +270,11 @@
               </div>
               <div>
                 <span class="text-sm text-gray-600">Caisse:</span>
-                <span class="ml-2 font-medium">{{ selectedTransaction.caisse.name }}</span>
+                <span class="ml-2 font-medium">{{ selectedTransaction.caisse?.name || '—' }}</span>
+              </div>
+              <div>
+                <span class="text-sm text-gray-600">Utilisateur:</span>
+                <span class="ml-2 font-medium">{{ getTransactionUserEmail(selectedTransaction) }}</span>
               </div>
             </div>
 
@@ -814,10 +818,24 @@ const formatDateTime = (date: string): string => {
   })
 }
 
+/** Email user : caisse.created_by en priorité, sinon transaction.created_by */
+const getTransactionUserEmail = (transaction: Transaction): string => {
+  const fromCaisse = transaction.caisse?.created_by?.email
+  if (fromCaisse) return fromCaisse
+  const createdBy = transaction.created_by
+  if (createdBy && typeof createdBy === 'object' && 'email' in createdBy) {
+    return createdBy.email || '—'
+  }
+  return '—'
+}
+
 // Notifier l'utilisateur d'un dépôt échoué
 const notifyFailedDeposit = (transaction: Transaction) => {
-  const userEmail = transaction.caisse.created_by.email
-  
+  const userEmail = getTransactionUserEmail(transaction)
+  if (!userEmail || userEmail === '—') {
+    return
+  }
+
   // Contenu pré-rempli pour la notification
   const title = 'Dépôt non réussi'
   const content = `Bonjour 👋

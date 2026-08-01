@@ -38,11 +38,13 @@ export interface Transaction {
   created_at: string
   status: string
   payment_mode: string
-  created_by: number
+  /** Objet user (serializer) — peut être absent sur certaines réponses */
+  created_by: User | number | null
   amount: number
   reference: string | null
   caisse_id: string
-  caisse: Caisse
+  /** Nullable : retraits Connect Pro / tests sans caisse */
+  caisse: Caisse | null
   type_trans: string
   phone: string
   is_suspect_transaction: boolean

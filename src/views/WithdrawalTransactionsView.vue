@@ -87,8 +87,8 @@
                   {{ transaction.status === 'accept' ? 'Success' : transaction.status === 'error' ? 'Erreur' : transaction.status === 'pending' ? 'Pending' : transaction.status === 'expired' ? 'Expired' : transaction.status === 'timeout' ? 'Timeout' : transaction.status }}
                 </span>
               </td>
-              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ transaction.caisse.created_by.email }}</td>
-              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ transaction.caisse.name }}</td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ getTransactionUserEmail(transaction) }}</td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ transaction.caisse?.name || '—' }}</td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
                 <div class="flex flex-col sm:flex-row gap-1 sm:gap-2">
                   <!-- Bouton Mettre à jour le statut (si status !== error && status !== accept) -->
@@ -312,11 +312,11 @@
                       </div>
                       <div class="flex justify-between text-sm">
                         <span class="font-medium">Utilisateur:</span>
-                        <span>{{ selectedTransaction?.caisse.created_by.email }}</span>
+                        <span>{{ selectedTransaction ? getTransactionUserEmail(selectedTransaction) : '—' }}</span>
                       </div>
                       <div class="flex justify-between text-sm">
                         <span class="font-medium">Caisse:</span>
-                        <span>{{ selectedTransaction?.caisse.name }}</span>
+                        <span>{{ selectedTransaction?.caisse?.name || '—' }}</span>
                       </div>
                     </div>
                   </div>
@@ -473,6 +473,17 @@ const hasNextPage = computed(() => {
   const total = withdrawalTransactionsStore.totalTransactions
   return currentPage * perPage < total
 })
+
+/** Email user : caisse.created_by en priorité, sinon transaction.created_by */
+const getTransactionUserEmail = (transaction: Transaction): string => {
+  const fromCaisse = transaction.caisse?.created_by?.email
+  if (fromCaisse) return fromCaisse
+  const createdBy = transaction.created_by
+  if (createdBy && typeof createdBy === 'object' && 'email' in createdBy) {
+    return createdBy.email || '—'
+  }
+  return '—'
+}
 
 // Vérifier si une transaction peut être approuvée
 function canApproveTransaction(transaction: Transaction): boolean {
