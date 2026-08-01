@@ -198,6 +198,7 @@
                 >
                   <option value="feexpay">FeexPay</option>
                   <option value="connect">Connect Pro</option>
+                  <option value="manual">Manuel (pas d'appel API)</option>
                 </select>
               </div>
               <div>
@@ -208,10 +209,11 @@
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="connect">Connect Pro</option>
-                  <option value="feexpay">FeexPay (pas de payout API — manuel)</option>
+                  <option value="manual">Manuel (pas d'appel API)</option>
+                  <option value="feexpay">FeexPay (équivalent manuel — pas de payout)</option>
                 </select>
                 <p class="mt-1 text-xs text-gray-500">
-                  Annulations / retraits partiels inclus. FeexPay = approve wallet seulement (pas d’envoi MM).
+                  Manuel = approve wallet/caisse seulement, aucun envoi Mobile Money automatique.
                 </p>
               </div>
             </div>
@@ -313,8 +315,8 @@ const formData = reactive({
   indication_country: '',
   enable_for_deposit: true,
   enable_for_withdrawal: true,
-  deposit_api: 'feexpay' as 'feexpay' | 'connect',
-  withdraw_api: 'connect' as 'feexpay' | 'connect',
+  deposit_api: 'feexpay' as 'feexpay' | 'connect' | 'manual',
+  withdraw_api: 'connect' as 'feexpay' | 'connect' | 'manual',
   system_account: '',
   image: '',
   is_active: true
