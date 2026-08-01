@@ -60,6 +60,10 @@ export interface Setting {
   dowload_ios_apk: string | null
   dowload_apk_link: string | null
   openwa_session_id: string
+  connect_pro_base_url: string
+  connect_pro_api_key: string
+  connect_pro_api_secret: string
+  public_base_url: string
 }
 
 export const useSettingsStore = defineStore('settings', () => {
@@ -129,6 +133,10 @@ export const useSettingsStore = defineStore('settings', () => {
       dowload_ios_apk: data.dowload_ios_apk || null,
       dowload_apk_link: data.dowload_apk_link || null,
       openwa_session_id: data.openwa_session_id || '',
+      connect_pro_base_url: data.connect_pro_base_url || 'https://connect.cenof.finance',
+      connect_pro_api_key: data.connect_pro_api_key || '',
+      connect_pro_api_secret: data.connect_pro_api_secret || '',
+      public_base_url: data.public_base_url || '',
     }
   }
 

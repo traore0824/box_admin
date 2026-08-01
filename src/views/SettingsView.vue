@@ -246,6 +246,55 @@
           </div>
         </div>
 
+        <!-- Connect Pro -->
+        <div v-if="isStaff" class="p-3 sm:p-4 md:p-6 border-t border-gray-100">
+          <h2 class="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-2 sm:mb-3 md:mb-4">
+            Connect Pro
+          </h2>
+          <p class="text-xs text-gray-500 mb-4">
+            Clés API stockées en base (comme CENOF). Les UUID réseaux se configurent sur chaque Network (system_account).
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">URL de base Connect</label>
+              <input
+                v-model="settings.connect_pro_base_url"
+                type="url"
+                placeholder="https://connect.cenof.finance"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+              <input
+                v-model="settings.connect_pro_api_key"
+                type="text"
+                autocomplete="off"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">API Secret</label>
+              <input
+                v-model="settings.connect_pro_api_secret"
+                type="password"
+                autocomplete="new-password"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+              />
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">URL publique BOX (webhook)</label>
+              <input
+                v-model="settings.public_base_url"
+                type="url"
+                placeholder="https://box.babilonbg.net"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+              />
+              <p class="text-xs text-gray-500 mt-1">Callback = {url}/box/connect-pro-webhook</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Other Settings -->
         <div v-if="isStaff" class="p-3 sm:p-4 md:p-6">
           <h2 class="text-sm sm:text-base md:text-lg font-medium text-gray-900 mb-2 sm:mb-3 md:mb-4">Autres paramètres</h2>

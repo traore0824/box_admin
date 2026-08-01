@@ -76,6 +76,10 @@
             </span>
             <span class="ml-2 text-xs text-gray-500 uppercase">{{ network.withdraw_api || 'connect' }}</span>
           </div>
+          <div v-if="network.system_account" class="flex items-center text-xs text-gray-500 font-mono truncate">
+            <span class="mr-1 shrink-0">UUID:</span>
+            <span class="truncate">{{ network.system_account }}</span>
+          </div>
         </div>
 
         <div class="flex space-x-2">
@@ -211,6 +215,19 @@
             </div>
 
             <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">UUID Connect (system_account)</label>
+              <input
+                v-model="formData.system_account"
+                type="text"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                placeholder="UUID réseau Connect Pro"
+              />
+              <p class="mt-1 text-xs text-gray-500">
+                Comme CENOF. Si vide, lookup auto via GET /api/payments/networks/?search=…
+              </p>
+            </div>
+
+            <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Image</label>
               <div class="flex items-center space-x-4">
                 <input 
@@ -296,6 +313,7 @@ const formData = reactive({
   enable_for_withdrawal: true,
   deposit_api: 'feexpay' as 'feexpay' | 'connect',
   withdraw_api: 'connect' as 'feexpay' | 'connect',
+  system_account: '',
   image: '',
   is_active: true
 })
@@ -328,6 +346,7 @@ const openEditModal = (network: any) => {
   formData.enable_for_withdrawal = network.enable_for_withdrawal
   formData.deposit_api = network.deposit_api || 'feexpay'
   formData.withdraw_api = network.withdraw_api || 'connect'
+  formData.system_account = network.system_account || ''
   formData.image = network.image
   formData.is_active = network.is_active
   showModal.value = true
@@ -348,6 +367,7 @@ const resetForm = () => {
   formData.enable_for_withdrawal = true
   formData.deposit_api = 'feexpay'
   formData.withdraw_api = 'connect'
+  formData.system_account = ''
   formData.image = ''
   formData.is_active = true
 }

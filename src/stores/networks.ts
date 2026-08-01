@@ -14,6 +14,7 @@ interface Network {
   enable_for_withdrawal: boolean
   deposit_api: 'feexpay' | 'connect'
   withdraw_api: 'feexpay' | 'connect'
+  system_account: string | null
   image: string
   is_active: boolean
   created_at: string
