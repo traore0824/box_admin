@@ -12,6 +12,8 @@ interface Network {
   indication_country: string
   enable_for_deposit: boolean
   enable_for_withdrawal: boolean
+  deposit_api: 'feexpay' | 'connect'
+  withdraw_api: 'feexpay' | 'connect'
   image: string
   is_active: boolean
   created_at: string

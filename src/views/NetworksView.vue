@@ -67,12 +67,14 @@
             <span :class="network.enable_for_deposit ? 'text-green-600' : 'text-red-600'">
               <i :class="network.enable_for_deposit ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
             </span>
+            <span class="ml-2 text-xs text-gray-500 uppercase">{{ network.deposit_api || 'feexpay' }}</span>
           </div>
           <div class="flex items-center text-sm">
             <span class="mr-2">Retraits:</span>
             <span :class="network.enable_for_withdrawal ? 'text-green-600' : 'text-red-600'">
               <i :class="network.enable_for_withdrawal ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
             </span>
+            <span class="ml-2 text-xs text-gray-500 uppercase">{{ network.withdraw_api || 'connect' }}</span>
           </div>
         </div>
 
@@ -182,6 +184,32 @@
               </div>
             </div>
 
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">API dépôt *</label>
+                <select
+                  v-model="formData.deposit_api"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="feexpay">FeexPay</option>
+                  <option value="connect">Connect Pro</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">API retrait / annulation *</label>
+                <select
+                  v-model="formData.withdraw_api"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="feexpay">FeexPay</option>
+                  <option value="connect">Connect Pro</option>
+                </select>
+                <p class="mt-1 text-xs text-gray-500">S’applique aussi aux annulations et retraits partiels</p>
+              </div>
+            </div>
+
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Image</label>
               <div class="flex items-center space-x-4">
@@ -266,6 +294,8 @@ const formData = reactive({
   indication_country: '',
   enable_for_deposit: true,
   enable_for_withdrawal: true,
+  deposit_api: 'feexpay' as 'feexpay' | 'connect',
+  withdraw_api: 'connect' as 'feexpay' | 'connect',
   image: '',
   is_active: true
 })
@@ -296,6 +326,8 @@ const openEditModal = (network: any) => {
   formData.indication_country = network.indication_country
   formData.enable_for_deposit = network.enable_for_deposit
   formData.enable_for_withdrawal = network.enable_for_withdrawal
+  formData.deposit_api = network.deposit_api || 'feexpay'
+  formData.withdraw_api = network.withdraw_api || 'connect'
   formData.image = network.image
   formData.is_active = network.is_active
   showModal.value = true
@@ -314,6 +346,8 @@ const resetForm = () => {
   formData.indication_country = ''
   formData.enable_for_deposit = true
   formData.enable_for_withdrawal = true
+  formData.deposit_api = 'feexpay'
+  formData.withdraw_api = 'connect'
   formData.image = ''
   formData.is_active = true
 }
