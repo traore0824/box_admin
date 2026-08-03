@@ -87,6 +87,23 @@
             <p class="text-gray-900">{{ formatNullValue(transaction.payment_mode) }}</p>
           </div>
           <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">API de paiement</label>
+            <select
+              class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :value="transaction.payment_api ?? ''"
+              :disabled="actionLoading"
+              @change="handlePaymentApiChange(($event.target as HTMLSelectElement).value)"
+            >
+              <option value="">Selon le réseau (défaut)</option>
+              <option value="connect">Connect Pro</option>
+              <option value="manual">Manuel (pas d'appel API)</option>
+              <option value="feexpay">FeexPay</option>
+            </select>
+            <p class="mt-1 text-xs text-gray-500">
+              Override pour cette transaction uniquement. Manuel = approve sans Mobile Money auto.
+            </p>
+          </div>
+          <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Montant</label>
             <p class="text-2xl font-bold" :class="getAmountClass(transaction.type_trans)">
               {{ transaction.type_trans === 'deposit' ? '+' : '-' }}{{ formatAmount(transaction.amount) }}
@@ -689,6 +706,26 @@ async function confirmReferenceUpdate() {
       err?.message || 'Erreur lors de la mise à jour de la référence',
       'error'
     )
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+async function handlePaymentApiChange(value: string) {
+  if (!transaction.value) return
+  const paymentApi = (value === 'feexpay' || value === 'connect' || value === 'manual'
+    ? value
+    : '') as '' | 'feexpay' | 'connect' | 'manual'
+  const previous = transaction.value.payment_api ?? ''
+  if (paymentApi === previous) return
+
+  try {
+    actionLoading.value = true
+    await transactionsStore.updateTransactionPaymentApi(transaction.value.id, paymentApi)
+    notification.addNotification('API de paiement mise à jour', 'success')
+    await loadTransactionDetails()
+  } catch (err: any) {
+    notification.addNotification(err?.message || 'Erreur mise à jour API', 'error')
   } finally {
     actionLoading.value = false
   }

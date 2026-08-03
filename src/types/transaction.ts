@@ -32,12 +32,17 @@ export interface Caisse {
   transaction_delay: number
 }
 
+/** Override agrégateur ; "" = selon le Network */
+export type TransactionPaymentApi = '' | 'feexpay' | 'connect' | 'manual'
+
 export interface Transaction {
   id: number
   public_reference: string
   created_at: string
   status: string
   payment_mode: string
+  /** Override API ; vide = deposit_api / withdraw_api du réseau */
+  payment_api?: TransactionPaymentApi
   /** Objet user (serializer) — peut être absent sur certaines réponses */
   created_by: User | number | null
   amount: number

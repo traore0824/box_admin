@@ -67,6 +67,7 @@
               <th class="px-2 sm:px-4 md:px-6 hidden lg:table-cell">Téléphone</th>
               <th class="px-2 sm:px-4 md:px-6">Type</th>
               <th class="px-2 sm:px-4 md:px-6">Statut</th>
+              <th class="px-2 sm:px-4 md:px-6 hidden lg:table-cell">API</th>
               <th class="px-2 sm:px-4 md:px-6 hidden xl:table-cell">Utilisateur</th>
               <th class="px-2 sm:px-4 md:px-6 hidden xl:table-cell">Caisse</th>
               <th class="px-2 sm:px-4 md:px-6">Actions</th>
@@ -107,6 +108,20 @@
                     SUSPECT
                   </span>
                 </div>
+              </td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 hidden lg:table-cell">
+                <select
+                  class="input text-xs py-1 px-2 min-w-[7.5rem]"
+                  :value="transaction.payment_api ?? ''"
+                  :disabled="transactionsStore.isLoading || updatingPaymentApiId === transaction.id"
+                  @change="handlePaymentApiChange(transaction, ($event.target as HTMLSelectElement).value)"
+                  title="Override API pour cette transaction"
+                >
+                  <option value="">Réseau (défaut)</option>
+                  <option value="connect">Connect Pro</option>
+                  <option value="manual">Manuel</option>
+                  <option value="feexpay">FeexPay</option>
+                </select>
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ getTransactionUserEmail(transaction) }}</td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ transaction.caisse?.name || '—' }}</td>
@@ -619,6 +634,7 @@ const feexpayError = ref<string | null>(null)
 const showReferenceModal = ref(false)
 const referenceTransaction = ref<Transaction | null>(null)
 const newReferenceValue = ref('')
+const updatingPaymentApiId = ref<number | null>(null)
 
 onMounted(() => {
   const page = parseInt(route.query.page as string) || 1
@@ -658,6 +674,24 @@ const hasNextPage = computed(() => {
 // Vérifier si une transaction peut être approuvée
 function canApproveTransaction(transaction: Transaction): boolean {
   return isWithdrawalLikeType(transaction.type_trans) && transaction.status === 'pending'
+}
+
+async function handlePaymentApiChange(transaction: Transaction, value: string) {
+  const paymentApi = (value === 'feexpay' || value === 'connect' || value === 'manual'
+    ? value
+    : '') as '' | 'feexpay' | 'connect' | 'manual'
+  const previous = transaction.payment_api ?? ''
+  if (paymentApi === previous) return
+
+  try {
+    updatingPaymentApiId.value = transaction.id
+    await transactionsStore.updateTransactionPaymentApi(transaction.id, paymentApi)
+    notification.addNotification('API de paiement mise à jour', 'success')
+  } catch (err: any) {
+    notification.addNotification(err?.message || 'Erreur mise à jour API', 'error')
+  } finally {
+    updatingPaymentApiId.value = null
+  }
 }
 
 function canUpdateReference(transaction: Transaction): boolean {

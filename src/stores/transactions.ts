@@ -251,6 +251,43 @@ export const useTransactionsStore = defineStore('transactions', () => {
     }
   }
 
+  // ✏️ Mettre à jour l'API de paiement (override Connect / FeexPay / Manuel)
+  async function updateTransactionPaymentApi(
+    transactionId: number,
+    paymentApi: '' | 'feexpay' | 'connect' | 'manual'
+  ) {
+    try {
+      isLoading.value = true
+      error.value = null
+
+      const response = await fetchWithAuth('/box/transaction/update-payment-api/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          transaction_id: transactionId,
+          payment_api: paymentApi
+        })
+      })
+
+      const result = await handleApiResponse<{
+        success?: boolean
+        message?: string
+        new_payment_api?: string
+      }>(response, "Erreur lors de la mise à jour de l'API")
+
+      await fetchTransactions(currentPage.value)
+      return result
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
+      console.error('Error updating payment_api:', err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   // 🔍 Vérifier le statut d'une transaction sur Feexpay
   async function checkFeexpayStatus(transactionId: number) {
     try {
@@ -298,6 +335,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     validateWithdrawal,
     approveWithdrawal,
     checkFeexpayStatus,
-    updateTransactionReference
+    updateTransactionReference,
+    updateTransactionPaymentApi
   }
 })

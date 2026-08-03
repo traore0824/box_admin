@@ -53,6 +53,7 @@
               <th class="px-2 sm:px-4 md:px-6 hidden lg:table-cell">Téléphone</th>
               <th class="px-2 sm:px-4 md:px-6">Type</th>
               <th class="px-2 sm:px-4 md:px-6">Statut</th>
+              <th class="px-2 sm:px-4 md:px-6 hidden lg:table-cell">API</th>
               <th class="px-2 sm:px-4 md:px-6 hidden xl:table-cell">Utilisateur</th>
               <th class="px-2 sm:px-4 md:px-6 hidden xl:table-cell">Caisse</th>
               <th class="px-2 sm:px-4 md:px-6">Actions</th>
@@ -86,6 +87,20 @@
                 }">
                   {{ transaction.status === 'accept' ? 'Success' : transaction.status === 'error' ? 'Erreur' : transaction.status === 'pending' ? 'Pending' : transaction.status === 'expired' ? 'Expired' : transaction.status === 'timeout' ? 'Timeout' : transaction.status }}
                 </span>
+              </td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 hidden lg:table-cell">
+                <select
+                  class="input text-xs py-1 px-2 min-w-[7.5rem]"
+                  :value="transaction.payment_api ?? ''"
+                  :disabled="withdrawalTransactionsStore.isLoading || updatingPaymentApiId === transaction.id"
+                  @change="handlePaymentApiChange(transaction, ($event.target as HTMLSelectElement).value)"
+                  title="Override API pour cette transaction"
+                >
+                  <option value="">Réseau (défaut)</option>
+                  <option value="connect">Connect Pro</option>
+                  <option value="manual">Manuel</option>
+                  <option value="feexpay">FeexPay</option>
+                </select>
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ getTransactionUserEmail(transaction) }}</td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ transaction.caisse?.name || '—' }}</td>
@@ -435,6 +450,7 @@ const validationDetails = ref<any>(null)
 const showApproveModal = ref(false)
 const selectedTransaction = ref<Transaction | null>(null)
 const approvingTransactionId = ref<number | null>(null)
+const updatingPaymentApiId = ref<number | null>(null)
 
 // État du modal de vérification Feexpay
 /* const showFeexpayModal = ref(false)
@@ -488,6 +504,24 @@ const getTransactionUserEmail = (transaction: Transaction): string => {
 // Vérifier si une transaction peut être approuvée
 function canApproveTransaction(transaction: Transaction): boolean {
   return isWithdrawalLikeType(transaction.type_trans) && transaction.status === 'pending'
+}
+
+async function handlePaymentApiChange(transaction: Transaction, value: string) {
+  const paymentApi = (value === 'feexpay' || value === 'connect' || value === 'manual'
+    ? value
+    : '') as '' | 'feexpay' | 'connect' | 'manual'
+  const previous = transaction.payment_api ?? ''
+  if (paymentApi === previous) return
+
+  try {
+    updatingPaymentApiId.value = transaction.id
+    await withdrawalTransactionsStore.updateTransactionPaymentApi(transaction.id, paymentApi)
+    notification.addNotification('API de paiement mise à jour', 'success')
+  } catch (err) {
+    console.error(err)
+  } finally {
+    updatingPaymentApiId.value = null
+  }
 }
 
 // Mettre à jour le statut d'une transaction
