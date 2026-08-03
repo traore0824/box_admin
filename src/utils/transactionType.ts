@@ -42,3 +42,33 @@ export function getTransactionAmountClass(type?: string | null): string {
   if (isDebitTransactionType(type)) return 'text-danger'
   return 'text-gray-900'
 }
+
+const PAYMENT_API_LABELS: Record<string, string> = {
+  feexpay: 'FeexPay',
+  connect: 'Connect Pro',
+  manual: 'Manuel',
+}
+
+/** Label affichable pour une API (feexpay / connect / manual) */
+export function getPaymentApiLabel(api?: string | null): string {
+  if (!api) return '—'
+  return PAYMENT_API_LABELS[api] || api
+}
+
+/** API effective : override sinon resolved_payment_api du backend */
+export function getEffectivePaymentApi(transaction: {
+  payment_api?: string | null
+  resolved_payment_api?: string | null
+}): string {
+  const override = (transaction.payment_api || '').trim()
+  if (override) return override
+  return (transaction.resolved_payment_api || '').trim()
+}
+
+/** Dropdown API uniquement pour retrait/annulation/partiel en pending */
+export function canEditPaymentApi(transaction: {
+  type_trans?: string | null
+  status?: string | null
+}): boolean {
+  return isWithdrawalLikeType(transaction.type_trans) && transaction.status === 'pending'
+}

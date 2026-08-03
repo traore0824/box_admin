@@ -88,19 +88,23 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">API de paiement</label>
-            <select
-              class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              :value="transaction.payment_api ?? ''"
-              :disabled="actionLoading"
-              @change="handlePaymentApiChange(($event.target as HTMLSelectElement).value)"
-            >
-              <option value="">Selon le réseau (défaut)</option>
-              <option value="connect">Connect Pro</option>
-              <option value="manual">Manuel (pas d'appel API)</option>
-              <option value="feexpay">FeexPay</option>
-            </select>
-            <p class="mt-1 text-xs text-gray-500">
-              Override pour cette transaction uniquement. Manuel = approve sans Mobile Money auto.
+            <template v-if="canEditPaymentApi(transaction)">
+              <select
+                class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                :value="getEffectivePaymentApi(transaction)"
+                :disabled="actionLoading"
+                @change="handlePaymentApiChange(($event.target as HTMLSelectElement).value)"
+              >
+                <option value="connect">Connect Pro</option>
+                <option value="manual">Manuel (pas d'appel API)</option>
+                <option value="feexpay">FeexPay</option>
+              </select>
+              <p class="mt-1 text-xs text-gray-500">
+                Override pour cette transaction uniquement. Manuel = approve sans Mobile Money auto.
+              </p>
+            </template>
+            <p v-else class="text-gray-900">
+              {{ getPaymentApiLabel(getEffectivePaymentApi(transaction)) }}
             </p>
           </div>
           <div>
@@ -456,7 +460,12 @@ import { formatAmount } from '../utils/currency'
 import { useNotification } from '../services/notification'
 import { useTransactionsStore } from '../stores/transactions'
 import { useAuthStore } from '../stores/auth'
-import { isWithdrawalLikeType } from '../utils/transactionType'
+import {
+  isWithdrawalLikeType,
+  canEditPaymentApi,
+  getEffectivePaymentApi,
+  getPaymentApiLabel,
+} from '../utils/transactionType'
 
 const route = useRoute()
 const router = useRouter()
@@ -716,8 +725,8 @@ async function handlePaymentApiChange(value: string) {
   const paymentApi = (value === 'feexpay' || value === 'connect' || value === 'manual'
     ? value
     : '') as '' | 'feexpay' | 'connect' | 'manual'
-  const previous = transaction.value.payment_api ?? ''
-  if (paymentApi === previous) return
+  const previous = getEffectivePaymentApi(transaction.value)
+  if (paymentApi === previous || !paymentApi) return
 
   try {
     actionLoading.value = true

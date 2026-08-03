@@ -111,17 +111,20 @@
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 hidden lg:table-cell">
                 <select
+                  v-if="canEditPaymentApi(transaction)"
                   class="input text-xs py-1 px-2 min-w-[7.5rem]"
-                  :value="transaction.payment_api ?? ''"
+                  :value="getEffectivePaymentApi(transaction)"
                   :disabled="transactionsStore.isLoading || updatingPaymentApiId === transaction.id"
                   @change="handlePaymentApiChange(transaction, ($event.target as HTMLSelectElement).value)"
                   title="Override API pour cette transaction"
                 >
-                  <option value="">Réseau (défaut)</option>
                   <option value="connect">Connect Pro</option>
                   <option value="manual">Manuel</option>
                   <option value="feexpay">FeexPay</option>
                 </select>
+                <span v-else class="text-xs sm:text-sm text-gray-800">
+                  {{ getPaymentApiLabel(getEffectivePaymentApi(transaction)) }}
+                </span>
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ getTransactionUserEmail(transaction) }}</td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ transaction.caisse?.name || '—' }}</td>
@@ -608,6 +611,9 @@ import {
   getTransactionTypeLabel,
   isDebitTransactionType,
   isWithdrawalLikeType,
+  canEditPaymentApi,
+  getEffectivePaymentApi,
+  getPaymentApiLabel,
 } from '../utils/transactionType'
 
 const router = useRouter()
@@ -680,8 +686,8 @@ async function handlePaymentApiChange(transaction: Transaction, value: string) {
   const paymentApi = (value === 'feexpay' || value === 'connect' || value === 'manual'
     ? value
     : '') as '' | 'feexpay' | 'connect' | 'manual'
-  const previous = transaction.payment_api ?? ''
-  if (paymentApi === previous) return
+  const previous = getEffectivePaymentApi(transaction)
+  if (paymentApi === previous || !paymentApi) return
 
   try {
     updatingPaymentApiId.value = transaction.id

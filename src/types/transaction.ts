@@ -43,6 +43,8 @@ export interface Transaction {
   payment_mode: string
   /** Override API ; vide = deposit_api / withdraw_api du réseau */
   payment_api?: TransactionPaymentApi
+  /** API effective résolue côté backend (override ou Network) */
+  resolved_payment_api?: TransactionPaymentApi | string | null
   /** Objet user (serializer) — peut être absent sur certaines réponses */
   created_by: User | number | null
   amount: number
