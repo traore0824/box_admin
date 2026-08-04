@@ -83,7 +83,34 @@
               :icon="reconciliationStats.current_deficit < 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"
               border
             />
+            <MetricItem
+              :value="formatCurrency(reconciliationStats.feexpay_balance || 0)"
+              label="Solde FeexPay"
+              color="primary"
+              icon="fas fa-university"
+            />
+            <MetricItem
+              :value="formatCurrency(reconciliationStats.devices_balance || 0)"
+              label="Soldes Devices / Réseaux"
+              color="info"
+              icon="fas fa-mobile-alt"
+            />
+            <MetricItem
+              :value="formatCurrency(reconciliationStats.liquidity || 0)"
+              label="Liquidité Totale"
+              color="success"
+              icon="fas fa-coins"
+            />
+            <MetricItem
+              :value="formatCurrency(reconciliationStats.float_loss_total || 0)"
+              label="Pertes Float (FeexPay→Agent)"
+              color="warning"
+              icon="fas fa-exchange-alt"
+            />
           </MetricGrid>
+          <p class="text-xs text-gray-500 mt-3">
+            Formule : Déficit = (FeexPay + Devices) − (Caisses actives + Commissions)
+          </p>
         </DashboardSection>
       </section>
 

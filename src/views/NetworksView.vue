@@ -80,6 +80,10 @@
             <span class="mr-1 shrink-0">UUID:</span>
             <span class="truncate">{{ network.system_account }}</span>
           </div>
+          <div v-if="network.device_id" class="flex items-center text-xs text-gray-600 font-mono truncate">
+            <span class="mr-1 shrink-0">Device:</span>
+            <span class="truncate">{{ network.device_id }}</span>
+          </div>
         </div>
 
         <div class="flex space-x-2">
@@ -232,6 +236,19 @@
             </div>
 
             <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Device ID FlashPay</label>
+              <input
+                v-model="formData.device_id"
+                type="text"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                placeholder="ex: 0146639765"
+              />
+              <p class="mt-1 text-xs text-gray-500">
+                ID device / SIM pour lire le solde MoMo (FlashPay). Utilisé dans le calcul du déficit.
+              </p>
+            </div>
+
+            <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Image</label>
               <div class="flex items-center space-x-4">
                 <input 
@@ -318,6 +335,7 @@ const formData = reactive({
   deposit_api: 'feexpay' as 'feexpay' | 'connect' | 'manual',
   withdraw_api: 'connect' as 'feexpay' | 'connect' | 'manual',
   system_account: '',
+  device_id: '',
   image: '',
   is_active: true
 })
@@ -351,6 +369,7 @@ const openEditModal = (network: any) => {
   formData.deposit_api = network.deposit_api || 'feexpay'
   formData.withdraw_api = network.withdraw_api || 'connect'
   formData.system_account = network.system_account || ''
+  formData.device_id = network.device_id || ''
   formData.image = network.image
   formData.is_active = network.is_active
   showModal.value = true
@@ -372,6 +391,7 @@ const resetForm = () => {
   formData.deposit_api = 'feexpay'
   formData.withdraw_api = 'connect'
   formData.system_account = ''
+  formData.device_id = ''
   formData.image = ''
   formData.is_active = true
 }

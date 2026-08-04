@@ -70,6 +70,12 @@ export const menuItems: MenuItem[] = [
     icon: 'fas fa-network-wired'
   },
   {
+    path: '/float-recharges',
+    name: 'Recharges Float',
+    icon: 'fas fa-exchange-alt',
+    staffOnly: true
+  },
+  {
     path: '/kyc-pending',
     name: 'KYC en Attente',
     icon: 'fas fa-id-card'

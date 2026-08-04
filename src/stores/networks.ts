@@ -15,6 +15,7 @@ interface Network {
   deposit_api: 'feexpay' | 'connect' | 'manual'
   withdraw_api: 'feexpay' | 'connect' | 'manual'
   system_account: string | null
+  device_id: string
   image: string
   is_active: boolean
   created_at: string

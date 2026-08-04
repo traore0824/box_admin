@@ -14,6 +14,20 @@ interface FeexpayBalance {
 interface ReconciliationStats {
   baseline_deficit: number
   current_deficit: number
+  feexpay_balance?: number
+  devices_balance?: number
+  liquidity?: number
+  caisse_active_amount?: number
+  commission_available?: number
+  float_loss_total?: number
+  networks?: Array<{
+    network_id: number
+    network_name: string
+    publique_name: string
+    device_id: string
+    amount: number
+  }>
+  devices_error?: string | null
 }
 
 interface DashboardStats {
