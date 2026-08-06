@@ -52,15 +52,28 @@
         />
       </section>
 
-      <!-- Solde Feexpay -->
-      <section class="feexpay-balance" v-if="feexpayStats">
-        <DashboardSection title="Solde Feexpay">
+      <!-- Soldes liquidité (FeexPay + Réseaux) -->
+      <section class="feexpay-balance" v-if="feexpayStats || reconciliationStats">
+        <DashboardSection title="Soldes liquidité">
           <MetricGrid>
             <MetricItem
-              :value="formatCurrency(feexpayStats.total_balance)"
-              label="Solde Total"
+              :value="formatCurrency(feexpayStats?.total_balance ?? reconciliationStats?.feexpay_balance ?? 0)"
+              label="Solde FeexPay"
               color="primary"
-              icon="fas fa-wallet"
+              icon="fas fa-university"
+            />
+            <MetricItem
+              :value="formatCurrency(reconciliationStats?.devices_balance ?? 0)"
+              label="Solde des réseaux"
+              color="info"
+              icon="fas fa-mobile-alt"
+            />
+            <MetricItem
+              :value="formatCurrency(liquidityTotal)"
+              label="Solde total"
+              color="success"
+              icon="fas fa-coins"
+              border
             />
           </MetricGrid>
         </DashboardSection>
@@ -369,6 +382,17 @@ const mainKPIs = computed(() => [
     growth: stats.value.evolution?.total_transactions || 0
   }
 ])
+
+// Solde total = FeexPay + réseaux (préfère liquidity API si dispo)
+const liquidityTotal = computed(() => {
+  if (reconciliationStats.value?.liquidity != null) {
+    return reconciliationStats.value.liquidity
+  }
+  const feex =
+    feexpayStats.value?.total_balance ?? reconciliationStats.value?.feexpay_balance ?? 0
+  const devices = reconciliationStats.value?.devices_balance ?? 0
+  return feex + devices
+})
 
 // Computed - Filtres actifs
 const hasActiveFilters = computed(() =>
