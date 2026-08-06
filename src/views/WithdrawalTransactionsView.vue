@@ -109,16 +109,28 @@
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden xl:table-cell">{{ transaction.caisse?.name || '—' }}</td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
                 <div class="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                  <!-- Bouton Mettre à jour le statut (si status !== error && status !== accept) -->
+                  <!-- Bouton MAJ Connect (Connect uniquement) -->
                   <button
-                    v-if="transaction.status !== 'error' && transaction.status !== 'accept'"
+                    v-if="transaction.status !== 'error' && transaction.status !== 'accept' && getEffectivePaymentApi(transaction) === 'connect'"
                     @click="handleUpdateStatus(transaction.id)"
                     :disabled="withdrawalTransactionsStore.isLoading"
                     class="btn btn-sm btn-outline text-xs"
-                    title="Mettre à jour le statut (vérifie Feexpay)"
+                    title="Mettre à jour Connect"
                   >
                     <i class="fas fa-sync-alt mr-1"></i>
-                    <span class="hidden sm:inline">Mettre à jour</span>
+                    <span class="hidden sm:inline">Maj Connect</span>
+                  </button>
+
+                  <!-- Bouton MAJ Fispi/FeexPay (FeexPay uniquement) -->
+                  <button
+                    v-if="transaction.status !== 'error' && transaction.status !== 'accept' && getEffectivePaymentApi(transaction) === 'feexpay'"
+                    @click="handleUpdateStatus(transaction.id)"
+                    :disabled="withdrawalTransactionsStore.isLoading"
+                    class="btn btn-sm btn-outline text-xs"
+                    title="Mettre à jour Fispi"
+                  >
+                    <i class="fas fa-sync-alt mr-1"></i>
+                    <span class="hidden sm:inline">Maj Fispi</span>
                   </button>
 
                   <!-- Bouton Vérifier Feexpay (pour toutes les transactions) -->

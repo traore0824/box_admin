@@ -259,15 +259,28 @@
           Actions
         </h3>
         <div class="flex flex-wrap gap-3">
-          <button @click="handleUpdateStatus" :disabled="actionLoading"
-            class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50 transition-colors">
+          <button
+            v-if="getEffectivePaymentApi(transaction) === 'connect'"
+            @click="handleUpdateStatus"
+            :disabled="actionLoading"
+            class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50 transition-colors"
+          >
             <i class="fas fa-sync-alt mr-2"></i>
-            Mettre à jour le statut
+            Mettre à jour Connect
           </button>
-          <button @click="handleCheckFeexpay" :disabled="actionLoading"
+          <button
+            v-if="getEffectivePaymentApi(transaction) === 'feexpay'"
+            @click="handleUpdateStatus"
+            :disabled="actionLoading"
+            class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50 transition-colors"
+          >
+            <i class="fas fa-sync-alt mr-2"></i>
+            Mettre à jour Fispi
+          </button>
+          <button v-if="getEffectivePaymentApi(transaction) === 'feexpay'" @click="handleCheckFeexpay" :disabled="actionLoading"
             class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
             <i class="fas fa-search mr-2"></i>
-            Vérifier statut Feexpay
+            Vérifier statut Fispi
           </button>
           <button v-if="isWithdrawalLikeType(transaction.type_trans) && transaction.status === 'pending'" 
             @click="handleValidateWithdrawal" :disabled="actionLoading"
