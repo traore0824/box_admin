@@ -484,7 +484,7 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useDashboardStore } from '../stores/dashboard'
 import { useChargesStore } from '../stores/charges'
-import { useAcquisitionStore, type CacPeriodKey } from '../stores/acquisition'
+import { useAcquisitionStore, type CacPeriodKey, type CacPeriodStats } from '../stores/acquisition'
 import { useCreditScoreStore } from '../stores/creditScore'
 import { storeToRefs } from 'pinia'
 import { formatCurrency } from '../utils/currency'
@@ -532,22 +532,42 @@ const cacPeriodOptions: { key: CacPeriodKey; label: string }[] = [
   { key: 'year', label: 'Annuel' },
 ]
 
-const currentCacPeriod = computed(() => {
+const EMPTY_CAC_PERIOD: CacPeriodStats = {
+  start: '',
+  end: '',
+  previous_start: '',
+  previous_end: '',
+  months_in_period: 1,
+  new_users: 0,
+  new_activated_users: 0,
+  marketing_spend: 0,
+  commercial_spend: 0,
+  acquisition_spend: 0,
+  cac: null,
+  previous_cac: null,
+  cac_evolution_pct: null,
+  revenue_total: 0,
+  paying_clients: 0,
+  avg_revenue_per_client: null,
+  monthly_arpu: null,
+  customers_at_start: 0,
+  churned_customers: 0,
+  period_churn_rate: null,
+  monthly_churn_rate: null,
+  gross_margin_percent: 70,
+  ltv: null,
+  ltv_cac_ratio: null,
+  ltv_cac_interpretation: {
+    code: 'unavailable',
+    label: 'Indisponible',
+    detail: '',
+  },
+  payback_months: null,
+}
+
+const currentCacPeriod = computed((): CacPeriodStats => {
   const summary = cacSummary.value
-  if (!summary) {
-    return {
-      new_users: 0,
-      new_activated_users: 0,
-      marketing_spend: 0,
-      commercial_spend: 0,
-      acquisition_spend: 0,
-      cac: null as number | null,
-      previous_cac: null as number | null,
-      cac_evolution_pct: null as number | null,
-      start: '',
-      end: '',
-    }
-  }
+  if (!summary) return EMPTY_CAC_PERIOD
   return summary[cacPeriod.value]
 })
 
