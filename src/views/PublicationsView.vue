@@ -462,26 +462,3 @@ const openImage = (url: string) => {
 }
 </script>
 
-<style scoped>
-.bg-primary {
-  @apply bg-primary;
-}
-.bg-primary-600 {
-  @apply bg-primary-dark;
-}
-.text-primary {
-  @apply text-primary;
-}
-.bg-primary-50 {
-  @apply bg-primary-50;
-}
-.bg-primary-100 {
-  @apply bg-primary-100;
-}
-.focus\:ring-primary:focus {
-  @apply ring-primary;
-}
-.focus\:border-primary:focus {
-  @apply border-primary;
-}
-</style>

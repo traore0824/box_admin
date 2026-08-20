@@ -583,25 +583,3 @@ const sendNotification = async () => {
   }
 }
 </script>
-
-<style scoped>
-.bg-primary {
-  @apply bg-primary;
-}
-
-.text-primary {
-  @apply text-primary;
-}
-
-.hover\:bg-primary-700:hover {
-  @apply bg-primary-dark;
-}
-
-.focus\:ring-primary:focus {
-  @apply ring-2 ring-primary ring-opacity-50;
-}
-
-.focus\:border-primary:focus {
-  @apply border-primary;
-}
-</style>

@@ -376,25 +376,3 @@ const getChannelClass = (channel: string) => {
 }
 </script>
 
-<style scoped>
-.bg-primary {
-  @apply bg-primary;
-}
-
-.bg-primary-700 {
-  @apply bg-primary-dark;
-}
-
-.text-primary {
-  @apply text-primary;
-}
-
-.focus\:ring-primary:focus {
-  @apply ring-2 ring-primary ring-opacity-50;
-}
-
-.focus\:border-primary:focus {
-  @apply border-primary;
-}
-</style>
-
