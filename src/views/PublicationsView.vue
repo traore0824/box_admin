@@ -63,7 +63,7 @@
               <div class="flex items-center space-x-2 mb-2">
                 <span 
                   v-if="!publication.is_read" 
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
                 >
                   Non lu
                 </span>
@@ -121,7 +121,7 @@
                 v-if="authStore.user?.is_staff"
                 @click="openRepublishConfirm(publication)"
                 :disabled="republishingId === publication.id"
-                class="inline-flex items-center px-3 py-1.5 border border-indigo-300 text-xs font-medium rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="inline-flex items-center px-3 py-1.5 border border-primary-300 text-xs font-medium rounded-md text-primary-dark bg-primary-50 hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Republier"
               >
                 <i
@@ -145,8 +145,8 @@
       >
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
           <div class="flex items-start gap-4 mb-4">
-            <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-redo-alt text-indigo-600"></i>
+            <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-redo-alt text-primary"></i>
             </div>
             <div>
               <h3 class="text-base font-semibold text-gray-900">Republier cette publication ?</h3>
@@ -155,10 +155,10 @@
               </p>
             </div>
           </div>
-          <ul class="text-sm text-gray-600 space-y-1.5 mb-5 bg-indigo-50 rounded-lg p-3">
-            <li class="flex items-center gap-2"><i class="fas fa-check text-indigo-500 w-4"></i> La publication repassera en tête du fil</li>
-            <li class="flex items-center gap-2"><i class="fas fa-check text-indigo-500 w-4"></i> Elle sera marquée comme <strong>active</strong></li>
-            <li class="flex items-center gap-2"><i class="fas fa-check text-indigo-500 w-4"></i> Toutes les lectures seront réinitialisées</li>
+          <ul class="text-sm text-gray-600 space-y-1.5 mb-5 bg-primary-50 rounded-lg p-3">
+            <li class="flex items-center gap-2"><i class="fas fa-check text-primary w-4"></i> La publication repassera en tête du fil</li>
+            <li class="flex items-center gap-2"><i class="fas fa-check text-primary w-4"></i> Elle sera marquée comme <strong>active</strong></li>
+            <li class="flex items-center gap-2"><i class="fas fa-check text-primary w-4"></i> Toutes les lectures seront réinitialisées</li>
           </ul>
           <div class="flex justify-end gap-3">
             <button
@@ -171,7 +171,7 @@
             <button
               @click="confirmRepublish"
               :disabled="republishingId !== null"
-              class="px-4 py-2 text-sm text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              class="px-4 py-2 text-sm text-white bg-primary rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               <i class="fas" :class="republishingId ? 'fa-spinner animate-spin' : 'fa-redo-alt'"></i>
               {{ republishingId ? 'Republication...' : 'Confirmer' }}
@@ -464,24 +464,24 @@ const openImage = (url: string) => {
 
 <style scoped>
 .bg-primary {
-  @apply bg-blue-600;
+  @apply bg-primary;
 }
 .bg-primary-600 {
-  @apply bg-blue-700;
+  @apply bg-primary-dark;
 }
 .text-primary {
-  @apply text-blue-600;
+  @apply text-primary;
 }
 .bg-primary-50 {
-  @apply bg-blue-50;
+  @apply bg-primary-50;
 }
 .bg-primary-100 {
-  @apply bg-blue-100;
+  @apply bg-primary-100;
 }
 .focus\:ring-primary:focus {
-  @apply ring-blue-500;
+  @apply ring-primary;
 }
 .focus\:border-primary:focus {
-  @apply border-blue-500;
+  @apply border-primary;
 }
 </style>

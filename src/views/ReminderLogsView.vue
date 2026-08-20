@@ -104,7 +104,7 @@
               <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <button
                   @click="openEditModal(log)"
-                  class="text-blue-600 hover:text-blue-900"
+                  class="text-primary hover:text-primary-dark"
                   title="Modifier"
                 >
                   <i class="fas fa-edit"></i>
@@ -368,7 +368,7 @@ const getChannelLabel = (channel: string) => {
 
 const getChannelClass = (channel: string) => {
   const classes: Record<string, string> = {
-    push: 'bg-blue-100 text-blue-800',
+    push: 'bg-primary-100 text-primary-800',
     email: 'bg-green-100 text-green-800',
     call: 'bg-orange-100 text-orange-800'
   }
@@ -378,23 +378,23 @@ const getChannelClass = (channel: string) => {
 
 <style scoped>
 .bg-primary {
-  @apply bg-blue-600;
+  @apply bg-primary;
 }
 
 .bg-primary-700 {
-  @apply bg-blue-700;
+  @apply bg-primary-dark;
 }
 
 .text-primary {
-  @apply text-blue-600;
+  @apply text-primary;
 }
 
 .focus\:ring-primary:focus {
-  @apply ring-2 ring-blue-500 ring-opacity-50;
+  @apply ring-2 ring-primary ring-opacity-50;
 }
 
 .focus\:border-primary:focus {
-  @apply border-blue-500;
+  @apply border-primary;
 }
 </style>
 

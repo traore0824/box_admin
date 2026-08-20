@@ -87,7 +87,7 @@
                   type="button"
                   @click="openParticipants(c)"
                   title="Voir les participants"
-                  class="inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-md border border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100"
+                  class="inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-md border border-primary-200 text-primary-dark bg-primary-50 hover:bg-primary-100"
                 >
                   <i class="fas fa-users"></i>
                   Participants
@@ -604,7 +604,7 @@ function formatAmount(value: number) {
 }
 
 function participationStatusClass(s: string) {
-  if (s === 'EN_COURS' || s === 'EN_ATTENTE') return 'bg-blue-100 text-blue-800'
+  if (s === 'EN_COURS' || s === 'EN_ATTENTE') return 'bg-primary-100 text-primary-800'
   if (s === 'REUSSI') return 'bg-green-100 text-green-800'
   return 'bg-red-100 text-red-800'
 }

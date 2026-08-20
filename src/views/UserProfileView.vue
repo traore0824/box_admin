@@ -63,7 +63,7 @@
               </span>
               <span :class="[
                 'px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full',
-                user.agent_client ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                user.agent_client ? 'bg-primary-100 text-primary-800' : 'bg-gray-100 text-gray-800'
               ]">
                 {{ user.agent_client ? 'Agent' : 'Client' }}
               </span>
@@ -109,7 +109,7 @@
           <!-- Nommer Agent / Retirer Agent -->
           <button @click="handleToggleAgent" :disabled="actionLoading"
             class="flex items-center justify-center px-4 py-3 border rounded-lg transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-            :class="user.agent_client ? 'border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100' : 'border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100'">
+            :class="user.agent_client ? 'border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100' : 'border-primary-300 bg-primary-50 text-primary-dark hover:bg-primary-100'">
             <i :class="['fas mr-2', user.agent_client ? 'fa-user-minus' : 'fa-user-tie']"></i>
             {{ user.agent_client ? 'Retirer Agent' : 'Nommer Agent' }}
           </button>
@@ -130,7 +130,7 @@
 
           <!-- Mettre à jour KYC -->
           <button @click="openKycModal" :disabled="actionLoading"
-            class="flex items-center justify-center px-4 py-3 border border-indigo-300 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+            class="flex items-center justify-center px-4 py-3 border border-primary-300 bg-primary-50 text-primary-dark rounded-lg hover:bg-primary-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
             <i class="fas fa-id-card mr-2"></i>
             Mettre à jour KYC
           </button>
@@ -151,7 +151,7 @@
 
           <!-- Admin KYC Verify — uniquement si KYC non vérifié -->
           <button v-if="user.status !== 'accept'" @click="openAdminKycModal" :disabled="actionLoading"
-            class="flex items-center justify-center px-4 py-3 border border-blue-300 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+            class="flex items-center justify-center px-4 py-3 border border-primary-300 bg-primary-50 text-primary-dark rounded-lg hover:bg-primary-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
             <i class="fas fa-shield-alt mr-2"></i>
             Vérifier KYC (Admin)
           </button>
@@ -287,9 +287,6 @@
             <span class="font-semibold text-gray-900">{{ row.subScore }}/100</span>
           </div>
         </div>
-        <p class="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-          {{ creditScoreDisclaimer }}
-        </p>
       </div>
 
       <!-- Engagement & valeur (pièces, badge, parrainage) -->
@@ -327,9 +324,9 @@
               {{ user.achieved_levels.length }} palier(s) atteints
             </p>
           </div>
-          <div class="bg-indigo-50 p-4 rounded-lg">
+          <div class="bg-primary-50 p-4 rounded-lg">
             <p class="text-sm text-gray-600 mb-1">Filleuls</p>
-            <p class="text-2xl font-bold text-indigo-700">
+            <p class="text-2xl font-bold text-primary-dark">
               {{ user.number_sponsor ?? 0 }}
             </p>
             <p class="text-xs text-gray-500 mt-1">Inscrits avec son code</p>
@@ -498,7 +495,7 @@
                       <i class="fas" :class="kycReqStatusIcon(req.status)"></i>
                       {{ kycReqStatusLabel(req.status) }}
                     </span>
-                    <span v-if="index === 0" class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">Dernière</span>
+                    <span v-if="index === 0" class="text-xs px-2 py-0.5 bg-primary-100 text-primary-dark rounded-full font-medium">Dernière</span>
                   </div>
                   <div class="flex items-center gap-4 text-xs text-gray-500">
                     <span v-if="req.submitted_at">
@@ -572,9 +569,9 @@
           Statistiques financières
         </h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div class="bg-blue-50 p-4 rounded-lg">
+          <div class="bg-primary-50 p-4 rounded-lg">
             <p class="text-sm text-gray-600 mb-1">Solde actuel (Wallet)</p>
-            <p class="text-2xl font-bold text-blue-600">
+            <p class="text-2xl font-bold text-primary">
               {{ walletBalance && walletBalance.current_balance ? formatCurrency(parseFloat(walletBalance.current_balance)) : 'Non défini' }}
             </p>
           </div>
@@ -885,7 +882,7 @@
               <td class="px-4 py-3 whitespace-nowrap">
                 <span :class="[
                   'px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full',
-                  entry.is_automatic ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'
+                  entry.is_automatic ? 'bg-yellow-100 text-yellow-800' : 'bg-primary-100 text-primary-800'
                 ]">
                   {{ entry.is_automatic ? 'Automatique' : 'Manuel' }}
                 </span>
@@ -1010,9 +1007,9 @@
 
           <!-- Résumé du Wallet -->
           <div v-if="walletsStore.summary" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-blue-50 p-4 rounded-lg">
+            <div class="bg-primary-50 p-4 rounded-lg">
               <p class="text-sm text-gray-600">Solde Actuel</p>
-              <p class="text-2xl font-bold text-blue-600">
+              <p class="text-2xl font-bold text-primary">
                 {{ formatCurrency(parseFloat(walletsStore.summary.current_balance)) }}
               </p>
             </div>
@@ -1562,13 +1559,7 @@ const creditScoreDetail = ref<{
   grade: string
   breakdown?: Record<string, any>
   calculated_at?: string | null
-  disclaimer?: string
 } | null>(null)
-
-const creditScoreDisclaimer = computed(() =>
-  creditScoreDetail.value?.disclaimer ||
-  "Le Credit Score BOX est un indicateur interne d'engagement et de fiabilité. Il ne constitue pas une décision automatique d'octroi de crédit et ne remplace pas les règles de crédit ni le cadre réglementaire applicable."
-)
 
 const creditScoreCriteria = computed(() => {
   const breakdown = creditScoreDetail.value?.breakdown || {}
@@ -1588,7 +1579,7 @@ function creditScoreBadgeClass(grade?: string | null) {
   if (grade === 'Moyen') return 'bg-amber-100 text-amber-800'
   if (grade === 'Faible') return 'bg-orange-100 text-orange-800'
   if (grade === 'Risqué') return 'bg-red-100 text-red-800'
-  return 'bg-indigo-100 text-indigo-800'
+  return 'bg-primary-100 text-primary-800'
 }
 
 function creditScoreTextClass(grade?: string | null) {
@@ -1663,7 +1654,7 @@ const kycReqStatusClass = (status: string): string => {
     verified: 'bg-green-100 text-green-800',
     rejected: 'bg-red-100 text-red-800',
     pending: 'bg-yellow-100 text-yellow-800',
-    in_review: 'bg-blue-100 text-blue-800',
+    in_review: 'bg-primary-100 text-primary-800',
     needs_revision: 'bg-orange-100 text-orange-800'
   }
   return map[status] ?? 'bg-gray-100 text-gray-600'
@@ -1836,7 +1827,7 @@ const getWalletTransactionTypeClass = (type: string): string => {
   const classes: Record<string, string> = {
     deposit: 'bg-green-100 text-green-800',
     withdrawal: 'bg-red-100 text-red-800',
-    bonus: 'bg-blue-100 text-blue-800',
+    bonus: 'bg-primary-100 text-primary-800',
     commission: 'bg-purple-100 text-purple-800',
     refund: 'bg-yellow-100 text-yellow-800',
     transfer: 'bg-gray-100 text-gray-800'
@@ -1887,7 +1878,7 @@ const getCaisseStatusLabel = (status: string): string => {
 const getCaisseStatusClass = (status: string): string => {
   const classes: Record<string, string> = {
     active: 'bg-green-100 text-green-800',
-    completed: 'bg-blue-100 text-blue-800',
+    completed: 'bg-primary-100 text-primary-800',
     blocked: 'bg-red-100 text-red-800'
   }
   return classes[status] || 'bg-gray-100 text-gray-800'

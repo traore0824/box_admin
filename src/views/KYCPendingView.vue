@@ -16,12 +16,12 @@
             @input="debouncedSearch"
             type="text"
             placeholder="Rechercher par email, téléphone, nom, prénom, numéro de pièce..."
-            class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
         <button
           @click="handleSearch"
-          class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          class="px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
         >
           <i class="fas fa-search"></i>
           Rechercher
@@ -39,7 +39,7 @@
 
     <!-- Loading state -->
     <div v-if="kycStore.isLoading && kycStore.pendingUsers.length === 0" class="bg-white rounded-lg shadow-sm p-16 text-center">
-      <i class="fas fa-spinner fa-spin text-4xl text-blue-400 mb-4"></i>
+      <i class="fas fa-spinner fa-spin text-4xl text-primary-400 mb-4"></i>
       <p class="text-gray-500">Chargement des demandes KYC...</p>
     </div>
 
@@ -62,8 +62,8 @@
         <!-- Card Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <span class="text-blue-700 font-bold text-sm">
+            <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <span class="text-primary-dark font-bold text-sm">
                 {{ userInitials(user) }}
               </span>
             </div>
@@ -109,7 +109,7 @@
             <div class="flex flex-col gap-2 pt-3 border-t border-gray-100">
               <router-link
                 :to="{ name: 'user-profile', params: { id: user.id.toString() } }"
-                class="w-full px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 transition-colors"
+                class="w-full px-3 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark flex items-center justify-center gap-2 transition-colors"
               >
                 <i class="fas fa-user-circle"></i>
                 Voir le profil
@@ -134,7 +134,7 @@
               </button>
               <button
                 @click="openManualVerifyModal(user)"
-                class="w-full px-3 py-2 bg-indigo-50 text-indigo-700 text-sm rounded-lg hover:bg-indigo-100 flex items-center justify-center gap-2 transition-colors border border-indigo-200"
+                class="w-full px-3 py-2 bg-primary-50 text-primary-dark text-sm rounded-lg hover:bg-primary-100 flex items-center justify-center gap-2 transition-colors border border-primary-200"
               >
                 <i class="fas fa-user-check"></i>
                 Vérif. manuelle
@@ -153,7 +153,7 @@
               <div
                 v-for="(imageUrl, index) in user.user_cards"
                 :key="index"
-                class="relative group cursor-pointer rounded-lg overflow-hidden border-2 border-gray-200 hover:border-blue-400 transition-colors aspect-[4/3]"
+                class="relative group cursor-pointer rounded-lg overflow-hidden border-2 border-gray-200 hover:border-primary-400 transition-colors aspect-[4/3]"
                 @click="openImageModal(imageUrl)"
               >
                 <img
@@ -195,7 +195,7 @@
           <i class="fas fa-chevron-left text-xs"></i>
           Précédent
         </button>
-        <span class="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg font-medium">
+        <span class="px-3 py-1.5 bg-primary text-white text-sm rounded-lg font-medium">
           {{ kycStore.currentPage }}
         </span>
         <button
@@ -280,33 +280,33 @@
               v-model.number="manualUserId"
               type="number"
               placeholder="Ex: 4674"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
-          <div v-else class="mb-4 flex items-center gap-3 p-3 bg-indigo-50 rounded-lg border border-indigo-200">
-            <i class="fas fa-user-circle text-indigo-500"></i>
+          <div v-else class="mb-4 flex items-center gap-3 p-3 bg-primary-50 rounded-lg border border-primary-200">
+            <i class="fas fa-user-circle text-primary"></i>
             <div>
-              <p class="text-sm font-medium text-indigo-800">{{ manualForm.first_name }} {{ manualForm.last_name }}</p>
-              <p class="text-xs text-indigo-500">ID: {{ manualForm.user_id }}</p>
+              <p class="text-sm font-medium text-primary-800">{{ manualForm.first_name }} {{ manualForm.last_name }}</p>
+              <p class="text-xs text-primary">ID: {{ manualForm.user_id }}</p>
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">Prénom</label>
-              <input v-model="manualForm.first_name" type="text" placeholder="Prénom" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+              <input v-model="manualForm.first_name" type="text" placeholder="Prénom" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">Nom</label>
-              <input v-model="manualForm.last_name" type="text" placeholder="Nom" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+              <input v-model="manualForm.last_name" type="text" placeholder="Nom" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">Date de naissance</label>
-              <input v-model="manualForm.birthday" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+              <input v-model="manualForm.birthday" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">Genre</label>
-              <select v-model="manualForm.sexe" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+              <select v-model="manualForm.sexe" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
                 <option value="">Sélectionner</option>
                 <option value="M">Masculin</option>
                 <option value="F">Féminin</option>
@@ -315,7 +315,7 @@
           </div>
           <div class="mt-4">
             <label class="block text-sm font-medium text-gray-700 mb-1.5">Numéro de pièce d'identité</label>
-            <input v-model="manualForm.card_id" type="text" placeholder="Ex: 12345678" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+            <input v-model="manualForm.card_id" type="text" placeholder="Ex: 12345678" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
           </div>
           <div class="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-200 flex items-start gap-2">
             <i class="fas fa-info-circle text-amber-500 mt-0.5 flex-shrink-0"></i>
@@ -328,7 +328,7 @@
             <button
               @click="confirmManualVerify"
               :disabled="kycStore.isLoading || (!manualForm.user_id && !manualUserId)"
-              class="px-4 py-2 text-sm text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+              class="px-4 py-2 text-sm text-white bg-primary rounded-lg hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
             >
               <i v-if="kycStore.isLoading" class="fas fa-spinner fa-spin"></i>
               <i v-else class="fas fa-user-check"></i>

@@ -6,7 +6,7 @@
       <span
         v-for="email in modelValue"
         :key="email"
-        class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50 border border-blue-200 text-xs text-gray-800"
+        class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary-50 border border-primary-200 text-xs text-gray-800"
       >
         {{ email }}
         <button
@@ -46,7 +46,7 @@
           :key="user.id"
           type="button"
           class="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 text-left"
-          :class="modelValue.includes(user.email) ? 'bg-blue-50/50' : ''"
+          :class="modelValue.includes(user.email) ? 'bg-primary-50/50' : ''"
           @click="addUser(user)"
         >
           <div>

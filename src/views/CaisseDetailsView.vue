@@ -41,7 +41,7 @@
               'bg-green-100 text-green-800': caisse.status === 'done',
               'bg-yellow-100 text-yellow-800': caisse.status === 'pending',
               'bg-red-100 text-red-800': caisse.status === 'disabled',
-              'bg-blue-100 text-blue-800': !['done', 'pending', 'disabled'].includes(caisse.status)
+              'bg-primary-100 text-primary-800': !['done', 'pending', 'disabled'].includes(caisse.status)
             }">
               {{ caisse.status === 'done' ? 'Terminé' :
               caisse.status === 'pending' ? 'En cours' :
@@ -138,7 +138,7 @@
       <!-- Actions admin : retrait / annulation (caisse personnelle) -->
       <div
         v-if="caisse.personal"
-        class="bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-indigo-100"
+        class="bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-primary-100"
       >
         <h2 class="text-lg font-semibold text-gray-900 mb-1">Créer une demande pour l'utilisateur</h2>
         <p class="text-sm text-gray-500 mb-4">
@@ -761,9 +761,9 @@ const adminConfirmHeaderClass = computed(() => {
     case 'cancellation':
       return 'bg-red-50 border-red-100 text-red-900'
     case 'partial':
-      return 'bg-blue-50 border-blue-100 text-blue-900'
+      return 'bg-primary-50 border-primary-100 text-primary-dark'
     default:
-      return 'bg-indigo-50 border-indigo-100 text-indigo-900'
+      return 'bg-primary-50 border-primary-100 text-primary-dark'
   }
 })
 
@@ -772,7 +772,7 @@ const adminConfirmNoticeClass = computed(() => {
     case 'cancellation':
       return 'bg-red-50 text-red-800 border border-red-100'
     case 'partial':
-      return 'bg-blue-50 text-blue-800 border border-blue-100'
+      return 'bg-primary-50 text-primary-800 border border-primary-100'
     default:
       return 'bg-amber-50 text-amber-800 border border-amber-100'
   }
@@ -937,7 +937,7 @@ const reasonBadgeClass = (reason: BalanceHistoryEntry['reason']): string => {
     deposit: 'bg-green-100 text-green-800',
     withdrawal: 'bg-orange-100 text-orange-800',
     cancellation: 'bg-red-100 text-red-800',
-    adjustment: 'bg-blue-100 text-blue-800',
+    adjustment: 'bg-primary-100 text-primary-800',
     unknown: 'bg-gray-100 text-gray-600'
   }
   return map[reason] ?? map.unknown

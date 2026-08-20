@@ -53,7 +53,7 @@
               <p class="text-sm text-gray-500">Générée le {{ formatDate(sample.created_at) }}</p>
             </div>
             <div class="flex gap-4 text-sm text-gray-600">
-              <span><i class="fas fa-briefcase mr-1 text-blue-500"></i>{{ sample.entries_with_caisse.length }} avec caisse</span>
+              <span><i class="fas fa-briefcase mr-1 text-primary"></i>{{ sample.entries_with_caisse.length }} avec caisse</span>
               <span><i class="fas fa-user mr-1 text-gray-400"></i>{{ sample.entries_without_caisse.length }} sans caisse</span>
               <span class="text-green-600">
                 <i class="fas fa-phone-check mr-1"></i>

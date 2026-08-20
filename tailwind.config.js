@@ -43,9 +43,9 @@ export default {
           dark: '#DC2626',
         },
         info: {
-          DEFAULT: '#3B82F6',
-          light: '#60A5FA',
-          dark: '#2563EB',
+          DEFAULT: '#5B6B7C',
+          light: '#7A8A9A',
+          dark: '#3C4A58',
         }
       },
       fontFamily: {

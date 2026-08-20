@@ -90,7 +90,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">API de paiement</label>
             <template v-if="canEditPaymentApi(transaction)">
               <select
-                class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 :value="getEffectivePaymentApi(transaction)"
                 :disabled="actionLoading"
                 @change="handlePaymentApiChange(($event.target as HTMLSelectElement).value)"
@@ -147,7 +147,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
             <span :class="[
               'px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full',
-              transaction.created_by.agent_client ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+              transaction.created_by.agent_client ? 'bg-primary-100 text-primary-800' : 'bg-gray-100 text-gray-800'
             ]">
               {{ transaction.created_by.agent_client ? 'Agent' : 'Client' }}
             </span>
@@ -236,7 +236,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">Personnelle</label>
             <span :class="[
               'px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full',
-              transaction.caisse.personal ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+              transaction.caisse.personal ? 'bg-primary-100 text-primary-800' : 'bg-purple-100 text-purple-800'
             ]">
               {{ transaction.caisse.personal ? 'Oui' : 'Non' }}
             </span>
@@ -278,7 +278,7 @@
             Mettre à jour Fispi
           </button>
           <button v-if="getEffectivePaymentApi(transaction) === 'feexpay'" @click="handleCheckFeexpay" :disabled="actionLoading"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
+            class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50 transition-colors">
             <i class="fas fa-search mr-2"></i>
             Vérifier statut Fispi
           </button>
@@ -440,7 +440,7 @@
           <input
             v-model="newReferenceValue"
             type="text"
-            class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             placeholder="Référence Feexpay"
             @keyup.enter="confirmReferenceUpdate"
           />
@@ -454,7 +454,7 @@
             <button
               @click="confirmReferenceUpdate"
               :disabled="transactionsStore.isLoading || !newReferenceValue.trim()"
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50"
             >
               Enregistrer
             </button>
@@ -569,7 +569,7 @@ const getTypeClass = (type: string): string => {
     deposit: 'bg-green-100 text-green-800',
     withdrawal: 'bg-red-100 text-red-800',
     cancellation: 'bg-orange-100 text-orange-800',
-    partial_withdrawal: 'bg-blue-100 text-blue-800',
+    partial_withdrawal: 'bg-primary-100 text-primary-800',
     withdrawal_request: 'bg-yellow-100 text-yellow-800',
   }
   return classes[type] || 'bg-gray-100 text-gray-800'
@@ -610,7 +610,7 @@ const getCaisseStatusClass = (status: string): string => {
   const classes: Record<string, string> = {
     active: 'bg-green-100 text-green-800',
     pending: 'bg-yellow-100 text-yellow-800',
-    completed: 'bg-blue-100 text-blue-800',
+    completed: 'bg-primary-100 text-primary-800',
     blocked: 'bg-red-100 text-red-800'
   }
   return classes[status] || 'bg-gray-100 text-gray-800'

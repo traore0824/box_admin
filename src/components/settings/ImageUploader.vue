@@ -48,7 +48,7 @@
       </button>
     </div>
     
-    <div v-if="isUploading" class="flex items-center gap-2 text-sm text-blue-600">
+    <div v-if="isUploading" class="flex items-center gap-2 text-sm text-primary">
       <i class="fas fa-spinner animate-spin"></i>
       <span>Upload en cours...</span>
     </div>

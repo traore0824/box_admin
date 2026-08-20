@@ -9,7 +9,7 @@
       </div>
       <button
         @click="openCreate"
-        class="mt-4 sm:mt-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        class="mt-4 sm:mt-0 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"
       >
         <i class="fas fa-plus mr-2"></i>
         Nouvelle recharge
@@ -41,9 +41,25 @@
             <td class="px-4 py-3 text-sm">{{ formatMoney(item.commission) }}</td>
             <td class="px-4 py-3 text-sm text-red-600 font-medium">{{ formatMoney(item.loss_amount) }}</td>
             <td class="px-4 py-3 text-sm">{{ item.network_name || '—' }}</td>
-            <td class="px-4 py-3 text-sm space-x-2">
-              <button @click="openEdit(item)" class="text-blue-600 hover:underline text-xs">Modifier</button>
-              <button @click="remove(item.id)" class="text-red-600 hover:underline text-xs">Suppr.</button>
+            <td class="px-4 py-3 text-sm">
+              <div class="flex items-center gap-3">
+                <button
+                  @click="openEdit(item)"
+                  class="text-primary hover:text-primary-dark"
+                  title="Modifier"
+                  aria-label="Modifier"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  @click="remove(item.id)"
+                  class="text-red-600 hover:text-red-800"
+                  title="Supprimer"
+                  aria-label="Supprimer"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
             </td>
           </tr>
           <tr v-if="!store.isLoading && store.items.length === 0">

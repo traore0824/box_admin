@@ -174,7 +174,7 @@
                 <div class="flex items-center gap-2">
                   <div class="w-full bg-gray-200 rounded-full h-2">
                     <div
-                      class="bg-blue-500 h-2 rounded-full"
+                      class="bg-primary h-2 rounded-full"
                       :style="{ width: `${Math.min(100, parseFloat(caisse.percentage_progession) || 0)}%` }"
                     ></div>
                   </div>
@@ -293,7 +293,7 @@ const statusBadgeClass = (status: string) => ({
   'bg-green-100 text-green-800': status === 'done' || status === 'withdrawn',
   'bg-yellow-100 text-yellow-800': status === 'pending',
   'bg-red-100 text-red-800': status === 'disabled' || status === 'cancel' || status === 'cancelled',
-  'bg-blue-100 text-blue-800': !['done', 'pending', 'disabled', 'withdrawn', 'cancel', 'cancelled'].includes(status),
+  'bg-primary-100 text-primary-800': !['done', 'pending', 'disabled', 'withdrawn', 'cancel', 'cancelled'].includes(status),
 })
 
 const goToPage = (page: number) => {
@@ -379,7 +379,7 @@ onBeforeRouteLeave(() => {
   @apply inline-flex items-center px-4 py-2 border border-transparent rounded-md font-medium text-sm transition-colors;
 }
 .btn-primary {
-  @apply bg-blue-600 text-white hover:bg-blue-700;
+  @apply bg-primary text-white hover:bg-primary-dark;
 }
 .btn-sm {
   @apply px-3 py-1.5 text-xs border border-gray-300 bg-white hover:bg-gray-50;

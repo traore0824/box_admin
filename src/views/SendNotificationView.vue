@@ -132,7 +132,7 @@
           <!-- Selected User Display -->
           <div v-if="selectedUserId" class="mb-4">
             <p class="text-sm font-medium text-gray-700 mb-2">Utilisateur sélectionné :</p>
-            <div class="flex items-center justify-between px-3 py-2 bg-blue-50 rounded-md border border-blue-200">
+            <div class="flex items-center justify-between px-3 py-2 bg-primary-50 rounded-md border border-primary-200">
               <div>
                 <p class="text-sm font-medium text-gray-900">{{ getUserById(selectedUserId)?.first_name }} {{ getUserById(selectedUserId)?.last_name }}</p>
                 <p class="text-xs text-gray-500">{{ getUserById(selectedUserId)?.email }}</p>
@@ -586,22 +586,22 @@ const sendNotification = async () => {
 
 <style scoped>
 .bg-primary {
-  @apply bg-blue-600;
+  @apply bg-primary;
 }
 
 .text-primary {
-  @apply text-blue-600;
+  @apply text-primary;
 }
 
 .hover\:bg-primary-700:hover {
-  @apply bg-blue-700;
+  @apply bg-primary-dark;
 }
 
 .focus\:ring-primary:focus {
-  @apply ring-2 ring-blue-500 ring-opacity-50;
+  @apply ring-2 ring-primary ring-opacity-50;
 }
 
 .focus\:border-primary:focus {
-  @apply border-blue-500;
+  @apply border-primary;
 }
 </style>

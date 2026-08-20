@@ -50,7 +50,7 @@
               v-for="notification in recentNotifications" 
               :key="notification.id"
               class="p-4 border-b border-gray-100 flex hover:bg-gray-50"
-              :class="{ 'bg-blue-50': (notification as any).status === 'pending' }"
+              :class="{ 'bg-primary-50': (notification as any).status === 'pending' }"
             >
               <div 
                 class="w-8 h-8 rounded-full flex items-center justify-center mr-3 flex-shrink-0"

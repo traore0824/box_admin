@@ -38,7 +38,7 @@
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-semibold">Pièces BOX par action</h2>
         <button @click="handleSeedActions" :disabled="saving"
-          class="px-3 py-1.5 text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 disabled:opacity-50">
+          class="px-3 py-1.5 text-sm bg-primary-50 text-primary-dark border border-primary-200 rounded-md hover:bg-primary-100 disabled:opacity-50">
           <i class="fas fa-magic mr-1"></i>Ajouter les manquants
         </button>
       </div>
@@ -86,7 +86,7 @@
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-semibold">Niveaux utilisateur</h2>
         <button @click="handleSeedLevels" :disabled="saving || loading"
-          class="px-3 py-1.5 text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 disabled:opacity-50">
+          class="px-3 py-1.5 text-sm bg-primary-50 text-primary-dark border border-primary-200 rounded-md hover:bg-primary-100 disabled:opacity-50">
           <i class="fas fa-magic mr-1"></i>Ajouter les niveaux manquants
         </button>
       </div>

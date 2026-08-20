@@ -10,7 +10,7 @@
           v-model="messages[index]"
           type="text"
           :placeholder="`Message ${index + 1}`"
-          class="flex-1 min-w-0 px-2 sm:px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="flex-1 min-w-0 px-2 sm:px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           @input="updateMessages"
         />
         <button
@@ -27,7 +27,7 @@
     <button
       type="button"
       @click="addMessage"
-      class="w-full px-4 py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-blue-500 hover:text-blue-600 transition-colors"
+      class="w-full px-4 py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-primary hover:text-primary transition-colors"
     >
       <i class="fas fa-plus mr-2"></i>
       Ajouter un message

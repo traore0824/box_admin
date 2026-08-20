@@ -160,9 +160,6 @@
               {{ grade || '—' }} : {{ count }}
             </span>
           </div>
-          <p class="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-3">
-            {{ creditScoreSummary.disclaimer }}
-          </p>
         </DashboardSection>
       </section>
 
@@ -176,7 +173,7 @@
               type="button"
               class="px-3 py-1.5 text-xs rounded-lg border transition-colors"
               :class="cacPeriod === opt.key
-                ? 'bg-blue-600 text-white border-blue-600'
+                ? 'bg-primary text-white border-primary'
                 : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
               @click="cacPeriod = opt.key"
             >
@@ -252,9 +249,9 @@
             Payback = CAC ÷ (ARPU mensuel × marge).
             Revenu = commissions BOX sur transactions acceptées.
             Période {{ currentCacPeriod.start }} → {{ currentCacPeriod.end }}.
-            <router-link to="/charges" class="text-blue-600 hover:underline ml-1">Charges</router-link>
+            <router-link to="/charges" class="text-primary hover:underline ml-1">Charges</router-link>
             ·
-            <router-link to="/settings" class="text-blue-600 hover:underline">Marge brute</router-link>
+            <router-link to="/settings" class="text-primary hover:underline">Marge brute</router-link>
           </p>
         </DashboardSection>
       </section>
@@ -298,7 +295,7 @@
           </div>
           <p class="text-xs text-gray-500 mt-3">
             Historique et saisie :
-            <router-link to="/charges" class="text-blue-600 hover:underline">page Charges</router-link>
+            <router-link to="/charges" class="text-primary hover:underline">page Charges</router-link>
           </p>
         </DashboardSection>
       </section>
@@ -829,7 +826,7 @@ onUnmounted(() => {
 }
 
 .remove-btn-blue {
-  color: #2563eb;
+  color: #BC8A1A;
 }
 
 .remove-btn-green {

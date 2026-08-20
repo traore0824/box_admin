@@ -9,7 +9,7 @@
       </div>
       <button
         @click="openCreate"
-        class="mt-4 sm:mt-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        class="mt-4 sm:mt-0 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"
       >
         <i class="fas fa-plus mr-2"></i>
         Nouvelle charge
@@ -17,7 +17,7 @@
     </div>
 
     <div v-if="store.summary" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-white rounded-lg shadow-sm p-4 border-l-4 border-blue-500">
+      <div class="bg-white rounded-lg shadow-sm p-4 border-l-4 border-primary">
         <p class="text-xs text-gray-500 uppercase tracking-wide">Ce mois</p>
         <p class="text-xl font-semibold text-gray-900 mt-1">
           {{ formatMoney(store.summary.month.total) }}
@@ -97,9 +97,25 @@
             </td>
             <td class="px-4 py-3 text-sm font-medium">{{ formatMoney(item.amount) }}</td>
             <td class="px-4 py-3 text-sm text-gray-500">{{ item.created_by_email || '—' }}</td>
-            <td class="px-4 py-3 text-sm space-x-2">
-              <button @click="openEdit(item)" class="text-blue-600 hover:underline text-xs">Modifier</button>
-              <button @click="remove(item.id)" class="text-red-600 hover:underline text-xs">Suppr.</button>
+            <td class="px-4 py-3 text-sm">
+              <div class="flex items-center gap-3">
+                <button
+                  @click="openEdit(item)"
+                  class="text-primary hover:text-primary-dark"
+                  title="Modifier"
+                  aria-label="Modifier"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  @click="remove(item.id)"
+                  class="text-red-600 hover:text-red-800"
+                  title="Supprimer"
+                  aria-label="Supprimer"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
             </td>
           </tr>
           <tr v-if="!store.isLoading && store.items.length === 0">

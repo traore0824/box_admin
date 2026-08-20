@@ -5,7 +5,7 @@
       <h1 class="text-2xl font-bold text-gray-900">Gestion des Réseaux de Paiement</h1>
       <button 
         @click="openCreateModal"
-        class="mt-4 sm:mt-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        class="mt-4 sm:mt-0 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"
       >
         <i class="fas fa-plus mr-2"></i>
         Créer un réseau
@@ -18,7 +18,7 @@
         <select 
           v-model="isActiveFilter"
           @change="loadNetworks"
-          class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
         >
           <option :value="null">Tous les réseaux</option>
           <option :value="true">Actifs uniquement</option>
@@ -89,7 +89,7 @@
         <div class="flex space-x-2">
           <button 
             @click="openEditModal(network)"
-            class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+            class="flex-1 px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark text-sm"
           >
             <i class="fas fa-edit mr-1"></i>
             Modifier
@@ -125,7 +125,7 @@
                 v-model="formData.name"
                 required
                 :disabled="editingNetwork !== null"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-gray-100"
               >
                 <option value="">Sélectionner un réseau</option>
                 <option value="moov">MOOV</option>
@@ -141,7 +141,7 @@
                 v-model="formData.publique_name"
                 type="text"
                 required
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="MOOV Money"
               />
             </div>
@@ -153,7 +153,7 @@
                   v-model="formData.country_code"
                   type="text"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="+229"
                 />
               </div>
@@ -163,7 +163,7 @@
                   v-model="formData.indication_country"
                   type="text"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Bénin"
                 />
               </div>
@@ -198,7 +198,7 @@
                 <select
                   v-model="formData.deposit_api"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="feexpay">FeexPay</option>
                   <option value="connect">Connect Pro</option>
@@ -210,7 +210,7 @@
                 <select
                   v-model="formData.withdraw_api"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="connect">Connect Pro</option>
                   <option value="manual">Manuel (pas d'appel API)</option>
@@ -227,7 +227,7 @@
               <input
                 v-model="formData.system_account"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
                 placeholder="UUID réseau Connect Pro"
               />
               <p class="mt-1 text-xs text-gray-500">
@@ -240,7 +240,7 @@
               <input
                 v-model="formData.device_id"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
                 placeholder="ex: 0146639765"
               />
               <p class="mt-1 text-xs text-gray-500">
@@ -255,7 +255,7 @@
                   type="file"
                   @change="handleImageUpload"
                   accept="image/*"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <img 
                   v-if="formData.image"
@@ -288,7 +288,7 @@
               <button 
                 type="submit"
                 :disabled="networksStore.isLoading"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
                 <i v-if="networksStore.isLoading" class="fas fa-spinner fa-spin mr-2"></i>
                 {{ editingNetwork ? (networksStore.isLoading ? 'Modification...' : 'Modifier') : (networksStore.isLoading ? 'Création...' : 'Créer') }}

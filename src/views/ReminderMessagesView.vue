@@ -79,7 +79,7 @@
                 <div class="flex justify-end gap-2">
                   <button
                     @click="openEditModal(message)"
-                    class="text-blue-600 hover:text-blue-900"
+                    class="text-primary hover:text-primary-dark"
                     title="Modifier"
                   >
                     <i class="fas fa-edit"></i>
@@ -414,23 +414,23 @@ const formatDate = (dateString: string) => {
 
 <style scoped>
 .bg-primary {
-  @apply bg-blue-600;
+  @apply bg-primary;
 }
 
 .bg-primary-700 {
-  @apply bg-blue-700;
+  @apply bg-primary-dark;
 }
 
 .text-primary {
-  @apply text-blue-600;
+  @apply text-primary;
 }
 
 .focus\:ring-primary:focus {
-  @apply ring-2 ring-blue-500 ring-opacity-50;
+  @apply ring-2 ring-primary ring-opacity-50;
 }
 
 .focus\:border-primary:focus {
-  @apply border-blue-500;
+  @apply border-primary;
 }
 </style>
 

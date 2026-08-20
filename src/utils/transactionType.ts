@@ -29,7 +29,7 @@ export function getTransactionTypeBadgeClass(type?: string | null): string {
     case 'withdrawal_request':
       return 'bg-warning-light text-warning-dark'
     case 'partial_withdrawal':
-      return 'bg-blue-100 text-blue-800'
+      return 'bg-primary-100 text-primary-800'
     case 'cancellation':
       return 'bg-red-100 text-red-800'
     default:

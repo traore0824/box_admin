@@ -26,7 +26,7 @@
             v-model="searchQuery"
             @input="handleSearch"
             placeholder="Rechercher par email ou ID utilisateur..."
-            class="w-full sm:flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full sm:flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
       </div>
@@ -69,7 +69,7 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <p class="text-sm font-semibold text-blue-600">
+                  <p class="text-sm font-semibold text-primary">
                     {{ formatCurrency(parseFloat(wallet.balance)) }}
                   </p>
                 </td>
@@ -90,7 +90,7 @@
                   <button 
                     v-if="wallet.user"
                     @click="viewWalletHistory(wallet.user.id)"
-                    class="text-blue-600 hover:text-blue-900"
+                    class="text-primary hover:text-primary-dark"
                   >
                     <i class="fas fa-history mr-1"></i>
                     Voir historique
@@ -144,9 +144,9 @@
           Wallet de {{ walletsStore.selectedUser.fullname }}
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-blue-50 p-4 rounded-lg">
+          <div class="bg-primary-50 p-4 rounded-lg">
             <p class="text-sm text-gray-600">Solde Actuel</p>
-            <p class="text-2xl font-bold text-blue-600">
+            <p class="text-2xl font-bold text-primary">
               {{ formatCurrency(parseFloat(walletsStore.summary.current_balance)) }}
             </p>
           </div>
@@ -177,7 +177,7 @@
           <select 
             v-model="transactionTypeFilter"
             @change="applyFilters"
-            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="all">Tous les types</option>
             <option value="deposit">Dépôt</option>
@@ -190,7 +190,7 @@
           <select 
             v-model="statusFilter"
             @change="applyFilters"
-            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="all">Tous les statuts</option>
             <option value="completed">Complété</option>
@@ -203,14 +203,14 @@
             v-model="dateFromFilter"
             @change="applyFilters"
             placeholder="Date de début"
-            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
           <input 
             type="date"
             v-model="dateToFilter"
             @change="applyFilters"
             placeholder="Date de fin"
-            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
       </div>
@@ -395,7 +395,7 @@ const getTransactionTypeClass = (type: string): string => {
   const classes: Record<string, string> = {
     deposit: 'bg-green-100 text-green-800',
     withdrawal: 'bg-red-100 text-red-800',
-    bonus: 'bg-blue-100 text-blue-800',
+    bonus: 'bg-primary-100 text-primary-800',
     commission: 'bg-purple-100 text-purple-800',
     refund: 'bg-yellow-100 text-yellow-800',
     transfer: 'bg-gray-100 text-gray-800'

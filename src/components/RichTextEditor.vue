@@ -215,5 +215,5 @@ onBeforeUnmount(() => {
 :deep(.ProseMirror ol) { @apply list-decimal pl-5 my-1; }
 :deep(.ProseMirror blockquote) { @apply border-l-4 border-gray-300 pl-3 italic text-gray-600 my-2; }
 :deep(.ProseMirror code) { @apply bg-gray-100 rounded px-1 text-sm font-mono; }
-:deep(.ProseMirror a) { @apply text-blue-600 underline; }
+:deep(.ProseMirror a) { @apply text-primary underline; }
 </style>

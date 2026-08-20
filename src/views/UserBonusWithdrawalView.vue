@@ -9,7 +9,7 @@
         <select
           v-model="statusFilter"
           @change="loadWithdrawals(1)"
-          class="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+          class="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
         >
           <option value="all">Tous les statuts</option>
           <option value="pending">En attente</option>
@@ -28,7 +28,7 @@
       </div>
 
       <div v-if="store.isLoading" class="p-12 text-center">
-        <i class="fas fa-spinner fa-spin text-4xl text-blue-500 mb-4"></i>
+        <i class="fas fa-spinner fa-spin text-4xl text-primary mb-4"></i>
         <p class="text-gray-500">Chargement...</p>
       </div>
 

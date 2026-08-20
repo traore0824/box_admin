@@ -85,7 +85,7 @@
               'bg-green-100 text-green-600': notification.type === 'success',
               'bg-yellow-100 text-yellow-600': notification.type === 'warning',
               'bg-red-100 text-red-600': notification.type === 'danger',
-              'bg-blue-100 text-blue-600': notification.type === 'info'
+              'bg-primary-100 text-primary': notification.type === 'info'
             }">
               <i :class="{
                 'fas fa-check': notification.type === 'success',
@@ -112,7 +112,7 @@
               <!-- Fichier si présent -->
               <div v-if="notification.file" class="mt-3">
                 <a :href="notification.file" target="_blank"
-                  class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                  class="inline-flex items-center text-primary hover:text-primary-800">
                   <i class="fas fa-paperclip mr-2"></i>
                   Fichier joint
                 </a>

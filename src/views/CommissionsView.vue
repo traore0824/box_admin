@@ -20,10 +20,10 @@
       <h2 class="text-lg font-semibold text-gray-800 mb-4">Commission Totale</h2>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-blue-50 p-4 rounded-lg">
+        <div class="bg-primary-50 p-4 rounded-lg">
           <p class="text-sm text-gray-600">Total généré</p>
           <p class="text-xs text-gray-500 mt-0.5">Disponible + Retiré</p>
-          <p class="text-2xl font-bold text-blue-600">
+          <p class="text-2xl font-bold text-primary">
             {{ formatCurrency(totalGenerated) }}
           </p>
         </div>
@@ -48,7 +48,7 @@
         <select 
           v-model="isWithdrawnFilter"
           @change="commissionsStore.fetchCommissionTransactions(1, isWithdrawnFilter)"
-          class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
         >
           <option :value="null">Toutes les commissions</option>
           <option :value="false">Non retirées</option>

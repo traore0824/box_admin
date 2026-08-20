@@ -8,7 +8,7 @@
           class="flex-1 py-3 text-sm font-medium transition-colors"
           :class="activeTab === 'with' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 hover:text-gray-700'"
         >
-          <i class="fas fa-briefcase mr-2 text-blue-500"></i>
+          <i class="fas fa-briefcase mr-2 text-primary"></i>
           Avec caisse ({{ sample.entries_with_caisse.length }})
         </button>
         <button
@@ -147,7 +147,7 @@ const statusClass = (status: string) => {
   const map: Record<string, string> = {
     active: 'bg-green-100 text-green-700',
     pending: 'bg-yellow-100 text-yellow-700',
-    completed: 'bg-blue-100 text-blue-700',
+    completed: 'bg-primary-100 text-primary-dark',
     blocked: 'bg-red-100 text-red-700'
   }
   return map[status] || 'bg-gray-100 text-gray-700'

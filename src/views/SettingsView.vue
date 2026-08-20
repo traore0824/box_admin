@@ -30,7 +30,7 @@
                 v-model="settings.email" 
                 type="email" 
                 maxlength="100"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
               />
             </div>
             <div>
@@ -39,7 +39,7 @@
                 v-model="settings.phone" 
                 type="tel" 
                 maxlength="120"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
               />
             </div>
           </div>
@@ -55,7 +55,7 @@
                 v-model.number="settings.minimum_amount" 
                 type="number" 
                 step="0.01"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
               />
             </div>
             <div>
@@ -64,7 +64,7 @@
                 v-model.number="settings.minimum_amount_obj" 
                 type="number" 
                 step="0.01"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
               />
             </div>
             <div>
@@ -73,7 +73,7 @@
                 v-model.number="settings.referral_bonus_amount" 
                 type="number" 
                 step="0.01"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
               />
             </div>
             <div>
@@ -81,7 +81,7 @@
               <input 
                 v-model.number="settings.minimum_days" 
                 type="number" 
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
               />
             </div>
             <div>
@@ -91,7 +91,7 @@
                 type="number" 
                 step="0.01"
                 min="0"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
               />
             </div>
             <div>
@@ -105,7 +105,7 @@
                 step="0.01"
                 min="0"
                 max="100"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
             <div>
@@ -114,7 +114,7 @@
                 v-model.number="settings.credit_score_min"
                 type="number"
                 min="0"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
             <div>
@@ -123,7 +123,7 @@
                 v-model.number="settings.credit_score_max"
                 type="number"
                 min="1"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
             <div>
@@ -133,7 +133,7 @@
                 type="number" 
                 step="0.01"
                 min="0"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
               />
             </div>
             <div>
@@ -146,7 +146,7 @@
                 type="number"
                 step="1"
                 min="0"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
           </div>
@@ -164,7 +164,7 @@
                 step="0.01"
                 min="0"
                 max="100"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
               />
             </div>
             <div>
@@ -175,7 +175,7 @@
                 step="0.01"
                 min="0"
                 max="100"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
               />
             </div>
             <div>
@@ -186,7 +186,7 @@
                 step="0.01"
                 min="0"
                 max="100"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
               />
             </div>
           </div>
@@ -203,7 +203,7 @@
                   <input
                     v-model="settings.partial_withdrawal_enabled"
                     type="checkbox"
-                    class="form-checkbox h-5 w-5 text-blue-600 rounded"
+                    class="form-checkbox h-5 w-5 text-primary rounded"
                   />
                   <span class="ml-2 text-sm text-gray-700">Activé</span>
                 </label>
@@ -216,7 +216,7 @@
                 type="number"
                 step="1"
                 min="0"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
             <div>
@@ -227,7 +227,7 @@
                 type="number"
                 step="1"
                 min="0"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
           </div>
@@ -249,7 +249,7 @@
                 type="text"
                 maxlength="120"
                 placeholder="ex. ee3c4a0f-01ed-491b-a02a-5143e8dfde83"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-mono text-sm"
               />
               <p class="text-xs text-gray-500 mt-1">
                 Copier depuis wa-admin.babilonbg.net → Sessions → Détails. Laisser vide pour utiliser OPENWA_SESSION_ID (.env).
@@ -293,7 +293,7 @@
                 v-model="settings.connect_pro_base_url"
                 type="url"
                 placeholder="https://connect.cenof.finance"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
               />
             </div>
             <div>
@@ -306,7 +306,7 @@
                 type="password"
                 autocomplete="new-password"
                 :placeholder="settings.connect_pro_api_key_set ? 'Laisser vide pour ne pas changer' : 'Coller la clé'"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
               />
             </div>
             <div>
@@ -319,7 +319,7 @@
                 type="password"
                 autocomplete="new-password"
                 :placeholder="settings.connect_pro_api_secret_set ? 'Laisser vide pour ne pas changer' : 'Coller le secret'"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
               />
             </div>
             <div class="sm:col-span-2">
@@ -328,7 +328,7 @@
                 v-model="settings.public_base_url"
                 type="url"
                 placeholder="https://box.babilonbg.net"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm"
               />
               <p class="text-xs text-gray-500 mt-1">Callback = {url}/box/connect-pro-webhook</p>
             </div>
@@ -349,7 +349,7 @@
                   <input 
                     v-model="settings.only_agente_can_share" 
                     type="checkbox" 
-                    class="form-checkbox h-5 w-5 text-blue-600 rounded"
+                    class="form-checkbox h-5 w-5 text-primary rounded"
                   />
                   <span class="ml-2 text-sm text-gray-700">Activé</span>
                 </label>
@@ -362,7 +362,7 @@
                   <input 
                     v-model="settings.test_mode" 
                     type="checkbox" 
-                    class="form-checkbox h-5 w-5 text-blue-600 rounded"
+                    class="form-checkbox h-5 w-5 text-primary rounded"
                   />
                   <span class="ml-2 text-sm text-gray-700">Activé</span>
                 </label>
@@ -378,7 +378,7 @@
                   <input
                     v-model="settings.box_coins_distribution_enabled"
                     type="checkbox"
-                    class="form-checkbox h-5 w-5 text-blue-600 rounded"
+                    class="form-checkbox h-5 w-5 text-primary rounded"
                   />
                   <span class="ml-2 text-sm text-gray-700">Activée</span>
                 </label>
@@ -394,7 +394,7 @@
                   <input
                     v-model="settings.challenge_publish_notifications_enabled"
                     type="checkbox"
-                    class="form-checkbox h-5 w-5 text-blue-600 rounded"
+                    class="form-checkbox h-5 w-5 text-primary rounded"
                   />
                   <span class="ml-2 text-sm text-gray-700">Activées</span>
                 </label>
@@ -411,7 +411,7 @@
                   <input
                     v-model="settings.whatsapp_prompt_enabled"
                     type="checkbox"
-                    class="form-checkbox h-5 w-5 text-blue-600 rounded"
+                    class="form-checkbox h-5 w-5 text-primary rounded"
                   />
                   <span class="ml-2 text-sm text-gray-700">Activée</span>
                 </label>
@@ -557,7 +557,7 @@
               <input 
                 v-model.number="settings.min_version" 
                 type="number" 
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
               />
             </div>
             <div>
@@ -565,7 +565,7 @@
               <input 
                 v-model.number="settings.last_version" 
                 type="number" 
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
               />
             </div>
             <div class="col-span-2">
@@ -574,7 +574,7 @@
                 v-model="settings.update_message" 
                 rows="3" 
                 maxlength="250"
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="Message affiché lors de la mise à jour..."
               ></textarea>
             </div>
@@ -590,7 +590,7 @@
               <input 
                 v-model="settings.dowload_android_apk" 
                 type="url" 
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
                 placeholder="https://..."
               />
             </div>
@@ -599,7 +599,7 @@
               <input 
                 v-model="settings.dowload_ios_apk" 
                 type="url" 
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
                 placeholder="https://..."
               />
             </div>
@@ -608,7 +608,7 @@
               <input 
                 v-model="settings.dowload_apk_link" 
                 type="url" 
-                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
                 placeholder="https://..."
               />
             </div>

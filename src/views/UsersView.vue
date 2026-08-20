@@ -214,8 +214,8 @@
                 <!-- Dropdown Component -->
                 <div class="relative inline-block text-left">
                   <button @click.stop="toggleDropdown(user.id)" type="button"
-                    class="inline-flex justify-center items-center rounded-md border border-gray-300 shadow-sm px-3 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 min-w-[80px]"
-                    :class="{ 'ring-2 ring-indigo-500': activeDropdown === user.id }" :disabled="actionLoading[user.id]"
+                    class="inline-flex justify-center items-center rounded-md border border-gray-300 shadow-sm px-3 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 min-w-[80px]"
+                    :class="{ 'ring-2 ring-primary': activeDropdown === user.id }" :disabled="actionLoading[user.id]"
                     :data-dropdown-id="user.id">
                     <span v-if="!actionLoading[user.id]">Actions</span>
                     <span v-else class="flex items-center">
@@ -262,7 +262,7 @@
                         <!-- Action Agent -->
                         <button @click="handleToggleAgent(user)" :disabled="actionLoading[user.id]"
                           class="group flex items-center w-full px-4 py-2 text-sm text-left hover:bg-gray-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-                          :class="user.agent_client ? 'text-orange-700 hover:text-orange-800' : 'text-blue-700 hover:text-blue-800'"
+                          :class="user.agent_client ? 'text-orange-700 hover:text-orange-800' : 'text-primary-dark hover:text-primary-800'"
                           role="menuitem">
                           <i :class="[
                             'fas mr-3 w-4 text-center',
@@ -289,7 +289,7 @@
 
                         <!-- Action KYC -->
                         <button @click="openKycModal(user)" :disabled="actionLoading[user.id]"
-                          class="group flex items-center w-full px-4 py-2 text-sm text-left hover:bg-gray-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed text-indigo-700 hover:text-indigo-800"
+                          class="group flex items-center w-full px-4 py-2 text-sm text-left hover:bg-gray-100 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed text-primary-dark hover:text-primary-800"
                           role="menuitem">
                           <i class="fas fa-id-card mr-3 w-4 text-center"></i>
                           Mettre à jour KYC
@@ -405,7 +405,7 @@
               <img 
                 :src="imageUrl" 
                 :alt="`Document KYC ${index + 1}`"
-                class="w-full h-32 object-cover rounded-lg border border-gray-200 hover:border-blue-500 transition-colors pointer-events-none"
+                class="w-full h-32 object-cover rounded-lg border border-gray-200 hover:border-primary transition-colors pointer-events-none"
               />
               <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-opacity flex items-center justify-center pointer-events-none">
                 <i class="fas fa-search-plus text-white opacity-0 group-hover:opacity-100 transition-opacity"></i>
@@ -418,7 +418,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-2">Nouveau statut *</label>
           <select 
             v-model="kycStatus"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="null">Aucun document</option>
             <option value="pending">En attente</option>
@@ -432,7 +432,7 @@
           </label>
           <textarea 
             v-model="kycRejectionReason"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             rows="4"
             placeholder="Expliquez la raison du rejet (ex: Photo de la carte d'identité floue, veuillez renvoyer une photo plus claire)..."
             required
@@ -451,7 +451,7 @@
           <button 
             @click="confirmKycUpdate"
             :disabled="!kycStatus || (kycStatus === 'reject' && !kycRejectionReason.trim()) || usersStore.isLoading"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50"
           >
             Mettre à jour
           </button>
@@ -504,9 +504,9 @@
 
         <!-- Résumé du Wallet -->
         <div v-if="walletsStore.summary" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div class="bg-blue-50 p-4 rounded-lg">
+          <div class="bg-primary-50 p-4 rounded-lg">
             <p class="text-sm text-gray-600">Solde Actuel</p>
-            <p class="text-2xl font-bold text-blue-600">
+            <p class="text-2xl font-bold text-primary">
               {{ formatCurrency(parseFloat(walletsStore.summary.current_balance)) }}
             </p>
           </div>
@@ -536,7 +536,7 @@
             <select 
               v-model="walletTransactionTypeFilter"
               @change="loadWalletTransactions"
-              class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="all">Tous les types</option>
               <option value="deposit">Dépôt</option>
@@ -549,7 +549,7 @@
             <select 
               v-model="walletStatusFilter"
               @change="loadWalletTransactions"
-              class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="all">Tous les statuts</option>
               <option value="completed">Complété</option>
@@ -623,7 +623,7 @@
         <div class="mt-4 flex justify-end">
           <button 
             @click="goToFullWalletView"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"
           >
             <i class="fas fa-external-link-alt mr-2"></i>
             Voir toutes les transactions
@@ -1071,7 +1071,7 @@ const getTransactionTypeClass = (type: string): string => {
   const classes: Record<string, string> = {
     deposit: 'bg-green-100 text-green-800',
     withdrawal: 'bg-red-100 text-red-800',
-    bonus: 'bg-blue-100 text-blue-800',
+    bonus: 'bg-primary-100 text-primary-800',
     commission: 'bg-purple-100 text-purple-800',
     refund: 'bg-yellow-100 text-yellow-800',
     transfer: 'bg-gray-100 text-gray-800'
