@@ -127,6 +127,182 @@
         </DashboardSection>
       </section>
 
+      <!-- Credit Score BOX (agrégats) -->
+      <section class="credit-score-summary" v-if="creditScoreSummary">
+        <DashboardSection title="Credit Score BOX">
+          <MetricGrid>
+            <MetricItem
+              :value="creditScoreSummary.users_scored"
+              label="Utilisateurs scorés"
+              color="primary"
+            />
+            <MetricItem
+              :value="creditScoreSummary.average_score"
+              label="Score moyen"
+              color="success"
+              border
+            />
+            <MetricItem
+              :value="`${creditScoreSummary.score_min} – ${creditScoreSummary.score_max}`"
+              label="Échelle"
+              color="secondary"
+            />
+          </MetricGrid>
+          <div
+            v-if="Object.keys(creditScoreSummary.by_grade || {}).length"
+            class="mt-3 flex flex-wrap gap-2"
+          >
+            <span
+              v-for="(count, grade) in creditScoreSummary.by_grade"
+              :key="grade"
+              class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700"
+            >
+              {{ grade || '—' }} : {{ count }}
+            </span>
+          </div>
+          <p class="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-3">
+            {{ creditScoreSummary.disclaimer }}
+          </p>
+        </DashboardSection>
+      </section>
+
+      <!-- Rentabilité acquisition -->
+      <section class="acquisition-cac" v-if="cacSummary">
+        <DashboardSection title="Rentabilité acquisition">
+          <div class="flex flex-wrap items-center gap-2 mb-4">
+            <button
+              v-for="opt in cacPeriodOptions"
+              :key="opt.key"
+              type="button"
+              class="px-3 py-1.5 text-xs rounded-lg border transition-colors"
+              :class="cacPeriod === opt.key
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
+              @click="cacPeriod = opt.key"
+            >
+              {{ opt.label }}
+            </button>
+            <span class="text-xs text-gray-500 ml-auto">
+              Marge brute : {{ cacSummary.gross_margin_percent ?? currentCacPeriod.gross_margin_percent ?? 70 }} %
+            </span>
+          </div>
+          <MetricGrid>
+            <MetricItem
+              :value="currentCacPeriod.new_users"
+              label="Nouveaux utilisateurs"
+              color="primary"
+            />
+            <MetricItem
+              :value="currentCacPeriod.new_activated_users"
+              label="Nouveaux activés"
+              color="success"
+            />
+            <MetricItem
+              :value="formatCurrency(currentCacPeriod.marketing_spend)"
+              label="Dépenses marketing"
+              color="warning"
+            />
+            <MetricItem
+              :value="formatCurrency(currentCacPeriod.commercial_spend)"
+              label="Dépenses commerciales"
+              color="info"
+            />
+            <MetricItem
+              :value="currentCacPeriod.cac == null ? '—' : formatCurrency(currentCacPeriod.cac)"
+              label="CAC"
+              color="danger"
+              border
+            />
+            <MetricItem
+              :value="formatCacEvolution(currentCacPeriod.cac_evolution_pct)"
+              :label="`Évolution CAC (vs ${cacPreviousLabel})`"
+              :color="cacEvolutionColor(currentCacPeriod.cac_evolution_pct)"
+              border
+            />
+            <MetricItem
+              :value="currentCacPeriod.ltv == null ? '—' : formatCurrency(currentCacPeriod.ltv)"
+              label="LTV moyenne"
+              color="success"
+              border
+            />
+            <MetricItem
+              :value="currentCacPeriod.ltv_cac_ratio == null ? '—' : `${currentCacPeriod.ltv_cac_ratio}×`"
+              :label="`LTV / CAC — ${currentCacPeriod.ltv_cac_interpretation?.label || '—'}`"
+              :color="ltvCacColor(currentCacPeriod.ltv_cac_interpretation?.code)"
+              border
+            />
+            <MetricItem
+              :value="currentCacPeriod.payback_months == null ? '—' : `${currentCacPeriod.payback_months} mois`"
+              label="Payback (récupération CAC)"
+              color="primary"
+              border
+            />
+          </MetricGrid>
+          <div
+            v-if="currentCacPeriod.ltv_cac_interpretation"
+            class="mt-3 text-xs rounded-lg px-3 py-2"
+            :class="ltvCacBannerClass(currentCacPeriod.ltv_cac_interpretation.code)"
+          >
+            <strong>{{ currentCacPeriod.ltv_cac_interpretation.label }}</strong>
+            — {{ currentCacPeriod.ltv_cac_interpretation.detail }}
+          </div>
+          <p class="text-xs text-gray-500 mt-3">
+            CAC = (marketing + commercial) ÷ nouveaux activés.
+            LTV = (ARPU mensuel × marge) ÷ churn mensuel.
+            Payback = CAC ÷ (ARPU mensuel × marge).
+            Revenu = commissions BOX sur transactions acceptées.
+            Période {{ currentCacPeriod.start }} → {{ currentCacPeriod.end }}.
+            <router-link to="/charges" class="text-blue-600 hover:underline ml-1">Charges</router-link>
+            ·
+            <router-link to="/settings" class="text-blue-600 hover:underline">Marge brute</router-link>
+          </p>
+        </DashboardSection>
+      </section>
+
+      <!-- Charges entreprise -->
+      <section class="charges-stats" v-if="chargesSummary">
+        <DashboardSection title="Charges">
+          <MetricGrid>
+            <MetricItem
+              :value="formatCurrency(chargesSummary.month.total)"
+              :label="`Ce mois (${chargesSummary.month.count})`"
+              color="primary"
+              icon="fas fa-calendar-day"
+            />
+            <MetricItem
+              :value="formatCurrency(chargesSummary.quarter.total)"
+              :label="`Ce trimestre (${chargesSummary.quarter.count})`"
+              color="warning"
+              icon="fas fa-calendar-alt"
+            />
+            <MetricItem
+              :value="formatCurrency(chargesSummary.year.total)"
+              :label="`Cette année (${chargesSummary.year.count})`"
+              color="danger"
+              icon="fas fa-calendar"
+              border
+            />
+          </MetricGrid>
+          <div
+            v-if="chargesSummary.year.by_category?.length"
+            class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2"
+          >
+            <div
+              v-for="cat in chargesSummary.year.by_category"
+              :key="cat.category"
+              class="text-xs bg-gray-50 rounded px-3 py-2"
+            >
+              <span class="text-gray-500">{{ cat.label }}</span>
+              <div class="font-medium text-gray-800">{{ formatCurrency(cat.total) }}</div>
+            </div>
+          </div>
+          <p class="text-xs text-gray-500 mt-3">
+            Historique et saisie :
+            <router-link to="/charges" class="text-blue-600 hover:underline">page Charges</router-link>
+          </p>
+        </DashboardSection>
+      </section>
+
       <!-- Statistiques Utilisateurs -->
       <section class="stats-grid">
         <DashboardSection title="Statistiques des Utilisateurs">
@@ -307,6 +483,9 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useDashboardStore } from '../stores/dashboard'
+import { useChargesStore } from '../stores/charges'
+import { useAcquisitionStore, type CacPeriodKey } from '../stores/acquisition'
+import { useCreditScoreStore } from '../stores/creditScore'
 import { storeToRefs } from 'pinia'
 import { formatCurrency } from '../utils/currency'
 
@@ -338,8 +517,72 @@ const REFRESH_INTERVAL = 5 * 60 * 1000 // 5 minutes
 
 // Store
 const dashboardStore = useDashboardStore()
+const chargesStore = useChargesStore()
+const acquisitionStore = useAcquisitionStore()
+const creditScoreStore = useCreditScoreStore()
 const { fetchStats, fetchFeexpayStats, fetchReconciliationStats } = dashboardStore
 const { stats, feexpayStats, reconciliationStats } = storeToRefs(dashboardStore)
+const { summary: chargesSummary } = storeToRefs(chargesStore)
+const { cacSummary, selectedPeriod: cacPeriod } = storeToRefs(acquisitionStore)
+const { summary: creditScoreSummary } = storeToRefs(creditScoreStore)
+
+const cacPeriodOptions: { key: CacPeriodKey; label: string }[] = [
+  { key: 'month', label: 'Mensuel' },
+  { key: 'quarter', label: 'Trimestriel' },
+  { key: 'year', label: 'Annuel' },
+]
+
+const currentCacPeriod = computed(() => {
+  const summary = cacSummary.value
+  if (!summary) {
+    return {
+      new_users: 0,
+      new_activated_users: 0,
+      marketing_spend: 0,
+      commercial_spend: 0,
+      acquisition_spend: 0,
+      cac: null as number | null,
+      previous_cac: null as number | null,
+      cac_evolution_pct: null as number | null,
+      start: '',
+      end: '',
+    }
+  }
+  return summary[cacPeriod.value]
+})
+
+const cacPreviousLabel = computed(() => {
+  if (cacPeriod.value === 'quarter') return 'trim. préc.'
+  if (cacPeriod.value === 'year') return 'année préc.'
+  return 'mois préc.'
+})
+
+function formatCacEvolution(pct: number | null | undefined) {
+  if (pct == null) return '—'
+  const sign = pct > 0 ? '+' : ''
+  return `${sign}${pct.toLocaleString('fr-FR')} %`
+}
+
+function cacEvolutionColor(pct: number | null | undefined): 'success' | 'danger' | 'secondary' {
+  if (pct == null) return 'secondary'
+  // CAC en baisse = meilleure acquisition
+  return pct <= 0 ? 'success' : 'danger'
+}
+
+function ltvCacColor(code?: string): 'success' | 'danger' | 'warning' | 'secondary' {
+  if (code === 'healthy') return 'success'
+  if (code === 'fragile') return 'warning'
+  if (code === 'unprofitable') return 'danger'
+  return 'secondary'
+}
+
+function ltvCacBannerClass(code?: string) {
+  if (code === 'healthy') return 'bg-green-50 text-green-800 border border-green-200'
+  if (code === 'fragile') return 'bg-amber-50 text-amber-800 border border-amber-200'
+  if (code === 'unprofitable') return 'bg-red-50 text-red-800 border border-red-200'
+  return 'bg-gray-50 text-gray-600 border border-gray-200'
+}
+
 
 // État local
 const loading = ref(false)
@@ -458,6 +701,11 @@ const loadData = async () => {
     await fetchStats(params)
     await fetchFeexpayStats()
     await fetchReconciliationStats()
+    await Promise.all([
+      chargesStore.fetchSummary(),
+      acquisitionStore.fetchCacSummary(),
+      creditScoreStore.fetchSummary(),
+    ])
   } catch (error) {
     console.error('Erreur lors du chargement des données:', error)
   } finally {

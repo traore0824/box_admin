@@ -37,6 +37,14 @@
             </h2>
             <p class="text-gray-600 mb-2">{{ user.email }}</p>
             <div class="flex flex-wrap gap-2">
+              <span
+                v-if="user.credit_score != null"
+                class="px-2 py-1 text-xs font-semibold rounded-full"
+                :class="creditScoreBadgeClass(user.credit_score_grade)"
+              >
+                Credit Score {{ user.credit_score }}
+                <span v-if="user.credit_score_grade">· {{ user.credit_score_grade }}</span>
+              </span>
               <span :class="[
                 'px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full',
                 user.is_block ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
@@ -229,6 +237,163 @@
             ]">
               {{ getKycStatusLabel(user.status) }}
             </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Credit Score BOX -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+            <i class="fas fa-gauge-high mr-2 text-primary"></i>
+            Credit Score BOX
+          </h3>
+          <button
+            @click="recalculateCreditScore"
+            :disabled="creditScoreLoading"
+            class="text-xs px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 flex items-center gap-1.5"
+          >
+            <i class="fas" :class="creditScoreLoading ? 'fa-spinner fa-spin' : 'fa-sync'"></i>
+            Recalculer
+          </button>
+        </div>
+        <div class="flex flex-wrap items-end gap-6 mb-4">
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Score</p>
+            <p class="text-4xl font-bold" :class="creditScoreTextClass(creditScoreDetail?.grade || user.credit_score_grade)">
+              {{ creditScoreDetail?.score ?? user.credit_score ?? '—' }}
+            </p>
+            <p class="text-sm text-gray-600 mt-1">
+              {{ creditScoreDetail?.grade || user.credit_score_grade || 'Non calculé' }}
+            </p>
+          </div>
+          <div v-if="creditScoreDetail?.calculated_at" class="text-xs text-gray-400">
+            Mis à jour : {{ formatDateTime(creditScoreDetail.calculated_at) }}
+          </div>
+        </div>
+        <div
+          v-if="creditScoreCriteria.length"
+          class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4"
+        >
+          <div
+            v-for="row in creditScoreCriteria"
+            :key="row.key"
+            class="text-xs bg-gray-50 rounded px-3 py-2 flex justify-between gap-2"
+          >
+            <span class="text-gray-600">
+              {{ row.label }}
+              <span class="text-gray-400">({{ row.weight }}%)</span>
+            </span>
+            <span class="font-semibold text-gray-900">{{ row.subScore }}/100</span>
+          </div>
+        </div>
+        <p class="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+          {{ creditScoreDisclaimer }}
+        </p>
+      </div>
+
+      <!-- Engagement & valeur (pièces, badge, parrainage) -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+            <i class="fas fa-chart-pie mr-2 text-primary"></i>
+            Engagement & valeur
+          </h3>
+          <button
+            @click="loadPointsHistory"
+            :disabled="pointsHistoryLoading"
+            class="text-xs px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 flex items-center gap-1.5"
+          >
+            <i class="fas" :class="pointsHistoryLoading ? 'fa-spinner fa-spin' : 'fa-history'"></i>
+            Historique pièces
+          </button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-amber-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600 mb-1">Pièces BOX</p>
+            <p class="text-2xl font-bold text-amber-700">
+              {{ user.total_points ?? 0 }}
+            </p>
+            <p v-if="user.points_to_next != null" class="text-xs text-gray-500 mt-1">
+              {{ user.points_to_next }} avant {{ user.next_level?.label || 'prochain niveau' }}
+            </p>
+          </div>
+          <div class="bg-yellow-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600 mb-1">Badge actuel</p>
+            <p class="text-2xl font-bold text-yellow-700">
+              {{ user.points_level?.label || '—' }}
+            </p>
+            <p v-if="user.achieved_levels?.length" class="text-xs text-gray-500 mt-1">
+              {{ user.achieved_levels.length }} palier(s) atteints
+            </p>
+          </div>
+          <div class="bg-indigo-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600 mb-1">Filleuls</p>
+            <p class="text-2xl font-bold text-indigo-700">
+              {{ user.number_sponsor ?? 0 }}
+            </p>
+            <p class="text-xs text-gray-500 mt-1">Inscrits avec son code</p>
+          </div>
+          <div class="bg-emerald-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600 mb-1">Revenus BOX (parrainage)</p>
+            <p class="text-2xl font-bold text-emerald-700">
+              {{ formatAmount(user.referral_revenue_for_box ?? 0) }}
+            </p>
+            <p class="text-xs text-gray-500 mt-1">
+              Commissions sur activité des filleuls
+            </p>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-3">
+          Bonus versés à cet utilisateur :
+          <span class="font-medium text-gray-700">{{ formatAmount(user.referral_bonus_attributed ?? 0) }}</span>
+          (coût BOX, distinct du revenu ci-dessus)
+        </p>
+
+        <div v-if="showPointsHistory" class="mt-5 border-t pt-4">
+          <h4 class="text-sm font-semibold text-gray-800 mb-3">Historique des pièces BOX</h4>
+          <div v-if="pointsHistoryLoading" class="text-center py-6 text-gray-400">
+            <i class="fas fa-spinner fa-spin"></i>
+          </div>
+          <div v-else-if="pointsHistory.length === 0" class="text-center py-6 text-gray-400 text-sm">
+            Aucun mouvement de pièces
+          </div>
+          <div v-else class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-3 py-2 text-left text-xs text-gray-500">Date</th>
+                  <th class="px-3 py-2 text-left text-xs text-gray-500">Action</th>
+                  <th class="px-3 py-2 text-left text-xs text-gray-500">Points</th>
+                  <th class="px-3 py-2 text-left text-xs text-gray-500">Solde après</th>
+                  <th class="px-3 py-2 text-left text-xs text-gray-500">Détail</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y">
+                <tr v-for="row in pointsHistory" :key="row.id">
+                  <td class="px-3 py-2 whitespace-nowrap">{{ formatDateTime(row.created_at) }}</td>
+                  <td class="px-3 py-2 font-mono text-xs">{{ row.action_code }}</td>
+                  <td class="px-3 py-2" :class="Number(row.points) >= 0 ? 'text-green-600' : 'text-red-600'">
+                    {{ Number(row.points) >= 0 ? '+' : '' }}{{ row.points }}
+                  </td>
+                  <td class="px-3 py-2 font-medium">{{ row.balance_after }}</td>
+                  <td class="px-3 py-2 text-gray-500 truncate max-w-xs">{{ row.description || '—' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-if="user.achieved_levels?.length" class="mt-4">
+            <p class="text-xs font-semibold text-gray-600 mb-2">Paliers atteints</p>
+            <div class="flex flex-wrap gap-2">
+              <span
+                v-for="lvl in user.achieved_levels"
+                :key="lvl.code || lvl.id"
+                class="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700"
+              >
+                {{ lvl.label }}
+                <span v-if="lvl.min_points != null" class="text-gray-400">({{ lvl.min_points }} pts)</span>
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -1381,6 +1546,59 @@ interface KycStatusV2 {
 }
 const kycStatus2FA = ref<KycStatusV2 | null>(null)
 const kycHistoryLoading = ref(false)
+const pointsHistoryLoading = ref(false)
+const showPointsHistory = ref(false)
+const pointsHistory = ref<Array<{
+  id: number
+  action_code: string
+  points: number
+  balance_after: number
+  description?: string | null
+  created_at: string
+}>>([])
+const creditScoreLoading = ref(false)
+const creditScoreDetail = ref<{
+  score: number
+  grade: string
+  breakdown?: Record<string, any>
+  calculated_at?: string | null
+  disclaimer?: string
+} | null>(null)
+
+const creditScoreDisclaimer = computed(() =>
+  creditScoreDetail.value?.disclaimer ||
+  "Le Credit Score BOX est un indicateur interne d'engagement et de fiabilité. Il ne constitue pas une décision automatique d'octroi de crédit et ne remplace pas les règles de crédit ni le cadre réglementaire applicable."
+)
+
+const creditScoreCriteria = computed(() => {
+  const breakdown = creditScoreDetail.value?.breakdown || {}
+  return Object.entries(breakdown)
+    .filter(([, v]) => v && typeof v === 'object' && 'sub_score' in (v as object))
+    .map(([key, v]: [string, any]) => ({
+      key,
+      label: v.label || key,
+      weight: v.weight_percent ?? 0,
+      subScore: v.sub_score ?? 0,
+    }))
+})
+
+function creditScoreBadgeClass(grade?: string | null) {
+  if (grade === 'Excellent') return 'bg-emerald-100 text-emerald-800'
+  if (grade === 'Bon') return 'bg-green-100 text-green-800'
+  if (grade === 'Moyen') return 'bg-amber-100 text-amber-800'
+  if (grade === 'Faible') return 'bg-orange-100 text-orange-800'
+  if (grade === 'Risqué') return 'bg-red-100 text-red-800'
+  return 'bg-indigo-100 text-indigo-800'
+}
+
+function creditScoreTextClass(grade?: string | null) {
+  if (grade === 'Excellent') return 'text-emerald-700'
+  if (grade === 'Bon') return 'text-green-700'
+  if (grade === 'Moyen') return 'text-amber-700'
+  if (grade === 'Faible') return 'text-orange-700'
+  if (grade === 'Risqué') return 'text-red-700'
+  return 'text-gray-800'
+}
 
 const isLegacyKycAccepted = computed(() => user.value?.status === 'accept')
 
@@ -1494,6 +1712,79 @@ const loadKycHistory = async () => {
     kycStatus2FA.value = null
   } finally {
     kycHistoryLoading.value = false
+  }
+}
+
+const loadPointsHistory = async () => {
+  if (!userId.value) return
+  showPointsHistory.value = true
+  pointsHistoryLoading.value = true
+  try {
+    const response = await fetchWithAuth('/box/points/history', {
+      queryParams: {
+        user_id: userId.value.toString(),
+        limit: '100',
+      },
+    })
+    const data = await handleApiResponse<{ success?: boolean; data?: typeof pointsHistory.value }>(
+      response,
+      'Erreur chargement historique pièces'
+    )
+    pointsHistory.value = Array.isArray(data?.data) ? data.data : []
+  } catch (err) {
+    console.error('Error loading points history:', err)
+    pointsHistory.value = []
+    notification.addNotification(
+      err instanceof Error ? err.message : 'Erreur historique pièces',
+      'error'
+    )
+  } finally {
+    pointsHistoryLoading.value = false
+  }
+}
+
+const loadCreditScore = async () => {
+  if (!userId.value) return
+  creditScoreLoading.value = true
+  try {
+    const response = await fetchWithAuth(`/box/credit-score/${userId.value}/`, {
+      method: 'GET',
+    })
+    creditScoreDetail.value = await handleApiResponse(
+      response,
+      'Erreur chargement Credit Score'
+    )
+  } catch (err) {
+    console.error('Error loading credit score:', err)
+  } finally {
+    creditScoreLoading.value = false
+  }
+}
+
+const recalculateCreditScore = async () => {
+  if (!userId.value) return
+  creditScoreLoading.value = true
+  try {
+    const response = await fetchWithAuth(
+      `/box/credit-score/${userId.value}/recalculate/`,
+      { method: 'POST' }
+    )
+    creditScoreDetail.value = await handleApiResponse(
+      response,
+      'Erreur recalcul Credit Score'
+    )
+    if (user.value && creditScoreDetail.value) {
+      user.value.credit_score = creditScoreDetail.value.score
+      user.value.credit_score_grade = creditScoreDetail.value.grade
+    }
+    notification.addNotification('Credit Score mis à jour', 'success')
+  } catch (err) {
+    notification.addNotification(
+      err instanceof Error ? err.message : 'Erreur recalcul',
+      'error'
+    )
+  } finally {
+    creditScoreLoading.value = false
   }
 }
 
@@ -1657,7 +1948,8 @@ const loadUserInfo = async () => {
       loadWalletTransactions(),
       loadCaisses(),
       blockHistoryStore.fetchBlockHistory(userId.value),
-      loadKycHistory()
+      loadKycHistory(),
+      loadCreditScore(),
     ])
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Une erreur est survenue'

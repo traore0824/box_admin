@@ -99,6 +99,21 @@
                 Caisse total
               </th>
               <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Pièces
+              </th>
+              <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Badge
+              </th>
+              <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Credit Score
+              </th>
+              <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Filleuls
+              </th>
+              <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Rev. parrainage
+              </th>
+              <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Statut
               </th>
               <th class="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -139,6 +154,31 @@
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm">
                 {{ user.total_box }} 
+              </td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium">
+                {{ user.total_points ?? 0 }}
+              </td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm">
+                <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 text-xs font-medium">
+                  {{ user.points_level?.label || '—' }}
+                </span>
+              </td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm">
+                <span
+                  v-if="user.credit_score != null"
+                  class="px-2 py-0.5 rounded-full text-xs font-semibold"
+                  :class="creditScoreClass(user.credit_score_grade)"
+                  :title="user.credit_score_grade || ''"
+                >
+                  {{ user.credit_score }}
+                </span>
+                <span v-else class="text-gray-400">—</span>
+              </td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm">
+                {{ user.number_sponsor ?? 0 }}
+              </td>
+              <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm">
+                {{ formatAmount(user.referral_revenue_for_box ?? 0) }}
               </td>
               <td class="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
                 <div class="flex flex-col space-y-1">
@@ -1075,6 +1115,15 @@ const getUserInitials = (user: User): string => {
   const firstInitial = firstName.charAt(0).toUpperCase()
   const lastInitial = lastName.charAt(0).toUpperCase()
   return `${firstInitial}${lastInitial}` || 'U'
+}
+
+const creditScoreClass = (grade?: string | null) => {
+  if (grade === 'Excellent') return 'bg-emerald-100 text-emerald-800'
+  if (grade === 'Bon') return 'bg-green-100 text-green-800'
+  if (grade === 'Moyen') return 'bg-amber-100 text-amber-800'
+  if (grade === 'Faible') return 'bg-orange-100 text-orange-800'
+  if (grade === 'Risqué') return 'bg-red-100 text-red-800'
+  return 'bg-gray-100 text-gray-700'
 }
 
 // La gestion de la touche Échap est déjà intégrée dans handleEscape ci-dessus

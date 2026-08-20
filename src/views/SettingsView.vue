@@ -95,6 +95,38 @@
               />
             </div>
             <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Marge brute acquisition (%)</label>
+              <p class="text-xs text-gray-500 mb-1">
+                Utilisée pour LTV et Payback (ex. 70 = 70 %).
+              </p>
+              <input
+                v-model.number="settings.acquisition_gross_margin_percent"
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Credit Score — minimum</label>
+              <input
+                v-model.number="settings.credit_score_min"
+                type="number"
+                min="0"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Credit Score — maximum</label>
+              <input
+                v-model.number="settings.credit_score_max"
+                type="number"
+                min="1"
+                class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Montant minimum retrait commission</label>
               <input 
                 v-model.number="settings.minimum_commission_withdrawal" 

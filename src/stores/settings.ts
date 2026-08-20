@@ -16,6 +16,10 @@ export interface Setting {
   done_commission: string
   cancel_block_commission: string
   operation_fee: string
+  acquisition_gross_margin_percent?: number | string
+  credit_score_min?: number
+  credit_score_max?: number
+  credit_score_weights?: Record<string, number>
   minimum_commission_withdrawal: string
   minimum_withdrawal: number
   partial_withdrawal_enabled: boolean

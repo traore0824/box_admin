@@ -17,11 +17,17 @@ interface User {
   user_referral_code: string | null
   card_id: string | null
   total_funds: number | string
+  total_points?: number | string
+  points_level?: { code?: string; label?: string; min_points?: number } | null
   push_notification: boolean
   email_notification: boolean
   updated_at: string | null
   commission_amount: string
-  number_sponsor: number
+  number_sponsor: number | string
+  referral_revenue_for_box?: number | string
+  referral_bonus_attributed?: number | string
+  credit_score?: number | null
+  credit_score_grade?: string | null
   sexe: string | null
   total_box: number
   available_amout: string
