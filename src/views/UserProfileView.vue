@@ -305,7 +305,7 @@
             Historique pièces
           </button>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           <div class="bg-amber-50 p-4 rounded-lg">
             <p class="text-sm text-gray-600 mb-1">Pièces BOX</p>
             <p class="text-2xl font-bold text-amber-700">
@@ -338,6 +338,15 @@
             </p>
             <p class="text-xs text-gray-500 mt-1">
               Commissions sur activité des filleuls
+            </p>
+          </div>
+          <div class="bg-teal-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600 mb-1">Commission gagnée sur l'utilisateur</p>
+            <p class="text-2xl font-bold text-teal-700">
+              {{ formatAmount(user.commission_earned_from_user ?? 0) }}
+            </p>
+            <p class="text-xs text-gray-500 mt-1">
+              Commissions sur ses transactions acceptées
             </p>
           </div>
         </div>

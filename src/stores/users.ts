@@ -26,6 +26,7 @@ interface User {
   number_sponsor: number | string
   referral_revenue_for_box?: number | string
   referral_bonus_attributed?: number | string
+  commission_earned_from_user?: number | string
   credit_score?: number | null
   credit_score_grade?: string | null
   sexe: string | null
