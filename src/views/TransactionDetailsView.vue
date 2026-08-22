@@ -275,12 +275,12 @@
             class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50 transition-colors"
           >
             <i class="fas fa-sync-alt mr-2"></i>
-            Mettre à jour Fispi
+            Mettre à jour FeexPay
           </button>
           <button v-if="getEffectivePaymentApi(transaction) === 'feexpay'" @click="handleCheckFeexpay" :disabled="actionLoading"
             class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark disabled:opacity-50 transition-colors">
             <i class="fas fa-search mr-2"></i>
-            Vérifier statut Fispi
+            Vérifier statut FeexPay
           </button>
           <button v-if="isWithdrawalLikeType(transaction.type_trans) && transaction.status === 'pending'" 
             @click="handleValidateWithdrawal" :disabled="actionLoading"

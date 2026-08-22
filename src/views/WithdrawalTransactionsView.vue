@@ -121,16 +121,16 @@
                     <span class="hidden sm:inline">Maj Connect</span>
                   </button>
 
-                  <!-- Bouton MAJ Fispi/FeexPay (FeexPay uniquement) -->
+                  <!-- Bouton MAJ FeexPay -->
                   <button
                     v-if="transaction.status !== 'error' && transaction.status !== 'accept' && getEffectivePaymentApi(transaction) === 'feexpay'"
                     @click="handleUpdateStatus(transaction.id)"
                     :disabled="withdrawalTransactionsStore.isLoading"
                     class="btn btn-sm btn-outline text-xs"
-                    title="Mettre à jour Fispi"
+                    title="Mettre à jour FeexPay"
                   >
                     <i class="fas fa-sync-alt mr-1"></i>
-                    <span class="hidden sm:inline">Maj Fispi</span>
+                    <span class="hidden sm:inline">Maj FeexPay</span>
                   </button>
 
                   <!-- Bouton Vérifier Feexpay (pour toutes les transactions) -->
