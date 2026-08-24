@@ -25,7 +25,7 @@
         ]">
           {{ growth.toFixed(1) }}%
         </span>
-        <span class="text-gray-500 text-sm ml-1">since last month</span>
+        <span class="text-gray-500 text-sm ml-1">{{ comparisonLabel }}</span>
       </div>
     </div>
   </div>
@@ -40,7 +40,10 @@ const props = defineProps<{
   icon: string;
   color: 'primary' | 'success' | 'warning' | 'danger' | 'info';
   growth: number;
+  comparisonLabel?: string;
 }>();
+
+const comparisonLabel = computed(() => props.comparisonLabel || 'vs mois préc.');
 
 const growthDirection = computed(() => {
   if (props.growth === 0) return 'neutral';

@@ -49,6 +49,7 @@
           :icon="kpi.icon"
           :color="kpi.color"
           :growth="kpi.growth"
+          :comparison-label="kpi.comparisonLabel"
         />
       </section>
 
@@ -611,37 +612,55 @@ const filters = ref<Filters>({
 
 let refreshTimer: number | null = null
 
+const evolutionLabel = computed(
+  () => (stats.value.evolution as { label?: string } | undefined)?.label || 'vs mois préc.'
+)
+
+const isPeriodFiltered = computed(
+  () =>
+    !!(filters.value.dateFrom || filters.value.dateTo) ||
+    filters.value.activePeriod !== 'Tous'
+)
+
 // Computed - KPIs principaux
-const mainKPIs = computed(() => [
-  {
-    title: "Total Utilisateurs",
-    value: stats.value.all_users,
-    icon: "users",
-    color: "primary" as const,
-    growth: stats.value.evolution?.all_users || 0
-  },
-  {
-    title: "Utilisateurs Actifs",
-    value: stats.value.active_users,
-    icon: "user-check",
-    color: "success" as const,
-    growth: stats.value.evolution?.active_users || 0
-  },
-  {
-    title: "Total Caisses",
-    value: stats.value.total_caisses,
-    icon: "piggy-bank",
-    color: "warning" as const,
-    growth: stats.value.evolution?.total_caisses || 0
-  },
-  {
-    title: "Total Transactions",
-    value: stats.value.total_transactions,
-    icon: "exchange-alt",
-    color: "info" as const,
-    growth: stats.value.evolution?.total_transactions || 0
-  }
-])
+const mainKPIs = computed(() => {
+  const periodSuffix = isPeriodFiltered.value ? ' (période)' : ''
+  const totalPrefix = isPeriodFiltered.value ? '' : 'Total '
+  return [
+    {
+      title: `${totalPrefix}Utilisateurs${periodSuffix}`,
+      value: stats.value.all_users,
+      icon: "users",
+      color: "primary" as const,
+      growth: stats.value.evolution?.all_users || 0,
+      comparisonLabel: evolutionLabel.value,
+    },
+    {
+      title: `Utilisateurs Actifs${periodSuffix}`,
+      value: stats.value.active_users,
+      icon: "user-check",
+      color: "success" as const,
+      growth: stats.value.evolution?.active_users || 0,
+      comparisonLabel: evolutionLabel.value,
+    },
+    {
+      title: `${totalPrefix}Caisses${periodSuffix}`,
+      value: stats.value.total_caisses,
+      icon: "piggy-bank",
+      color: "warning" as const,
+      growth: stats.value.evolution?.total_caisses || 0,
+      comparisonLabel: evolutionLabel.value,
+    },
+    {
+      title: `${totalPrefix}Transactions${periodSuffix}`,
+      value: stats.value.total_transactions,
+      icon: "exchange-alt",
+      color: "info" as const,
+      growth: stats.value.evolution?.total_transactions || 0,
+      comparisonLabel: evolutionLabel.value,
+    }
+  ]
+})
 
 // Solde total = FeexPay + réseaux (préfère liquidity API si dispo)
 const liquidityTotal = computed(() => {
@@ -705,6 +724,16 @@ const handlePeriodChange = (newPeriod: string) => {
   filters.value.dateTo = ''
   filters.value.activePeriod = newPeriod
 }
+
+// Dès qu'on saisit une date, désactiver le preset période (évite "Tous" allumé à tort)
+watch(
+  () => [filters.value.dateFrom, filters.value.dateTo],
+  ([from, to]) => {
+    if (from || to) {
+      filters.value.activePeriod = 'Tous'
+    }
+  }
+)
 
 const loadData = async () => {
   loading.value = true

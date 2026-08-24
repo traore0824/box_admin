@@ -62,6 +62,7 @@ interface DashboardStats {
     active_users: number
     total_caisses: number
     total_transactions: number
+    label?: string
   }
   // Nouvelles statistiques Wallet
   total_wallets?: number
@@ -140,7 +141,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
       all_users: 0,
       active_users: 0,
       total_caisses: 0,
-      total_transactions: 0
+      total_transactions: 0,
+      label: 'vs mois préc.',
     },
     // Nouvelles statistiques initialisées à 0
     total_wallets: 0,
@@ -221,7 +223,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
           all_users: 0,
           active_users: 0,
           total_caisses: 0,
-          total_transactions: 0
+          total_transactions: 0,
+          label: 'vs mois préc.',
         }
       }
       // Fusionner avec les valeurs par défaut pour les nouvelles statistiques

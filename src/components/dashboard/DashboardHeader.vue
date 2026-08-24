@@ -46,15 +46,15 @@
           @click="$emit('update:period', period)"
           class="px-4 py-2 text-sm font-medium transition-colors relative" 
           :class="{
-            'bg-custom-yellow text-white': activePeriod === period,
-            'text-gray-500 hover:bg-gray-50': activePeriod !== period,
+            'bg-custom-yellow text-white': !hasCustomDates && activePeriod === period,
+            'text-gray-500 hover:bg-gray-50': hasCustomDates || activePeriod !== period,
             'rounded-l-lg': period === periods[0],
             'rounded-r-lg': period === periods[periods.length - 1]
           }"
         >
           {{ period }}
           <div 
-            v-if="activePeriod === period" 
+            v-if="!hasCustomDates && activePeriod === period" 
             class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-custom-yellow rounded-full"
           ></div>
         </button>
@@ -64,7 +64,9 @@
 </template>
 
 <script setup lang="ts">
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   dateFrom: String,
   dateTo: String,
   activePeriod: {
@@ -78,6 +80,8 @@ defineProps({
 })
 
 defineEmits(['update:dateFrom', 'update:dateTo', 'update:period', 'clear-dates'])
+
+const hasCustomDates = computed(() => !!(props.dateFrom || props.dateTo))
 </script>
 
 <style scoped>
