@@ -85,22 +85,18 @@ export async function fetchWithAuth(
     }
   }
 
-  // Gestion des autres erreurs d'authentification
+  // 403 : ne déconnecter que si 2FA requis (sinon erreur de permission métier)
   if (response.status === 403) {
     const data = await response.clone().json().catch(() => ({}))
-    
-    // Si 2FA requis, rediriger vers la page de vérification
+
     if (data.code === '2FA_REQUIRED') {
       window.location.href = '/verify-2fa'
       throw new Error('Vérification 2FA requise')
     }
 
     if (import.meta.env.DEV) {
-      console.log('Accès non autorisé')
+      console.log('Accès non autorisé (403) — session conservée')
     }
-    authStore.logout()
-    window.location.href = '/login?message=Accès+non+autorisé.+Veuillez+vous+reconnecter.'
-    throw new Error('Accès non autorisé')
   }
 
   return response
