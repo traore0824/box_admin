@@ -72,6 +72,7 @@ interface DashboardStats {
   total_wallet_withdrawals?: number
   // Nouvelles statistiques Commissions
   total_commissions_generated?: number
+  total_commissions_generated_period?: number
   total_commissions_withdrawn?: number
   commission_withdrawals_count?: number
   commission_available?: number
@@ -149,6 +150,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     total_wallet_deposits: 0,
     total_wallet_withdrawals: 0,
     total_commissions_generated: 0,
+    total_commissions_generated_period: 0,
     total_commissions_withdrawn: 0,
     commission_withdrawals_count: 0,
     commission_available: 0,
@@ -241,6 +243,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
         total_wallet_deposits: data.total_wallet_deposits ?? 0,
         total_wallet_withdrawals: data.total_wallet_withdrawals ?? 0,
         total_commissions_generated: data.total_commissions_generated ?? 0,
+        total_commissions_generated_period: data.total_commissions_generated_period ?? 0,
         total_commissions_withdrawn: data.total_commissions_withdrawn ?? 0,
         commission_withdrawals_count: data.commission_withdrawals_count ?? 0,
         commission_available: data.commission_available ?? 0,

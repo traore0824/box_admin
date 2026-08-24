@@ -186,11 +186,11 @@
               <h3 class="text-sm font-semibold text-gray-800 mb-3">Configuration de la caisse challenge</h3>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Montant de cotisation (FCFA)</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Montant de cotisation (XOF)</label>
                   <input v-model.number="caisseConfig.amount" type="number" min="0" class="w-full border rounded-md px-3 py-2 text-sm" />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Objectif montant (FCFA)</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Objectif montant (XOF)</label>
                   <input v-model.number="caisseConfig.amount_obj" type="number" min="0" class="w-full border rounded-md px-3 py-2 text-sm" />
                 </div>
                 <div>
@@ -224,7 +224,7 @@
               <h3 class="text-sm font-semibold text-gray-800 mb-3">Règles de réussite</h3>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Montant cible pour réussir (FCFA)</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Montant cible pour réussir (XOF)</label>
                   <input v-model.number="successRules.target_amount" type="number" min="0" class="w-full border rounded-md px-3 py-2 text-sm" />
                 </div>
                 <div>
@@ -600,7 +600,7 @@ function formatDate(iso: string) {
 }
 
 function formatAmount(value: number) {
-  return `${Number(value || 0).toLocaleString('fr-FR')} F CFA`
+  return `${Number(value || 0).toLocaleString('fr-FR')} XOF`
 }
 
 function participationStatusClass(s: string) {

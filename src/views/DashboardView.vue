@@ -402,19 +402,19 @@
         <!-- Statistiques Commissions -->
         <DashboardSection title="Statistiques Commissions">
           <MetricGrid>
-            <MetricItem :value="formatCurrency(stats.commission_available || 0)" label="Commission Disponible"
+            <MetricItem :value="formatCurrency(stats.commission_available || 0)" label="Commission Disponible (Actuel)"
               color="success" />
           </MetricGrid>
           <div class="amounts-section">
-            <AmountDisplay :value="stats.total_commissions_generated || 0" label="Commissions Générées (Total)" />
-            <AmountDisplay :value="stats.commission_withdrawn_all_time || 0" label="Commissions Retirées (Total)" />
+            <AmountDisplay :value="stats.total_commissions_generated_period || 0" label="Commissions Générées (Période)" />
+            <AmountDisplay :value="stats.total_commissions_withdrawn || 0" label="Commissions Retirées (Période)" />
           </div>
         </DashboardSection>
 
         <!-- Bonus de Parrainage -->
         <DashboardSection title="Bonus de Parrainage">
           <MetricGrid>
-            <MetricItem :value="formatCurrency(stats.total_referral_bonus_available || 0)" label="Bonus Disponibles"
+            <MetricItem :value="formatCurrency(stats.total_referral_bonus_available || 0)" label="Bonus Disponibles (Actuel)"
               color="success" />
           </MetricGrid>
           <div class="amounts-section">
@@ -700,6 +700,9 @@ const clearDateFilter = () => {
 }
 
 const handlePeriodChange = (newPeriod: string) => {
+  // Les dates personnalisées priment sinon sur la période : on les reset
+  filters.value.dateFrom = ''
+  filters.value.dateTo = ''
   filters.value.activePeriod = newPeriod
 }
 
@@ -713,6 +716,9 @@ const loadData = async () => {
 
     if (!filters.value.dateFrom && !filters.value.dateTo) {
       params.q = PERIOD_MAPPING[filters.value.activePeriod] || 'all'
+    } else {
+      // Évite qu'un ancien q (ex. this_month) pollue le filtre dates
+      params.q = 'all'
     }
 
     await fetchStats(params)

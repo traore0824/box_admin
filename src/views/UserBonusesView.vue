@@ -30,7 +30,7 @@
             placeholder="Ex: Bonus fidélité" />
         </div>
         <div v-if="form.bonus_type === 'money'">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Montant (FCFA)</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Montant (XOF)</label>
           <input v-model.number="form.amount" type="number" min="0" step="0.01"
             class="w-full border rounded-md px-3 py-2 text-sm" />
         </div>
@@ -106,7 +106,7 @@
           </div>
           <div class="text-right text-sm">
             <span class="inline-block px-2 py-0.5 rounded bg-gray-100">{{ b.bonus_type_display }}</span>
-            <p v-if="b.amount" class="font-semibold mt-1">{{ b.amount }} FCFA</p>
+            <p v-if="b.amount" class="font-semibold mt-1">{{ b.amount }} XOF</p>
             <p v-if="b.coins_value" class="font-semibold mt-1">{{ b.coins_value }} pièces BOX</p>
             <p v-if="b.object_label" class="mt-1">{{ b.object_label }}</p>
           </div>

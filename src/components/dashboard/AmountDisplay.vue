@@ -28,10 +28,10 @@ const props = defineProps({
 })
 
 const formatAmount = (amount: number): string => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XOF',
-    minimumFractionDigits: 0
-  }).format(amount)
+  const formatted = new Intl.NumberFormat('fr-FR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount || 0)
+  return `${formatted} XOF`
 }
 </script> 

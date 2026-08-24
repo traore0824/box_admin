@@ -102,7 +102,7 @@
 
       <div v-else>
         <p class="text-sm text-gray-500 mb-3">
-          Définissez le seuil de pièces BOX, le bonus argent (FCFA) crédité sur le wallet,
+          Définissez le seuil de pièces BOX, le bonus argent (XOF) crédité sur le wallet,
           et optionnellement un bonus objet (via UserBonus) à l'atteinte du niveau.
           Le dialogue de félicitations s'affiche à partir du 2e niveau (pas Bronze).
           Clés disponibles : <code class="text-xs bg-gray-100 px-1 rounded">{level_label}</code>,
@@ -137,7 +137,7 @@
                 <div class="flex items-center gap-1">
                   <input v-model.number="l.bonus_amount" type="number" min="0" step="1"
                     class="w-28 border rounded px-2 py-1.5 text-sm text-center font-semibold" />
-                  <span class="text-xs text-gray-400">FCFA wallet</span>
+                  <span class="text-xs text-gray-400">XOF wallet</span>
                 </div>
               </div>
             </div>
