@@ -245,58 +245,12 @@
             — {{ currentCacPeriod.ltv_cac_interpretation.detail }}
           </div>
           <p class="text-xs text-gray-500 mt-3">
-            CAC = (marketing + commercial) ÷ nouveaux activés.
+            CAC = dépense acquisition ÷ nouveaux activés (spend charges retiré).
             LTV = (ARPU mensuel × marge) ÷ churn mensuel.
             Payback = CAC ÷ (ARPU mensuel × marge).
             Revenu = commissions BOX sur transactions acceptées.
             Période {{ currentCacPeriod.start }} → {{ currentCacPeriod.end }}.
-            <router-link to="/charges" class="text-primary hover:underline ml-1">Charges</router-link>
-            ·
-            <router-link to="/settings" class="text-primary hover:underline">Marge brute</router-link>
-          </p>
-        </DashboardSection>
-      </section>
-
-      <!-- Charges entreprise -->
-      <section class="charges-stats" v-if="chargesSummary">
-        <DashboardSection title="Charges">
-          <MetricGrid>
-            <MetricItem
-              :value="formatCurrency(chargesSummary.month.total)"
-              :label="`Ce mois (${chargesSummary.month.count})`"
-              color="primary"
-              icon="fas fa-calendar-day"
-            />
-            <MetricItem
-              :value="formatCurrency(chargesSummary.quarter.total)"
-              :label="`Ce trimestre (${chargesSummary.quarter.count})`"
-              color="warning"
-              icon="fas fa-calendar-alt"
-            />
-            <MetricItem
-              :value="formatCurrency(chargesSummary.year.total)"
-              :label="`Cette année (${chargesSummary.year.count})`"
-              color="danger"
-              icon="fas fa-calendar"
-              border
-            />
-          </MetricGrid>
-          <div
-            v-if="chargesSummary.year.by_category?.length"
-            class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2"
-          >
-            <div
-              v-for="cat in chargesSummary.year.by_category"
-              :key="cat.category"
-              class="text-xs bg-gray-50 rounded px-3 py-2"
-            >
-              <span class="text-gray-500">{{ cat.label }}</span>
-              <div class="font-medium text-gray-800">{{ formatCurrency(cat.total) }}</div>
-            </div>
-          </div>
-          <p class="text-xs text-gray-500 mt-3">
-            Historique et saisie :
-            <router-link to="/charges" class="text-primary hover:underline">page Charges</router-link>
+            <router-link to="/settings" class="text-primary hover:underline ml-1">Marge brute</router-link>
           </p>
         </DashboardSection>
       </section>
@@ -481,7 +435,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useDashboardStore } from '../stores/dashboard'
-import { useChargesStore } from '../stores/charges'
 import { useAcquisitionStore, type CacPeriodKey, type CacPeriodStats } from '../stores/acquisition'
 import { useCreditScoreStore } from '../stores/creditScore'
 import { storeToRefs } from 'pinia'
@@ -515,12 +468,10 @@ const REFRESH_INTERVAL = 5 * 60 * 1000 // 5 minutes
 
 // Store
 const dashboardStore = useDashboardStore()
-const chargesStore = useChargesStore()
 const acquisitionStore = useAcquisitionStore()
 const creditScoreStore = useCreditScoreStore()
 const { fetchStats, fetchFeexpayStats, fetchReconciliationStats } = dashboardStore
 const { stats, feexpayStats, reconciliationStats } = storeToRefs(dashboardStore)
-const { summary: chargesSummary } = storeToRefs(chargesStore)
 const { cacSummary, selectedPeriod: cacPeriod } = storeToRefs(acquisitionStore)
 const { summary: creditScoreSummary } = storeToRefs(creditScoreStore)
 
@@ -754,7 +705,6 @@ const loadData = async () => {
     await fetchFeexpayStats()
     await fetchReconciliationStats()
     await Promise.all([
-      chargesStore.fetchSummary(),
       acquisitionStore.fetchCacSummary(),
       creditScoreStore.fetchSummary(),
     ])

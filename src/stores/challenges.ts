@@ -67,6 +67,8 @@ export interface ChallengeParticipant {
   amount_deposited: number
   delays: number
   can_remove: boolean
+  /** Rang mobile (null si ECHOUE / hors classement) */
+  rank?: number | null
 }
 
 export interface ChallengeParticipantsSummary {

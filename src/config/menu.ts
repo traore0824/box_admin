@@ -76,12 +76,6 @@ export const menuItems: MenuItem[] = [
     staffOnly: true
   },
   {
-    path: '/charges',
-    name: 'Charges',
-    icon: 'fas fa-file-invoice-dollar',
-    staffOnly: true
-  },
-  {
     path: '/kyc-pending',
     name: 'KYC en Attente',
     icon: 'fas fa-id-card'

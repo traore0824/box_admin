@@ -279,8 +279,6 @@
         </div>
       </div>
     </Teleport>
-
-    <!-- Modal de Réconciliation - Supprimé car non utilisé -->
   </div>
 </template>
 

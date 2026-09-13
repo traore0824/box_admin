@@ -12,7 +12,6 @@ import BonusView from '../views/BonusView.vue'
 import WalletsView from '../views/WalletsView.vue'
 import NetworksView from '../views/NetworksView.vue'
 import FloatRechargesView from '../views/FloatRechargesView.vue'
-import ChargesView from '../views/ChargesView.vue'
 import KYCPendingView from '../views/KYCPendingView.vue'
 import NotificationsView from '../views/NotificationsView.vue'
 import SendNotificationView from '../views/SendNotificationView.vue'
@@ -117,12 +116,6 @@ const routes = [
     path: '/float-recharges',
     name: 'float-recharges',
     component: FloatRechargesView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/charges',
-    name: 'charges',
-    component: ChargesView,
     meta: { requiresAuth: true }
   },
   {
@@ -295,7 +288,6 @@ router.beforeEach(async (to, _from, next) => {
       '/challenges',
       '/points-config',
       '/float-recharges',
-      '/charges',
     ]
 
     // Bloquer l'accès aux pages staff pour les non-staff (agents/chargés de clientèle)

@@ -320,6 +320,7 @@
             <table class="min-w-full divide-y divide-gray-200 text-sm">
               <thead class="bg-gray-50">
                 <tr>
+                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Rang</th>
                   <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Utilisateur</th>
                   <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
                   <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Déposé</th>
@@ -330,6 +331,10 @@
               </thead>
               <tbody class="divide-y divide-gray-100">
                 <tr v-for="p in participants" :key="p.id" class="hover:bg-gray-50">
+                  <td class="px-3 py-2 font-semibold text-gray-800 tabular-nums">
+                    <span v-if="p.rank != null">{{ p.rank }}</span>
+                    <span v-else class="text-gray-400 font-normal">—</span>
+                  </td>
                   <td class="px-3 py-2">
                     <div class="font-medium text-gray-900">{{ p.user_name }}</div>
                     <div class="text-xs text-gray-500">{{ p.user_email }}</div>
