@@ -35,6 +35,7 @@ interface CommissionWithdrawal {
   calculated_total: string
   discrepancy: string
   status: 'pending' | 'completed' | 'cancelled'
+  is_fund_transfer?: boolean
   withdrawn_by: number
   withdrawn_by_email: string
   notes: string | null
@@ -142,7 +143,11 @@ export const useCommissionsStore = defineStore('commissions', () => {
   }
 
   // Retirer des commissions - Nouvelle API simplifiée
-  async function withdrawCommissions(amount: number | string, notes?: string) {
+  async function withdrawCommissions(
+    amount: number | string,
+    notes?: string,
+    isFundTransfer: boolean = false
+  ) {
     try {
       isLoading.value = true
       error.value = null
@@ -151,7 +156,8 @@ export const useCommissionsStore = defineStore('commissions', () => {
         method: 'POST',
         body: {
           amount: amount,
-          notes: notes || ''
+          notes: notes || '',
+          is_fund_transfer: isFundTransfer
         }
       })
 

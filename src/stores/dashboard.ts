@@ -16,6 +16,7 @@ interface ReconciliationStats {
   current_deficit: number
   feexpay_balance?: number
   devices_balance?: number
+  fund_transfers_balance?: number
   liquidity?: number
   caisse_active_amount?: number
   commission_available?: number

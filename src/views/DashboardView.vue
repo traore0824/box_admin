@@ -110,6 +110,12 @@
               icon="fas fa-mobile-alt"
             />
             <MetricItem
+              :value="formatCurrency(reconciliationStats.fund_transfers_balance || 0)"
+              label="Déplacements FeexPay → banque"
+              color="secondary"
+              icon="fas fa-university"
+            />
+            <MetricItem
               :value="formatCurrency(reconciliationStats.liquidity || 0)"
               label="Liquidité Totale"
               color="success"
@@ -123,7 +129,7 @@
             />
           </MetricGrid>
           <p class="text-xs text-gray-500 mt-3">
-            Formule : Déficit = (FeexPay + Devices) − (Caisses actives + Commissions)
+            Formule : Déficit = (FeexPay + Devices + Déplacements banque) − (Caisses actives + Commissions)
           </p>
         </DashboardSection>
       </section>

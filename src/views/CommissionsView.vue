@@ -191,17 +191,25 @@
                 {{ formatCurrency(parseFloat(withdrawal.total_amount)) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <span 
-                  :class="[
-                    'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
-                    withdrawal.status === 'completed' ? 'bg-green-100 text-green-800' :
-                    withdrawal.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                  ]"
-                >
-                  {{ withdrawal.status === 'completed' ? 'Complété' : 
-                     withdrawal.status === 'pending' ? 'En attente' : 'Annulé' }}
-                </span>
+                <div class="flex flex-col gap-1">
+                  <span 
+                    :class="[
+                      'px-2 inline-flex text-xs leading-5 font-semibold rounded-full w-fit',
+                      withdrawal.status === 'completed' ? 'bg-green-100 text-green-800' :
+                      withdrawal.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    ]"
+                  >
+                    {{ withdrawal.status === 'completed' ? 'Complété' : 
+                       withdrawal.status === 'pending' ? 'En attente' : 'Annulé' }}
+                  </span>
+                  <span
+                    v-if="withdrawal.is_fund_transfer"
+                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full w-fit bg-blue-100 text-blue-800"
+                  >
+                    FeexPay → banque
+                  </span>
+                </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ withdrawal.withdrawn_by_email }}
@@ -260,6 +268,24 @@
             ></textarea>
           </div>
 
+          <div class="mb-6">
+            <label class="flex items-start gap-3 cursor-pointer">
+              <input
+                v-model="withdrawIsFundTransfer"
+                type="checkbox"
+                class="mt-1 h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+              />
+              <span>
+                <span class="block text-sm font-medium text-gray-800">
+                  Déplacement de fonds (FeexPay → banque)
+                </span>
+                <span class="block text-xs text-gray-500 mt-0.5">
+                  Les fonds restent comptés dans la liquidité / déficit (pas une dépense).
+                </span>
+              </span>
+            </label>
+          </div>
+
           <div class="flex justify-end space-x-3">
             <button 
               @click="closeWithdrawModal"
@@ -292,6 +318,7 @@ const isWithdrawnFilter = ref<boolean | null>(null)
 const showWithdrawModal = ref(false)
 const withdrawAmount = ref<number>(0)
 const withdrawNotes = ref('')
+const withdrawIsFundTransfer = ref(false)
 const withdrawAmountError = ref('')
 
 onMounted(async () => {
@@ -336,6 +363,7 @@ const isValidWithdrawAmount = computed(() => {
 const openWithdrawModal = () => {
   withdrawAmount.value = 0
   withdrawNotes.value = ''
+  withdrawIsFundTransfer.value = false
   withdrawAmountError.value = ''
   showWithdrawModal.value = true
 }
@@ -344,6 +372,7 @@ const closeWithdrawModal = () => {
   showWithdrawModal.value = false
   withdrawAmount.value = 0
   withdrawNotes.value = ''
+  withdrawIsFundTransfer.value = false
   withdrawAmountError.value = ''
 }
 
@@ -365,7 +394,8 @@ const handleWithdraw = async () => {
     
     await commissionsStore.withdrawCommissions(
       withdrawAmount.value,
-      withdrawNotes.value
+      withdrawNotes.value,
+      withdrawIsFundTransfer.value
     )
     
     closeWithdrawModal()
