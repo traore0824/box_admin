@@ -27,11 +27,12 @@ export const useNotificationStore = defineStore('notification', () => {
   const itemsPerPage = 10
 
   async function sendNotification(data: {
-    type: 'single' | 'all'
+    type: 'single' | 'all' | 'challenge'
     channel: 'email' | 'push' | 'both'
     title: string
     content: string
     user_id?: number
+    challenge_id?: number
     image_url?: string
     kyc_status?: string | null
     is_active?: boolean | null
@@ -53,6 +54,9 @@ export const useNotificationStore = defineStore('notification', () => {
       if (data.type === 'single' && !data.user_id) {
         throw new Error('user_id est obligatoire lorsque type="single"')
       }
+      if (data.type === 'challenge' && !data.challenge_id) {
+        throw new Error('challenge_id est obligatoire lorsque type="challenge"')
+      }
 
       const payload: any = {
         type: data.type,
@@ -63,6 +67,10 @@ export const useNotificationStore = defineStore('notification', () => {
 
       if (data.type === 'single' && data.user_id) {
         payload.user_id = data.user_id
+      }
+
+      if (data.type === 'challenge' && data.challenge_id) {
+        payload.challenge_id = data.challenge_id
       }
 
       if (data.image_url) {

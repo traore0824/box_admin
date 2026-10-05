@@ -166,7 +166,12 @@ export const useCommissionsStore = defineStore('commissions', () => {
         'Erreur lors du retrait des commissions'
       )
       const notification = useNotification()
-      notification.addNotification('Retrait de commissions effectué avec succès', 'success')
+      notification.addNotification(
+        isFundTransfer
+          ? 'Déplacement de fonds enregistré avec succès'
+          : 'Retrait de commissions effectué avec succès',
+        'success'
+      )
       
       // Rafraîchir les données
       await fetchCommission()

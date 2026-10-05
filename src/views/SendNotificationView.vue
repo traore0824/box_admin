@@ -110,11 +110,32 @@
         <select
           id="type"
           v-model="type"
+          @change="onRecipientTypeChange"
           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm"
         >
           <option value="all">Tous les utilisateurs</option>
           <option value="single">Utilisateur spécifique</option>
+          <option value="challenge">Membres d'un challenge</option>
         </select>
+
+        <div v-if="type === 'challenge'" class="mt-4">
+          <label for="challenge" class="block text-sm font-medium text-gray-700 mb-2">
+            Challenge <span class="text-red-500">*</span>
+          </label>
+          <select
+            id="challenge"
+            v-model="selectedChallengeId"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary text-sm"
+          >
+            <option :value="null" disabled>Choisir un challenge</option>
+            <option v-for="c in challengesStore.challenges" :key="c.id" :value="c.id">
+              {{ c.name }} ({{ c.participant_count ?? 0 }} participant(s))
+            </option>
+          </select>
+          <p class="mt-2 text-xs text-gray-500">
+            La notification part uniquement aux participants de ce challenge.
+          </p>
+        </div>
 
         <!-- Specific User Selection -->
         <div v-if="type === 'single'" class="mt-4">
@@ -134,8 +155,8 @@
             <p class="text-sm font-medium text-gray-700 mb-2">Utilisateur sélectionné :</p>
             <div class="flex items-center justify-between px-3 py-2 bg-primary-50 rounded-md border border-primary-200">
               <div>
-                <p class="text-sm font-medium text-gray-900">{{ getUserById(selectedUserId)?.first_name }} {{ getUserById(selectedUserId)?.last_name }}</p>
-                <p class="text-xs text-gray-500">{{ getUserById(selectedUserId)?.email }}</p>
+                <p class="text-sm font-medium text-gray-900">{{ selectedUserName }}</p>
+                <p class="text-xs text-gray-500">{{ selectedUserEmail }}</p>
               </div>
               <button @click="selectedUserId = null" class="text-gray-400 hover:text-red-500 transition-colors">
                 <i class="fas fa-times"></i>
@@ -305,9 +326,9 @@
           class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
           Annuler
         </button>
-        <button @click="sendNotification" :disabled="!notification.title || !notification.content || notificationStore.isLoading || (type === 'single' && !selectedUserId)"
+        <button @click="sendNotification" :disabled="!canSend"
           class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          :class="{ 'opacity-50 cursor-not-allowed': !notification.title || !notification.content || notificationStore.isLoading }">
+          :class="{ 'opacity-50 cursor-not-allowed': !canSend }">
           <i v-if="notificationStore.isLoading" class="fas fa-spinner fa-spin"></i>
           <i v-else class="fas fa-paper-plane"></i>
           {{ notificationStore.isLoading ? 'Envoi...' : 'Envoyer' }}
@@ -325,12 +346,14 @@ import { useUsersStore } from '../stores/users'
 import { useNotification } from '../services/notification'
 import { useNotificationStore } from '../stores/notification'
 import { useUploadStore } from '../stores/upload'
+import { useChallengesStore } from '../stores/challenges'
 import RichTextEditor from '../components/RichTextEditor.vue'
 
 const usersStore = useUsersStore()
 const notificationService = useNotification()
 const notificationStore = useNotificationStore()
 const uploadStore = useUploadStore()
+const challengesStore = useChallengesStore()
 
 // Notification state
 const notification = ref({
@@ -343,13 +366,16 @@ const notification = ref({
 const contentMode = ref<'rich' | 'plain'>('rich')
 
 // Type: 'all' ou 'single'
-const type = ref<'all' | 'single'>('all')
+const type = ref<'all' | 'single' | 'challenge'>('all')
+const selectedChallengeId = ref<number | null>(null)
 
 // Channel: 'email', 'push', ou 'both'
 const channel = ref<'email' | 'push' | 'both'>('push')
 
 // Selected user (pour type='single')
 const selectedUserId = ref<number | null>(null)
+const preselectedName = ref('')
+const preselectedEmail = ref('')
 
 // Search and pagination state
 const searchQuery = ref('')
@@ -388,6 +414,27 @@ const currentUsers = computed(() => {
   return filteredUsers.value.slice(startIndex, startIndex + usersPerPage)
 })
 
+const canSend = computed(() => {
+  if (!notification.value.title || !notification.value.content || notificationStore.isLoading) {
+    return false
+  }
+  if (type.value === 'single' && !selectedUserId.value) return false
+  if (type.value === 'challenge' && !selectedChallengeId.value) return false
+  return true
+})
+
+const selectedUserName = computed(() => {
+  if (!selectedUserId.value) return ''
+  const user = getUserById(selectedUserId.value)
+  const fromStore = [user?.first_name, user?.last_name].filter(Boolean).join(' ')
+  return fromStore || preselectedName.value || 'Participant'
+})
+
+const selectedUserEmail = computed(() => {
+  if (!selectedUserId.value) return ''
+  return getUserById(selectedUserId.value)?.email || preselectedEmail.value
+})
+
 // Methods
 const getUserById = (id: number) => {
   return usersStore.users.find(user => user.id === id)
@@ -396,6 +443,14 @@ const getUserById = (id: number) => {
 const selectUser = (user: any) => {
   selectedUserId.value = user.id
   showUserList.value = false
+}
+
+function onRecipientTypeChange() {
+  if (type.value === 'challenge' && challengesStore.challenges.length === 0) {
+    challengesStore.fetchChallenges().catch(() => {
+      notificationService.addNotification('Erreur lors du chargement des challenges', 'error')
+    })
+  }
 }
 
 // Débogage de la recherche
@@ -427,12 +482,31 @@ onMounted(() => {
     notification.value.content = route.query.content as string
   }
   if (route.query.type) {
-    type.value = route.query.type as 'all' | 'single'
+    type.value = route.query.type as 'all' | 'single' | 'challenge'
   }
   if (route.query.channel) {
     channel.value = route.query.channel as 'email' | 'push' | 'both'
   }
-  if (route.query.email && type.value === 'single') {
+  if (route.query.challenge_id && route.query.type !== 'single') {
+    type.value = 'challenge'
+    const parsed = Number(route.query.challenge_id)
+    selectedChallengeId.value = Number.isNaN(parsed) ? null : parsed
+  }
+  if (type.value === 'challenge') {
+    challengesStore.fetchChallenges().catch(() => {
+      notificationService.addNotification('Erreur lors du chargement des challenges', 'error')
+    })
+  }
+  if (route.query.user_id && type.value === 'single') {
+    const parsedId = Number(route.query.user_id)
+    if (!Number.isNaN(parsedId)) {
+      selectedUserId.value = parsedId
+      preselectedName.value = (route.query.user_name as string) || ''
+      preselectedEmail.value = (route.query.email as string) || ''
+      searchQuery.value = preselectedEmail.value || preselectedName.value
+      showUserList.value = false
+    }
+  } else if (route.query.email && type.value === 'single') {
     // Rechercher l'utilisateur par email
     const userEmail = route.query.email as string
     searchQuery.value = userEmail
@@ -490,8 +564,11 @@ const clearForm = () => {
     image_url: undefined
   }
   type.value = 'all'
+  selectedChallengeId.value = null
   channel.value = 'push'
   selectedUserId.value = null
+  preselectedName.value = ''
+  preselectedEmail.value = ''
   searchQuery.value = ''
   showUserList.value = false
   currentPage.value = 1
@@ -524,6 +601,10 @@ const sendNotification = async () => {
       notificationService.addNotification('Veuillez sélectionner un utilisateur', 'error')
       return
     }
+    if (type.value === 'challenge' && !selectedChallengeId.value) {
+      notificationService.addNotification('Veuillez sélectionner un challenge', 'error')
+      return
+    }
 
     // Préparer les données pour l'API
     const data: any = {
@@ -536,6 +617,9 @@ const sendNotification = async () => {
     // Ajouter user_id si type='single'
     if (type.value === 'single' && selectedUserId.value) {
       data.user_id = selectedUserId.value
+    }
+    if (type.value === 'challenge' && selectedChallengeId.value) {
+      data.challenge_id = selectedChallengeId.value
     }
 
     // Ajouter l'image si elle existe
@@ -564,7 +648,9 @@ const sendNotification = async () => {
     
     // Message de succès personnalisé
     let successMessage = 'Notification envoyée avec succès !'
-    if (channel.value === 'email') {
+    if (type.value === 'challenge') {
+      successMessage = 'Notification envoyée aux participants du challenge !'
+    } else if (channel.value === 'email') {
       successMessage = 'Email envoyé avec succès !'
     } else if (channel.value === 'push') {
       successMessage = 'Notification push envoyée avec succès !'

@@ -304,9 +304,19 @@
               Actifs : {{ participantsSummary.active_count }}
             </p>
           </div>
-          <button @click="closeParticipants" class="text-gray-400 hover:text-gray-600">
-            <i class="fas fa-times"></i>
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              :disabled="!participants.length"
+              @click="sendMessageToChallenge"
+              class="px-3 py-1.5 text-xs font-semibold rounded-md border border-primary-200 text-primary-dark bg-primary-50 hover:bg-primary-100 disabled:opacity-50"
+            >
+              Message aux participants
+            </button>
+            <button @click="closeParticipants" class="text-gray-400 hover:text-gray-600">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
         </div>
 
         <div class="p-4 overflow-y-auto flex-1">
@@ -336,8 +346,20 @@
                     <span v-else class="text-gray-400 font-normal">—</span>
                   </td>
                   <td class="px-3 py-2">
-                    <div class="font-medium text-gray-900">{{ p.user_name }}</div>
-                    <div class="text-xs text-gray-500">{{ p.user_email }}</div>
+                    <div class="flex items-center gap-2">
+                      <div class="min-w-0">
+                        <div class="font-medium text-gray-900">{{ p.user_name }}</div>
+                        <div class="text-xs text-gray-500">{{ p.user_email }}</div>
+                      </div>
+                      <button
+                        type="button"
+                        title="Envoyer un message à ce participant"
+                        @click="sendMessageToParticipant(p)"
+                        class="shrink-0 px-2 py-1 text-xs font-semibold rounded-md border border-primary-200 text-primary-dark bg-primary-50 hover:bg-primary-100"
+                      >
+                        Message
+                      </button>
+                    </div>
                   </td>
                   <td class="px-3 py-2">
                     <span class="px-2 py-0.5 rounded-full text-xs" :class="participationStatusClass(p.status)">
@@ -407,6 +429,7 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import {
   useChallengesStore,
   type ChallengeAdmin,
@@ -419,6 +442,7 @@ import { useNotification } from '../services/notification'
 const store = useChallengesStore()
 const settingsStore = useSettingsStore()
 const notification = useNotification()
+const router = useRouter()
 const showModal = ref(false)
 const editing = ref<ChallengeAdmin | null>(null)
 const saving = ref(false)
@@ -647,6 +671,36 @@ function closeParticipants() {
   participantsSummary.value = null
   removeTarget.value = null
   removeReason.value = ''
+}
+
+function sendMessageToParticipant(p: ChallengeParticipant) {
+  if (!p.user_id) {
+    notification.addNotification('Participant introuvable', 'error')
+    return
+  }
+  router.push({
+    name: 'send-notification',
+    query: {
+      type: 'single',
+      channel: 'push',
+      user_id: String(p.user_id),
+      email: p.user_email || '',
+      user_name: p.user_name || '',
+    },
+  })
+}
+
+function sendMessageToChallenge() {
+  if (!selectedChallenge.value) return
+  router.push({
+    name: 'send-notification',
+    query: {
+      type: 'challenge',
+      channel: 'push',
+      challenge_id: String(selectedChallenge.value.id),
+      title: selectedChallenge.value.name || '',
+    },
+  })
 }
 
 function askRemoveParticipant(p: ChallengeParticipant) {

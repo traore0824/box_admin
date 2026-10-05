@@ -6,7 +6,7 @@
       <div class="mt-4 sm:mt-0">
         <button 
           @click="openWithdrawModal"
-          :disabled="commissionsStore.isLoading || !hasAvailableCommission"
+          :disabled="commissionsStore.isLoading || !canOpenWithdrawModal"
           class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <i class="fas fa-money-bill-wave mr-2"></i>
@@ -233,25 +233,29 @@
     <Teleport to="body">
       <div v-if="showWithdrawModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
-          <h3 class="text-xl font-semibold text-gray-800 mb-4">Retirer des Commissions</h3>
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">
+            {{ withdrawIsFundTransfer ? 'Déplacer des fonds' : 'Retirer des Commissions' }}
+          </h3>
           
           <div class="mb-4">
-            <p class="text-sm text-gray-600 mb-2">Commission disponible:</p>
+            <p class="text-sm text-gray-600 mb-2">
+              {{ withdrawIsFundTransfer ? 'Solde FeexPay courant:' : 'Commission disponible:' }}
+            </p>
             <p class="text-2xl font-bold text-green-600">
-              {{ formatCurrency(parseFloat(String(commissionsStore.commission?.available_amount || '0'))) }}
+              {{ formatCurrency(withdrawLimit) }}
             </p>
           </div>
 
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Montant à retirer <span class="text-red-500">*</span>
+              Montant à {{ withdrawIsFundTransfer ? 'déplacer' : 'retirer' }} <span class="text-red-500">*</span>
             </label>
             <input 
               v-model.number="withdrawAmount"
               type="number"
               step="0.01"
               min="0"
-              :max="parseFloat(String(commissionsStore.commission?.available_amount || '0'))"
+              :max="withdrawLimit"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder="Entrez le montant"
             />
@@ -299,7 +303,7 @@
               class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <i v-if="commissionsStore.isLoading" class="fas fa-spinner fa-spin mr-2"></i>
-              Confirmer le retrait
+              {{ withdrawIsFundTransfer ? 'Confirmer le déplacement' : 'Confirmer le retrait' }}
             </button>
           </div>
         </div>
@@ -310,10 +314,14 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useCommissionsStore } from '../stores/commissions'
+import { useDashboardStore } from '../stores/dashboard'
 import { formatCurrency } from '../utils/currency'
 
 const commissionsStore = useCommissionsStore()
+const dashboardStore = useDashboardStore()
+const { feexpayStats } = storeToRefs(dashboardStore)
 const isWithdrawnFilter = ref<boolean | null>(null)
 const showWithdrawModal = ref(false)
 const withdrawAmount = ref<number>(0)
@@ -322,13 +330,24 @@ const withdrawIsFundTransfer = ref(false)
 const withdrawAmountError = ref('')
 
 onMounted(async () => {
-  await commissionsStore.fetchCommission()
-  await commissionsStore.fetchCommissionTransactions(1, null)
-  await commissionsStore.fetchWithdrawals()
+  await Promise.all([
+    commissionsStore.fetchCommission(),
+    commissionsStore.fetchCommissionTransactions(1, null),
+    commissionsStore.fetchWithdrawals(),
+    dashboardStore.fetchFeexpayStats(),
+  ])
 })
 
 const availableAmount = computed(() =>
   parseFloat(String(commissionsStore.commission?.available_amount || '0'))
+)
+
+const feexpayBalance = computed(() =>
+  Number(feexpayStats.value?.total_balance || 0)
+)
+
+const withdrawLimit = computed(() =>
+  withdrawIsFundTransfer.value ? feexpayBalance.value : availableAmount.value
 )
 
 const withdrawnAmount = computed(() =>
@@ -350,22 +369,24 @@ const formatDate = (date: string): string => {
   })
 }
 
-const hasAvailableCommission = computed(() => availableAmount.value > 0)
+const canOpenWithdrawModal = computed(() =>
+  availableAmount.value > 0 || feexpayBalance.value > 0
+)
 
 const isValidWithdrawAmount = computed(() => {
   if (!withdrawAmount.value || withdrawAmount.value <= 0) {
     return false
   }
-  const available = availableAmount.value
-  return withdrawAmount.value <= available
+  return withdrawAmount.value <= withdrawLimit.value
 })
 
-const openWithdrawModal = () => {
+const openWithdrawModal = async () => {
   withdrawAmount.value = 0
   withdrawNotes.value = ''
   withdrawIsFundTransfer.value = false
   withdrawAmountError.value = ''
   showWithdrawModal.value = true
+  await dashboardStore.fetchFeexpayStats()
 }
 
 const closeWithdrawModal = () => {
@@ -386,9 +407,12 @@ const handleWithdraw = async () => {
       return
     }
     
-    const available = availableAmount.value
-    if (withdrawAmount.value > available) {
-      withdrawAmountError.value = `Le montant ne peut pas dépasser ${formatCurrency(available)}`
+    const limit = withdrawLimit.value
+    if (withdrawAmount.value > limit) {
+      const label = withdrawIsFundTransfer.value
+        ? 'le solde FeexPay courant'
+        : 'la commission disponible'
+      withdrawAmountError.value = `Le montant ne peut pas dépasser ${formatCurrency(limit)} (${label})`
       return
     }
     
@@ -399,6 +423,7 @@ const handleWithdraw = async () => {
     )
     
     closeWithdrawModal()
+    await dashboardStore.fetchFeexpayStats()
   } catch (error) {
     // L'erreur est déjà gérée dans le store
   }
